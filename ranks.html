@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Ranks - National Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styling for the rank cards */
+        .rank-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .rank-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        /* Different border colors for different levels of society */
+        .border-gov { border-left: 6px solid var(--primary-color); }
+        .border-citizen { border-left: 6px solid #38a169; } /* Green */
+        .border-punished { border-left: 6px solid var(--secondary-color); } /* Red */
+
+        .rank-icon {
+            font-size: 3rem;
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 50%;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .rank-info h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: normal;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .bg-gov { background-color: var(--primary-color); }
+        .bg-citizen { background-color: #38a169; }
+        .bg-punished { background-color: var(--secondary-color); }
+
+        .rank-info p {
+            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Makes it look good on mobile phones too */
+        @media (max-width: 600px) {
+            .rank-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Republic of [Name]</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Government Ranks</a>
+            <a href="economy.html">Economy</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Government & Society Ranks</h1>
+        <p>The hierarchy, roles, and responsibilities of all individuals within our simulation.</p>
+    </div>
+
+    <div class="rank-container">
+        
+        <div class="rank-card border-gov">
+            <div class="rank-icon">👑</div>
+            <div class="rank-info">
+                <h2>The Chancellor <span class="badge bg-gov">Executive</span></h2>
+                <p>The elected ruler of the simulation. The Chancellor proposes laws (which require a 51% citizen vote to pass) and appoints one of the three Judges. They must win the popular vote, can serve up to 3 consecutive two-week terms, and are required to follow all laws alongside the citizens.</p>
+            </div>
+        </div>
+
+        <div class="rank-card border-gov">
+            <div class="rank-icon">⚖️</div>
+            <div class="rank-info">
+                <h2>Judge <span class="badge bg-gov">Judicial</span></h2>
+                <p>One of three individuals responsible for ensuring fairness. One Judge is appointed by the Chancellor, and two are elected by the people. Judges listen to trials, determine guilt, hand out reasonable sentences (max 2 weeks), and have the power to throw out laws that violate the Constitution. They can be removed by a 75% popular vote.</p>
+            </div>
+        </div>
+
+        <div class="rank-card border-citizen">
+            <div class="rank-icon">👋</div>
+            <div class="rank-info">
+                <h2>Citizen <span class="badge bg-citizen">Public</span></h2>
+                <p>The foundational rank of the simulation. Citizens have the power to vote for the Chancellor, elect Judges, and vote on proposed laws. They hold the fundamental right to complain about leadership or laws without fear of punishment or banishment.</p>
+            </div>
+        </div>
+
+        <div class="rank-card border-punished">
+            <div class="rank-icon">⛓️</div>
+            <div class="rank-info">
+                <h2>Prisoner <span class="badge bg-punished">Restricted</span></h2>
+                <p>A citizen who has been found guilty during a trial by at least two Judges. Prisoners must serve a set, reasonable sentence (no longer than two weeks) decided by the Judges. They cannot be tried twice for the same incident if previously found not guilty.</p>
+            </div>
+        </div>
+
+        <div class="rank-card border-punished">
+            <div class="rank-icon">🚶</div>
+            <div class="rank-info">
+                <h2>Banished <span class="badge bg-punished">Exiled</span></h2>
+                <p>An individual who has been entirely removed from the simulation's society by a vote of the Judges. To be un-banished and return to the kingdom, they must secure a "yes" vote from over 66% of the kingdom's population.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> Republic of [Name] | Class Simulation Project
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
