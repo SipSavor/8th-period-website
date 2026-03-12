@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Results - National Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .results-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            border-top: 8px solid var(--primary-color);
+        }
+
+        .chart-card h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .chart-card p {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* This keeps your chart centered and prevents it from breaking on small screens */
+        .chart-wrapper {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Government Ranks</a>
+            <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Live Election Results 📊</h1>
+        <p>Watch the votes come in real-time as our citizens make their voices heard.</p>
+    </div>
+
+    <div class="results-container">
+        
+        <div class="chart-card">
+            <h2>Current Election: Chancellor</h2>
+            <p>This chart updates automatically every time a new ballot is submitted.</p>
+            
+            <div class="chart-wrapper">
+                <iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQJF-JGBPwtXdRKnFFxHLVFwTcEkMLJf_TFIR9Z1v9Z4Cix83B5IVZ0ReWy3rI-F06B9KZSSN4edRg6/pubchart?oid=501805582&amp;format=interactive"></iframe>
+            </div>
+
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> Kingdom of 8th period
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
