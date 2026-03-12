@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Links - National Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .links-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .link-item {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            border-left: 6px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .link-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .link-text h3 {
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            font-size: 1.3rem;
+        }
+
+        .link-text p {
+            margin: 0;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .link-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .link-btn:hover {
+            background-color: #9b2c2c; /* Darker red on hover */
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Government Ranks</a>
+            <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Important Links</h1>
+        <p>Official forms, voting booths, and external resources for citizens.</p>
+    </div>
+
+    <div class="links-container"> 
+
+        <div class="link-item">
+            <div class="link-text">
+                <h3>⚖️ Nominate a Judge</h3>
+                <p>Submit your nomination for the people's judicial representatives.</p>
+            </div>
+            <a href="#" class="link-btn">Go to Form</a>
+        </div>
+
+        
+
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> Kingdom of 8th period
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
