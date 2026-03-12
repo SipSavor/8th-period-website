@@ -10,8 +10,8 @@
             max-width: 800px;
             margin: 40px auto;
             padding: 0 20px;
-            display: grid;
-            gap: 25px;
+            display: flex;
+            justify-content: center;
         }
 
         /* Treasury Display Card */
@@ -23,6 +23,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
             border-top: 8px solid #38a169; /* Green accent for money */
+            width: 100%;
         }
 
         .treasury-card h2 {
@@ -37,46 +38,6 @@
             color: #38a169;
             margin: 20px 0;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Admin Controls */
-        .admin-panel {
-            background-color: #f7fafc;
-            border: 2px dashed #cbd5e0;
-            border-radius: 8px;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .admin-panel h3 {
-            color: var(--secondary-color);
-            margin-top: 0;
-        }
-
-        .admin-panel input {
-            padding: 12px;
-            font-size: 1.1rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
-            margin-right: 10px;
-            width: 200px;
-            text-align: center;
-        }
-
-        .update-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .update-btn:hover {
-            background-color: #2a4365;
         }
     </style>
 </head>
@@ -106,13 +67,6 @@
             <p>This fund is managed by the Chancellor and utilized for national operations.</p>
         </div>
 
-        <div class="admin-panel">
-            <h3>🔧 Chancellor Controls: Update Treasury</h3>
-            <p>Enter the new total amount for the national treasury (Numbers only):</p>
-            <input type="number" id="new-amount" placeholder="e.g. 5000">
-            <button class="update-btn" onclick="updateTreasury()">Set New Balance</button>
-        </div>
-
     </div>
 
     <footer>
@@ -122,39 +76,22 @@
     <script src="script.js"></script>
     
     <script>
-        // Function to load the treasury amount when the page opens
+        // ==========================================
+        // HOW TO CHANGE THE MONEY:
+        // Just change the number below, save the file, 
+        // and refresh the page! (Don't use commas here)
+        // ==========================================
+        
+        const currentTreasury = 5000; 
+
+        // ==========================================
+
         function loadTreasury() {
-            // Check the browser's memory for saved money
-            let savedMoney = localStorage.getItem('simulationTreasury');
-            
-            // If there's no money saved yet, start the country off with $5,000
-            if (savedMoney === null) {
-                savedMoney = 5000;
-                localStorage.setItem('simulationTreasury', savedMoney);
-            }
-
-            // Display the money properly with a dollar sign and commas
-            document.getElementById('treasury-amount').textContent = '$' + parseInt(savedMoney).toLocaleString();
+            // This automatically adds the dollar sign and commas for you
+            document.getElementById('treasury-amount').textContent = '$' + currentTreasury.toLocaleString();
         }
 
-        // Function to update the treasury when you click the button
-        function updateTreasury() {
-            let newAmount = document.getElementById('new-amount').value;
-            
-            // Make sure the box isn't empty before updating
-            if (newAmount !== "") {
-                // Save the new number to the browser's memory
-                localStorage.setItem('simulationTreasury', newAmount);
-                // Refresh the big green number display
-                loadTreasury();
-                // Clear the input box so it's ready for next time
-                document.getElementById('new-amount').value = "";
-            } else {
-                alert("Please enter a valid number!");
-            }
-        }
-
-        // Make sure the money loads right away
+        // Run this when the page loads
         window.addEventListener('load', loadTreasury);
     </script>
 
