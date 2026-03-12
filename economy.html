@@ -6,61 +6,157 @@
     <title>Economy - National Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific styling for the construction card */
-        .construction-card {
+        .economy-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            gap: 25px;
+        }
+
+        /* Treasury Display Card */
+        .treasury-card {
             background-color: var(--card-bg);
             border-radius: 8px;
-            padding: 80px 20px;
-            margin: 60px auto;
-            max-width: 600px;
+            padding: 50px 20px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 2px dashed var(--primary-color);
+            border: 1px solid #e2e8f0;
+            border-top: 8px solid #38a169; /* Green accent for money */
         }
 
-        .construction-card h2 {
+        .treasury-card h2 {
             color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-top: 20px;
-            margin-bottom: 10px;
+            margin-top: 0;
+            font-size: 2rem;
         }
 
-        .construction-card p {
-            color: #718096;
-            font-size: 1.1rem;
-        }
-
-        .construction-icon {
+        .money-display {
             font-size: 5rem;
+            font-weight: bold;
+            color: #38a169;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Admin Controls */
+        .admin-panel {
+            background-color: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .admin-panel h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        .admin-panel input {
+            padding: 12px;
+            font-size: 1.1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            margin-right: 10px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .update-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .update-btn:hover {
+            background-color: #2a4365;
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-logo">Republic of [Name]</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="constitution.html">Constitution</a>
             <a href="ranks.html">Government Ranks</a>
             <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="hero">
+        <h1>National Economy</h1>
+        <p>Monitor the wealth, trade, and treasury of our simulation.</p>
+    </div>
+
+    <div class="economy-container">
         
-        <div class="construction-card">
-            <div class="construction-icon">🚧</div>
-            <h2>Being Worked on</h2>
-            <p>The economic policies and treasury details for our simulation are currently under development. Check back later!</p>
+        <div class="treasury-card">
+            <h2>Current National Treasury</h2>
+            <div class="money-display" id="treasury-amount">$0</div>
+            <p>This fund is managed by the Chancellor and utilized for national operations.</p>
+        </div>
+
+        <div class="admin-panel">
+            <h3>🔧 Chancellor Controls: Update Treasury</h3>
+            <p>Enter the new total amount for the national treasury (Numbers only):</p>
+            <input type="number" id="new-amount" placeholder="e.g. 5000">
+            <button class="update-btn" onclick="updateTreasury()">Set New Balance</button>
         </div>
 
     </div>
 
     <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th period
+        &copy; <span id="current-year"></span> Republic of [Name] | Class Simulation Project
     </footer>
 
     <script src="script.js"></script>
+    
+    <script>
+        // Function to load the treasury amount when the page opens
+        function loadTreasury() {
+            // Check the browser's memory for saved money
+            let savedMoney = localStorage.getItem('simulationTreasury');
+            
+            // If there's no money saved yet, start the country off with $5,000
+            if (savedMoney === null) {
+                savedMoney = 5000;
+                localStorage.setItem('simulationTreasury', savedMoney);
+            }
+
+            // Display the money properly with a dollar sign and commas
+            document.getElementById('treasury-amount').textContent = '$' + parseInt(savedMoney).toLocaleString();
+        }
+
+        // Function to update the treasury when you click the button
+        function updateTreasury() {
+            let newAmount = document.getElementById('new-amount').value;
+            
+            // Make sure the box isn't empty before updating
+            if (newAmount !== "") {
+                // Save the new number to the browser's memory
+                localStorage.setItem('simulationTreasury', newAmount);
+                // Refresh the big green number display
+                loadTreasury();
+                // Clear the input box so it's ready for next time
+                document.getElementById('new-amount').value = "";
+            } else {
+                alert("Please enter a valid number!");
+            }
+        }
+
+        // Make sure the money loads right away
+        window.addEventListener('load', loadTreasury);
+    </script>
+
 </body>
 </html>
