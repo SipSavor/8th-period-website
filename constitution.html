@@ -3,32 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Constitution - National Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>The Constitution - Kingdom of 8th Period</title>
     <style>
-        /* Specific styling to make reading the rules look like the landing page cards */
+        :root {
+            --primary-blue: #007bff;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --gold-accent: #ffc107;
+            --red-accent: #dc3545; /* Added for the rule cards */
+            --text-dark: #333333;
+            --text-muted: #555555;
+            --nav-gradient: linear-gradient(135deg, #007bff 0%, #00d4ff 100%);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--nav-gradient);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-logo {
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: var(--white);
+            padding: 100px 20px 140px; 
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--primary-blue);
+            margin: 0 0 15px 0;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CONSTITUTION CONTAINER - Overlapping the Hero */
+        .constitution-container {
+            max-width: 800px;
+            margin: -60px auto 80px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Modernized Rule Cards */
         .rule-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 35px;
+            background: var(--white);
+            border-radius: 15px;
+            padding: 35px 40px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            border-left: 6px solid var(--secondary-color); /* Adds that nice red accent */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-left: 6px solid var(--red-accent); /* Nice red accent kept */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .rule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
         }
 
         .rule-card h2 {
-            color: var(--primary-color);
+            color: var(--primary-blue);
             margin-top: 0;
             font-size: 1.8rem;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 12px;
             margin-bottom: 20px;
         }
 
         .rule-card ol {
             line-height: 1.8;
-            color: #4a5568;
+            color: var(--text-muted);
             margin: 0;
             padding-left: 25px;
             font-size: 1.1rem;
@@ -37,17 +120,51 @@
         .rule-card li {
             margin-bottom: 15px;
         }
+
+        /* MOBILE FIXES */
+        @media (max-width: 650px) {
+            .hero {
+                padding: 60px 20px 100px;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .constitution-container {
+                margin-top: -40px;
+            }
+            .rule-card {
+                padding: 25px 20px;
+            }
+            .nav-links a {
+                margin-left: 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        footer {
+            background: var(--white);
+            color: var(--text-muted);
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 1px solid #eee;
+        }
+
+        #current-year {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-logo">Kingdom of 8th Period</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Government Ranks</a>
+            <a href="ranks.html">Ranks</a>
             <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
         </div>
     </nav>
 
@@ -56,18 +173,18 @@
         <p>The supreme law and guiding rules of our classroom simulation.</p>
     </div>
 
-    <div class="container">
+    <div class="constitution-container">
         
         <div class="rule-card">
             <h2>I. Chancellor and Law Rules</h2>
             <ol>
-                <li>If the Chancellor is not there one of the judges has to take over</li>
+                <li>If the Chancellor is not there one of the judges has to take over.</li>
                 <li>Voting for another Chancellor must be 2 weeks, starting on the ending week on the last day (Friday) when school ends and ending on the Sunday of that week at 10:00pm so that you know who’s ruler on Monday morning.</li>
                 <li>Have to have the popular vote to become Chancellor (Of everyone that voted).</li>
                 <li>You can only be Chancellor for up to 3 terms consecutively.</li>
                 <li>When the Chancellor proposes a law 51% of the people must say yes before it is passed.</li>
                 <li>The ruler must follow all laws too.</li>
-                <li>If 75% of the people vote yes to get rid of the Chancellor they have to leave office</li>
+                <li>If 75% of the people vote yes to get rid of the Chancellor they have to leave office.</li>
             </ol>
         </div>
 
@@ -99,17 +216,18 @@
                 <li>Before becoming a prisoner or being banished the judges must vote and have 2 or more people say yes.</li>
                 <li>When you are voted to be in prison you must be told how long by the judges.</li>
                 <li>To get from being banished you must have over 66% of the kingdom's population vote yes to come back in.</li>
-                <li>When voting you can't bribe people to make it turn your way other wise you will be sentenced up to week ana half of prison.</li>
+                <li>When voting you can't bribe people to make it turn your way otherwise you will be sentenced up to a week and a half of prison.</li>
             </ol>
         </div>
 
     </div>
 
     <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th period
+        &copy; <span id="current-year"></span> Kingdom of 8th Period
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
-od
