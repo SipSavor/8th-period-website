@@ -3,55 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Results - National Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Live Results - Kingdom of 8th Period</title>
     <style>
+        /* Modern Bright Palette */
+        :root {
+            --primary-blue: #007bff;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --gold-accent: #ffc107;
+            --text-dark: #333333;
+            --text-muted: #666666;
+            --nav-gradient: linear-gradient(135deg, #007bff 0%, #00d4ff 100%);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Bright & Clear Navigation */
+        nav {
+            background: var(--nav-gradient);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-logo {
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--white);
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Results Container */
         .results-container {
             max-width: 800px;
-            margin: 40px auto;
+            margin: -40px auto 60px;
             padding: 0 20px;
         }
 
         .chart-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 40px 20px;
+            background: var(--white);
+            border-radius: 15px;
+            padding: 60px 40px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            border-top: 8px solid var(--primary-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
         }
 
         .chart-card h2 {
-            color: var(--primary-color);
             margin-top: 0;
+            color: var(--primary-blue);
             font-size: 2rem;
-            margin-bottom: 10px;
+            font-weight: 700;
         }
 
-        .chart-card p {
+        .status-tag {
+            background-color: #e2e8f0;
             color: #4a5568;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* This keeps your chart centered and prevents it from breaking on small screens */
+        /* Footer */
+        footer {
+            background: var(--white);
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #eee;
+            font-weight: 500;
+        }
+
+        #current-year {
+            color: var(--primary-blue);
+        }
+
+        /* Helper for future charts */
         .chart-wrapper {
             display: flex;
             justify-content: center;
-            overflow-x: auto;
-            padding: 10px;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-logo">Kingdom of 8th Period</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Government Ranks</a>
+            <a href="ranks.html">Ranks</a>
             <a href="economy.html">Economy</a>
             <a href="links.html">Links</a>
         </div>
@@ -59,20 +153,25 @@
 
     <div class="hero">
         <h1>Live Election Results 📊</h1>
-        <p>Watch the votes come in real-time as our citizens make their voices heard.</p>
+        <p>Real-time data and voting outcomes from across the Kingdom.</p>
     </div>
 
     <div class="results-container">
         
         <div class="chart-card">
-            <h2>No current voting going on at the moment</h2>
-        </div
+            <div class="status-tag">System Idle</div>
+            <h2>No active voting at this time</h2>
+            <p>Check back later or view the National News for upcoming election announcements.</p>
+        </div>
+
     </div>
 
     <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th period
+        &copy; <span id="current-year"></span> Kingdom of 8th Period
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
