@@ -1,40 +1,63 @@
-    <nav>
-        <div class="nav-logo">Kingdom of 8th Period</div>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Ranks</a>
-            <a href="economy.html">Economy</a>
-        </div>
-    </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News & Events - Kingdom of 8th Period</title>
+    <style>
+        /* Modern Bright Palette */
+        :root {
+            --primary-blue: #007bff;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --gold-accent: #ffc107;
+            --text-dark: #333333;
+            --text-muted: #666666;
+            --nav-gradient: linear-gradient(135deg, #007bff 0%, #00d4ff 100%);
+        }
 
-    <div class="hero">
-        <h1>National News</h1>
-        <p>The official source for announcements and rulings within the Kingdom.</p>
-    </div>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
 
-    <div class="news-container">
+        /* Bright & Clear Navigation */
+        nav {
+            background: var(--nav-gradient);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-        <div class="news-card">
-            <div class="news-tag">Legislation</div>
-            <h2>New Laws Passed</h2>
-            <p>A new law is being passed by Tamar stating "If you attack this country you are automatically banished. To be a normal citizen again you have go through the normal laws"</p>
-        </div>
-        
-        <div class="news-card">
-            <div class="news-tag">Global Affairs</div>
-            <h2>International Relations</h2>
-            <p>Ever since we allied with russia canada has backed down from attacking us</p>
-        </div>
+        .nav-logo {
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
 
-    </div>
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
 
-    <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th Period
-    </footer>
+        .nav-links a:hover {
+            color: var(--gold-accent);
+        }
 
-    <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-    </script>
-</body>
-</html>
+        /* Hero Section - Light & Airy */
+        .hero {
+            background: var(--white);
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
