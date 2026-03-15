@@ -3,69 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Important Links - National Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Important Links - Kingdom of 8th Period</title>
     <style>
+        /* Modern Bright Palette */
+        :root {
+            --primary-blue: #007bff;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --gold-accent: #ffc107;
+            --text-dark: #333333;
+            --text-muted: #666666;
+            --nav-gradient: linear-gradient(135deg, #007bff 0%, #00d4ff 100%);
+            --btn-hover: #0056b3;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--nav-gradient);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-logo {
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--white);
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Links Container */
         .links-container {
             max-width: 800px;
-            margin: 40px auto;
+            margin: -40px auto 60px;
             padding: 0 20px;
         }
 
         .link-item {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px 25px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            border-left: 6px solid var(--primary-color);
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .link-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            transform: translateX(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
 
         .link-text h3 {
-            color: var(--primary-color);
+            color: var(--primary-blue);
             margin: 0 0 5px 0;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .link-text p {
             margin: 0;
-            color: #4a5568;
-            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-size: 1rem;
         }
 
+        /* Button Styling */
         .link-btn {
-            background-color: var(--secondary-color);
+            background-color: var(--primary-blue);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 25px;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
 
         .link-btn:hover {
-            background-color: #9b2c2c; /* Darker red on hover */
+            background-color: var(--btn-hover);
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .link-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            .link-item:hover {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: var(--white);
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #eee;
+            font-weight: 500;
+        }
+
+        #current-year {
+            color: var(--primary-blue);
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="nav-logo">Kingdom of 8th period</div>
+        <div class="nav-logo">Kingdom of 8th Period</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Government Ranks</a>
+            <a href="ranks.html">Ranks</a>
             <a href="economy.html">Economy</a>
             <a href="links.html">Links</a>
         </div>
@@ -73,25 +176,27 @@
 
     <div class="hero">
         <h1>Important Links</h1>
-        <p>Official forms, voting booths, and external resources for citizens.</p>
+        <p>Official forms, voting booths, and external resources for our citizens.</p>
     </div>
 
     <div class="links-container"> 
 
         <div class="link-item">
             <div class="link-text">
-                <h3>📊 View vote's </h3>
-                <p>Check the current standing votes</p>
+                <h3>📊 View Live Results</h3>
+                <p>Check the current standings of active votes and polls.</p>
             </div>
             <a href="results.html" class="link-btn">View Charts</a>
         </div>
 
-    </div>
+        </div>
     
     <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th period
+        &copy; <span id="current-year"></span> Kingdom of 8th Period
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
