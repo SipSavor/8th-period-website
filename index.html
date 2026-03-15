@@ -3,142 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>National Government Portal - Kingdom of 8th Period</title>
+    <title>National Government Portal</title>
     <style>
-        /* Modern Bright Palette (Matching News Page) */
         :root {
-            --primary-blue: #007bff;
-            --light-bg: #f8f9fa;
-            --white: #ffffff;
-            --gold-accent: #ffc107;
-            --text-dark: #333333;
-            --text-muted: #666666;
-            --nav-gradient: linear-gradient(135deg, #007bff 0%, #00d4ff 100%);
+            --primary: #0062ff;
+            --accent: #ffd700;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            --nav-blur: saturate(180%) blur(10px);
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: #1a202c;
+            min-height: 100vh;
         }
 
-        /* Bright Navigation */
+        /* --- UPDATED INTERACTIVE NAVIGATION --- */
         nav {
-            background: var(--nav-gradient);
-            padding: 1rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: var(--nav-blur);
+            padding: 1.2rem 8%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
         }
 
         .nav-logo {
-            color: white;
+            font-size: 1.2rem;
             font-weight: 800;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            cursor: default;
         }
 
         .nav-links a {
-            color: rgba(255,255,255,0.9);
             text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            color: #4a5568;
+            font-weight: 600;
+            margin-left: 25px;
+            font-size: 0.9rem;
+            position: relative; /* Needed for the underline effect */
+            padding: 5px 0;
+            transition: color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+        }
+
+        /* The sliding underline effect */
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transform: scaleX(0); /* Hidden by default */
+            transform-origin: bottom right;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .nav-links a:hover {
-            color: var(--gold-accent);
+            color: var(--primary);
+            transform: translateY(-2px); /* Lifts the link slightly like the cards */
         }
 
-        /* Hero Section */
+        .nav-links a:hover::after {
+            transform: scaleX(1); /* Shows the underline on hover */
+            transform-origin: bottom left;
+        }
+
+        /* --- REST OF THE STYLES --- */
         .hero {
-            background: var(--white);
-            padding: 80px 20px;
             text-align: center;
-            border-bottom: 1px solid #eee;
+            padding: 100px 20px 80px;
         }
 
         .hero h1 {
-            font-size: 3rem;
-            color: var(--primary-blue);
-            margin-bottom: 10px;
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(to right, #2d3748, #0062ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
         }
 
         .hero p {
+            color: #718096;
             font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto;
+            max-width: 600px;
+            margin: 20px auto 0;
         }
 
-        /* Portal Grid Layout */
         .container {
-            max-width: 1100px;
-            margin: -40px auto 60px;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 30px;
         }
 
         .portal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
 
         .portal-card {
-            background: var(--white);
-            border-radius: 15px;
-            padding: 35px 25px;
-            text-align: center;
-            text-decoration: none; /* Removes underline from links */
-            color: var(--text-dark);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 40px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-align: center;
         }
 
         .portal-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border-color: var(--primary-blue);
+            transform: translateY(-12px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 30px 60px rgba(0, 98, 255, 0.15);
+            border-color: var(--primary);
         }
 
-        .icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            display: block;
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .portal-card:hover .icon-circle {
+            background: var(--primary);
+            transform: scale(1.1) rotate(5deg);
         }
 
         .portal-card h2 {
-            margin: 0 0 12px 0;
-            color: var(--primary-blue);
+            margin: 0 0 15px;
             font-size: 1.5rem;
+            color: #2d3748;
         }
 
         .portal-card p {
-            font-size: 0.95rem;
-            color: var(--text-muted);
             margin: 0;
+            color: #718096;
+            font-size: 1rem;
+            line-height: 1.5;
         }
 
-        /* Footer */
         footer {
-            background: var(--white);
-            color: var(--text-muted);
+            padding: 60px 20px;
             text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid #eee;
-            margin-top: 40px;
+            color: #a0aec0;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
         }
 
-        #current-year {
-            color: var(--primary-blue);
+        footer span {
+            color: var(--primary);
             font-weight: bold;
         }
     </style>
@@ -157,48 +197,48 @@
     </nav>
 
     <div class="hero">
-        <h1 id="greeting-title">Official Citizen Portal</h1>
-        <p>Welcome to the central hub. Access laws, view leadership roles, and monitor the state of our union.</p>
+        <h1 id="greeting-title">Citizen Portal</h1>
+        <p>Your unified access point for kingdom records, law, and economic data.</p>
     </div>
 
     <div class="container">
         <div class="portal-grid">
             
             <a href="constitution.html" class="portal-card">
-                <div class="icon">📜</div>
+                <div class="icon-circle">📜</div>
                 <h2>The Constitution</h2>
-                <p>Read the founding articles, amendments, and core rights of our citizens.</p>
+                <p>Founding articles and your core citizen rights.</p>
             </a>
 
             <a href="ranks.html" class="portal-card">
-                <div class="icon">🏛️</div>
+                <div class="icon-circle">🏛️</div>
                 <h2>Government Ranks</h2>
-                <p>View the current hierarchy, elected officials, and job descriptions.</p>
+                <p>Leadership hierarchy and role descriptions.</p>
             </a>
 
             <a href="economy.html" class="portal-card">
-                <div class="icon">💰</div>
+                <div class="icon-circle">💰</div>
                 <h2>National Economy</h2>
-                <p>Check the national treasury, current taxes, and market regulations.</p>
+                <p>Treasury status, tax rates, and market data.</p>
             </a>
 
             <a href="news.html" class="portal-card">
-                <div class="icon">📰</div>
+                <div class="icon-circle">📰</div>
                 <h2>News & Events</h2>
-                <p>Stay updated on recently passed laws, vetoes, and announcements.</p>
+                <p>Latest updates on laws and simulation events.</p>
             </a>
 
             <a href="links.html" class="portal-card">
-                <div class="icon">🔗</div>
+                <div class="icon-circle">🔗</div>
                 <h2>Important Links</h2>
-                <p>Access voting forms, classroom materials, and citizen resources.</p>
+                <p>Voting forms and external classroom materials.</p>
             </a>
 
         </div>
     </div>
 
     <footer>
-        &copy; <span id="current-year"></span> Kingdom of 8th Period
+        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD
     </footer>
 
     <script>
