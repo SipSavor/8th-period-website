@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Important Links - Kingdom of 8th Period</title>
     <style>
-        /* Modern Bright Palette */
         :root {
             --primary-blue: #007bff;
             --light-bg: #f8f9fa;
@@ -25,7 +24,6 @@
             line-height: 1.6;
         }
 
-        /* Navigation */
         nav {
             background: var(--nav-gradient);
             padding: 1rem 5%;
@@ -55,10 +53,10 @@
             color: var(--gold-accent);
         }
 
-        /* Hero Section */
+        /* FIX: Increased bottom padding (120px) to prevent overlap */
         .hero {
             background: var(--white);
-            padding: 80px 20px;
+            padding: 80px 20px 120px; 
             text-align: center;
             border-bottom: 1px solid #eee;
         }
@@ -66,7 +64,7 @@
         .hero h1 {
             font-size: 3rem;
             color: var(--primary-blue);
-            margin-bottom: 10px;
+            margin: 0 0 10px 0;
         }
 
         .hero p {
@@ -76,11 +74,12 @@
             margin: 0 auto;
         }
 
-        /* Links Container */
+        /* FIX: Adjusted negative margin to -50px */
         .links-container {
             max-width: 800px;
-            margin: -40px auto 60px;
+            margin: -50px auto 60px;
             padding: 0 20px;
+            position: relative; /* Ensures it stays on top layer correctly */
         }
 
         .link-item {
@@ -105,9 +104,6 @@
             color: var(--primary-blue);
             margin: 0 0 5px 0;
             font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .link-text p {
@@ -116,7 +112,6 @@
             font-size: 1rem;
         }
 
-        /* Button Styling */
         .link-btn {
             background-color: var(--primary-blue);
             color: white;
@@ -125,8 +120,9 @@
             border-radius: 50px;
             font-weight: 600;
             font-size: 0.9rem;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            white-space: nowrap;
         }
 
         .link-btn:hover {
@@ -134,8 +130,13 @@
             transform: scale(1.05);
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
+            .hero {
+                padding: 60px 20px 100px;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
             .link-item {
                 flex-direction: column;
                 text-align: center;
@@ -146,7 +147,6 @@
             }
         }
 
-        /* Footer */
         footer {
             background: var(--white);
             color: var(--text-muted);
@@ -180,7 +180,6 @@
     </div>
 
     <div class="links-container"> 
-
         <div class="link-item">
             <div class="link-text">
                 <h3>📊 View Live Results</h3>
@@ -188,8 +187,7 @@
             </div>
             <a href="results.html" class="link-btn">View Charts</a>
         </div>
-
-        </div>
+    </div>
     
     <footer>
         &copy; <span id="current-year"></span> Kingdom of 8th Period
