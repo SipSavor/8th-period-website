@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The National Economy of the Kingdom of 8th Period">
+    <title>Economy | Kingdom of 8th Period</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --primary-glow: rgba(129, 140, 248, 0.25);
+            --money-green: #34d399; /* Vibrant emerald for dark mode */
+            --money-glow: rgba(52, 211, 153, 0.3);
+            --bg-main: #020617;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(52, 211, 153, 0.08) 0%, transparent 40%); /* Subtle green tint on the right */
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- ACCESSIBILITY --- */
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.25rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* --- HERO --- */
+        .hero {
+            text-align: center;
+            padding: 100px 20px 60px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin-bottom: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right bottom, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* --- ECONOMY CONTAINER --- */
+        .economy-container {
+            max-width: 800px;
+            margin: 0 auto 100px;
+            padding: 0 24px;
+        }
+
+        .treasury-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-top: 4px solid var(--money-green); /* Keep the green accent */
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.6s ease-out backwards;
+            animation-delay: 0.1s;
+        }
+
+        .treasury-card:hover {
+            transform: translateY(-6px);
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(52, 211, 153, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--money-glow);
+        }
+
+        .treasury-card h2 {
+            color: var(--text-main);
+            margin-top: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+
+        .money-display {
+            font-size: clamp(4rem, 10vw, 6rem);
+            font-weight: 800;
+            color: var(--money-green);
+            margin: 10px 0 20px;
+            letter-spacing: -0.04em;
+            text-shadow: 0 0 30px var(--money-glow);
+        }
+
+        .treasury-card p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .treasury-card .emphasis {
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-top: 20px;
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 40px 20px 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-top: 1px solid var(--card-border);
+            opacity: 0.7;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero {
+                padding: 80px 20px 40px;
+            }
+            .treasury-card {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom of 8th</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Ranks</a>
+            <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>National Treasury</h1>
+        <p>Monitor the wealth and financial stability of the realm.</p>
+    </header>
+
+    <main class="economy-container"> 
+        <div class="treasury-card">
+            <h2>Current Balance</h2>
+            <div class="money-display" id="treasury-amount">$0</div>
+            <p>This fund is managed by the Chancellor to finance national operations and initiatives.</p>
+            <span class="emphasis">Citizens may contribute personal funds directly to the treasury via the Chancellor.</span>
+        </div>
+    </main>
+    
+    <footer>
+        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
+    </footer>
+
+    <script>
+        // Set the dynamic year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // ==========================================
+        // HOW TO CHANGE THE MONEY:
+        // Just change the number below, save the file, 
+        // and refresh the page! (Don't use commas here)
+        // ==========================================
+        
+        const currentTreasury = 0; // Example starting amount, change as needed!
+
+        // ==========================================
+
+        function loadTreasury() {
+            // This automatically adds the dollar sign and commas for you
+            document.getElementById('treasury-amount').textContent = '$' + currentTreasury.toLocaleString();
+        }
+
+        // Run this when the page loads
+        window.addEventListener('load', loadTreasury);
+    </script>
+</body>
+</html>

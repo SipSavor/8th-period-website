@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Important Links for the Kingdom of 8th Period">
+    <title>Links | Kingdom of 8th Period</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --primary-glow: rgba(129, 140, 248, 0.25);
+            --bg-main: #020617;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-border-hover: rgba(129, 140, 248, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- ACCESSIBILITY --- */
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.25rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* --- HERO --- */
+        .hero {
+            text-align: center;
+            padding: 100px 20px 60px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin-bottom: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right bottom, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* --- LINKS CONTAINER --- */
+        .links-container {
+            max-width: 800px;
+            margin: 0 auto 100px;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .link-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--primary);
+            border-radius: 20px;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.6s ease-out backwards;
+        }
+
+        .link-item:hover {
+            transform: translateX(8px);
+            background: rgba(30, 41, 59, 0.6);
+            border-color: var(--card-border-hover);
+            border-left-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), -5px 0 30px var(--primary-glow);
+        }
+
+        .link-text h2 {
+            color: var(--text-main);
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .link-text p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .link-btn {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            white-space: nowrap;
+        }
+
+        .link-btn:hover {
+            background-color: #6366f1;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Staggered animation for links */
+        .link-item:nth-child(1) { animation-delay: 0.1s; }
+        .link-item:nth-child(2) { animation-delay: 0.2s; }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 40px 20px 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-top: 1px solid var(--card-border);
+            opacity: 0.7;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero {
+                padding: 80px 20px 40px;
+            }
+            .link-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 24px;
+                padding: 30px 24px;
+                border-left: 1px solid var(--card-border); /* Remove left border on mobile */
+                border-top: 4px solid var(--primary); /* Move accent to top */
+            }
+            .link-item:hover {
+                transform: translateY(-6px); /* Change hover direction on mobile */
+            }
+            .link-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom of 8th</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Ranks</a>
+            <a href="economy.html">Economy</a>
+            <a href="links.html">Links</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Important Links</h1>
+        <p>Official forms, voting booths, and external resources for our citizens.</p>
+    </header>
+
+    <main class="links-container">
+        
+        <div class="link-item">
+            <div class="link-text">
+                <h2>✅/❌ Chancellor Elections</h2>
+                <p>Vote for your country's newest leader.</p>
+            </div>
+            <a href="https://forms.gle/zm63fevdox1PEop37" target="_blank" rel="noopener noreferrer" class="link-btn">Vote Here</a>
+        </div>
+
+        <div class="link-item">
+            <div class="link-text">
+                <h2>📊 View Live Results</h2>
+                <p>Check the current standings of active votes and polls.</p>
+            </div>
+            <a href="results.html" class="link-btn">View Charts</a>
+        </div>
+
+    </main>
+    
+    <footer>
+        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

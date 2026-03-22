@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="National News and Events for the Kingdom of 8th Period">
+    <title>News & Events | Kingdom of 8th Period</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --primary-glow: rgba(129, 140, 248, 0.25);
+            --bg-main: #020617;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-border-hover: rgba(129, 140, 248, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Tag Colors */
+            --tag-gold-bg: rgba(245, 158, 11, 0.15);
+            --tag-gold-text: #fbbf24;
+            --tag-gold-border: rgba(245, 158, 11, 0.3);
+            
+            --tag-green-bg: rgba(52, 211, 153, 0.15);
+            --tag-green-text: #34d399;
+            --tag-green-border: rgba(52, 211, 153, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- ACCESSIBILITY --- */
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.25rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* --- HERO --- */
+        .hero {
+            text-align: center;
+            padding: 100px 20px 60px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin-bottom: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right bottom, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* --- NEWS CONTAINER --- */
+        .news-container {
+            max-width: 800px;
+            margin: 0 auto 100px;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .news-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.6s ease-out backwards;
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            background: rgba(30, 41, 59, 0.6);
+            border-color: var(--card-border-hover);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 10px 30px var(--primary-glow);
+        }
+
+        .news-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .tag-legislation {
+            background-color: var(--tag-gold-bg);
+            color: var(--tag-gold-text);
+            border: 1px solid var(--tag-gold-border);
+        }
+
+        .tag-global {
+            background-color: var(--tag-green-bg);
+            color: var(--tag-green-text);
+            border: 1px solid var(--tag-green-border);
+        }
+
+        .news-card h2 {
+            color: var(--text-main);
+            margin: 0 0 12px 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .news-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* Staggered animation for cards */
+        .news-card:nth-child(1) { animation-delay: 0.1s; }
+        .news-card:nth-child(2) { animation-delay: 0.2s; }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 40px 20px 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-top: 1px solid var(--card-border);
+            opacity: 0.7;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero {
+                padding: 80px 20px 40px;
+            }
+            .news-card {
+                padding: 30px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom of 8th</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="constitution.html">Constitution</a>
+            <a href="ranks.html">Ranks</a>
+            <a href="economy.html">Economy</a>
+            <a href="news.html">News</a>
+            <a href="links.html">Links</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>National News</h1>
+        <p>The official source for announcements and rulings within the Kingdom.</p>
+    </header>
+
+    <main class="news-container">
+
+        <article class="news-card">
+            <div class="news-tag tag-legislation">Legislation</div>
+            <h2>New Laws Passed</h2>
+            <p>A new royal decree states: "Any unprovoked attack on the Kingdom will result in immediate banishment. Reinstatement requires following standard legal appeals."</p>
+        </article>
+        
+        <article class="news-card">
+            <div class="news-tag tag-global">Global Affairs</div>
+            <h2>International Relations</h2>
+            <p>Peace has been secured on the northern front. Following new strategic alliances, previous regional tensions have significantly cooled.</p>
+        </article>
+
+    </main>
+
+    <footer>
+        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
