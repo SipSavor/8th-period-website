@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Citizen Portal for the Kingdom of 8th Period">
     <title>Kingdom of 8th Period | Portal</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary: #818cf8; /* Lightened slightly for better dark mode contrast */
+            --primary: #818cf8;
             --primary-glow: rgba(129, 140, 248, 0.25);
             --accent: #f59e0b;
-            --bg-main: #020617; /* Deep slate */
+            --bg-main: #020617; 
             --card-bg: rgba(30, 41, 59, 0.4);
             --card-border: rgba(255, 255, 255, 0.08);
             --card-border-hover: rgba(129, 140, 248, 0.4);
@@ -21,11 +26,7 @@
             --text-muted: #94a3b8;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -33,283 +34,212 @@
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
                 radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.1) 0%, transparent 40%);
-            background-attachment: fixed; /* Anchors the gradient during scroll */
+            background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
             line-height: 1.6;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* --- ACCESSIBILITY --- */
-        :focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 4px;
-            border-radius: 4px;
+        /* --- AUTH SCREEN STYLES --- */
+        #auth-overlay {
+            position: fixed; inset: 0; background: var(--bg-main); z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
         }
 
-        /* --- NAVIGATION --- */
+        .auth-card {
+            background: var(--card-bg); padding: 40px; border-radius: 28px;
+            border: 1px solid var(--card-border); width: 90%; max-width: 400px;
+            backdrop-filter: blur(20px); text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .auth-input {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border);
+            color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; outline: none;
+            font-family: inherit;
+        }
+
+        .auth-btn {
+            width: 100%; background: var(--primary); color: #020617; border: none;
+            padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer;
+            margin-bottom: 10px; transition: 0.3s;
+        }
+
+        /* --- MAIN CONTENT (Hidden until login) --- */
+        #main-content { display: none; opacity: 0; transition: opacity 0.8s ease; }
+
         nav {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(2, 6, 23, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 1.25rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 1000; background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(20px); padding: 1.25rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--card-border);
         }
 
         .nav-logo {
-            font-size: 1.1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
             background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--text-main); }
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
+        .logout-btn { background: none; border: 1px solid var(--danger); color: #ef4444; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
 
-        .nav-links a:hover {
-            color: var(--text-main);
-        }
+        .hero { text-align: center; padding: 120px 20px 60px; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 1rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(to right bottom, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-muted); font-size: clamp(1rem, 4vw, 1.25rem); max-width: 600px; margin: 0 auto; }
 
-        /* --- HERO --- */
-        .hero {
-            text-align: center;
-            padding: 120px 20px 60px;
-            animation: slideUp 0.8s ease-out;
-        }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            margin-bottom: 1rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            background: linear-gradient(to right bottom, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            color: var(--text-muted);
-            font-size: clamp(1rem, 4vw, 1.25rem);
-            max-width: 600px;
-            margin: 0 auto;
-            font-weight: 400;
-        }
-
-        /* --- GRID --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto 100px;
-            padding: 0 24px;
-        }
-
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto 100px; padding: 0 24px; }
+        .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        
         .portal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 40px 32px;
-            text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            overflow: hidden;
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px;
+            padding: 40px 32px; text-decoration: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; backdrop-filter: blur(12px);
         }
 
-        /* Subtle gradient overlay on hover */
-        .portal-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.03), transparent);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
+        .portal-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow); }
 
-        .portal-card:hover {
-            transform: translateY(-6px);
-            background: rgba(30, 41, 59, 0.6);
-            border-color: var(--card-border-hover);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow);
-        }
+        .icon-circle { width: 64px; height: 64px; background: rgba(255, 255, 255, 0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; border: 1px solid var(--card-border); }
 
-        .portal-card:hover::before {
-            opacity: 1;
-        }
+        footer { padding: 40px 20px 60px; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 2px; border-top: 1px solid var(--card-border); opacity: 0.7; }
 
-        .icon-circle {
-            width: 64px;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 24px;
-            border: 1px solid var(--card-border);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .portal-card:hover .icon-circle {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: scale(1.08) rotate(-8deg);
-            box-shadow: 0 10px 20px var(--primary-glow);
-        }
-
-        .portal-card h2 {
-            margin: 0 0 12px;
-            font-size: 1.5rem;
-            color: var(--text-main);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .portal-card p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 40px 20px 60px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            border-top: 1px solid var(--card-border);
-            opacity: 0.7;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .portal-card {
-            /* 'backwards' ensures the cards are invisible before their delay starts */
-            animation: slideUp 0.6s ease-out backwards;
-        }
-
-        .portal-card:nth-child(1) { animation-delay: 0.1s; }
-        .portal-card:nth-child(2) { animation-delay: 0.2s; }
-        .portal-card:nth-child(3) { animation-delay: 0.3s; }
-        .portal-card:nth-child(4) { animation-delay: 0.4s; }
-        .portal-card:nth-child(5) { animation-delay: 0.5s; }
-
-        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            nav {
-                flex-direction: column;
-                gap: 1.5rem;
-                padding: 1.5rem;
-            }
-            .nav-links {
-                gap: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .hero {
-                padding: 80px 20px 40px;
-            }
-            .portal-card {
-                padding: 32px 24px;
-            }
+            nav { flex-direction: column; gap: 1.5rem; }
+            .nav-links { gap: 1rem; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-logo">Kingdom of 8th</div>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Ranks</a>
-            <a href="economy.html">Economy</a>
-            <a href="links.html">Links</a>
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div class="nav-logo" style="font-size: 1.5rem; margin-bottom: 20px;">Kingdom of 8th</div>
+            <h2 style="margin-bottom: 20px; font-weight: 700;">Secure Access</h2>
+            <input type="email" id="email" class="auth-input" placeholder="Citizen Email">
+            <input type="password" id="password" class="auth-input" placeholder="Secret Password">
+            <button class="auth-btn" onclick="handleAuth('login')">Enter Realm</button>
+            <button class="auth-btn" style="background:none; color:var(--primary); border: 1px solid var(--primary);" onclick="handleAuth('signup')">Register New Citizen</button>
         </div>
-    </nav>
+    </div>
 
-    <header class="hero">
-        <h1 id="greeting-title">Citizen Portal</h1>
-        <p>Your gateway to the legislative heart and economic pulse of the 8th Period realm.</p>
-    </header>
+    <div id="main-content">
+        <nav>
+            <div class="nav-logo">Kingdom of 8th</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="constitution.html">Constitution</a>
+                <a href="ranks.html">Ranks</a>
+                <a href="economy.html">Economy</a>
+                <a href="chat.html">Secure Chat</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
 
-    <main class="container">
-        <div class="portal-grid">
-            
-            <a href="constitution.html" class="portal-card">
-                <div class="icon-circle">📜</div>
-                <h2>Constitution</h2>
-                <p>The supreme law of the land. Understand your rights and the foundations of our society.</p>
-            </a>
+        <header class="hero">
+            <h1 id="greeting-title">Citizen Portal</h1>
+            <p>Your gateway to the legislative heart and economic pulse of the 8th Period realm.</p>
+        </header>
 
-            <a href="ranks.html" class="portal-card">
-                <div class="icon-circle">🏛️</div>
-                <h2>Government</h2>
-                <p>Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
-            </a>
+        <main class="container">
+            <div class="portal-grid">
+                <a href="constitution.html" class="portal-card">
+                    <div class="icon-circle">📜</div>
+                    <h2>Constitution</h2>
+                    <p>The supreme law of the land. Understand your rights and the foundations of our society.</p>
+                </a>
 
-            <a href="economy.html" class="portal-card">
-                <div class="icon-circle">💰</div>
-                <h2>Economy</h2>
-                <p>Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
-            </a>
+                <a href="ranks.html" class="portal-card">
+                    <div class="icon-circle">🏛️</div>
+                    <h2>Government</h2>
+                    <p>Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
+                </a>
 
-            <a href="news.html" class="portal-card">
-                <div class="icon-circle">📰</div>
-                <h2>Chronicles</h2>
-                <p>The latest decrees, simulation updates, and major historical events within the realm.</p>
-            </a>
+                <a href="chat.html" class="portal-card">
+                    <div class="icon-circle">💬</div>
+                    <h2>Secure Chat</h2>
+                    <p>Encrypted peer-to-peer communication with fellow citizens of the realm.</p>
+                </a>
 
-            <a href="links.html" class="portal-card">
-                <div class="icon-circle">🔗</div>
-                <h2>Resources</h2>
-                <p>Essential voting forms, classroom portals, and external kingdom documents.</p>
-            </a>
+                <a href="economy.html" class="portal-card">
+                    <div class="icon-circle">💰</div>
+                    <h2>Economy</h2>
+                    <p>Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
+                </a>
 
-        </div>
-    </main>
+                <a href="news.html" class="portal-card">
+                    <div class="icon-circle">📰</div>
+                    <h2>Chronicles</h2>
+                    <p>The latest decrees, simulation updates, and major historical events within the realm.</p>
+                </a>
+            </div>
+        </main>
 
-    <footer>
-        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
-    </footer>
+        <footer>
+            &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
+        </footer>
+    </div>
 
     <script>
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9AQ8I79SzcOxhyT4-Z9qYVSr4Cv3njK0",
+            authDomain: "kingdom-of-8th-79341.firebaseapp.com",
+            databaseURL: "https://kingdom-of-8th-79341-default-rtdb.firebaseio.com",
+            projectId: "kingdom-of-8th-79341",
+            storageBucket: "kingdom-of-8th-79341.firebasestorage.app",
+            messagingSenderId: "399956360550",
+            appId: "1:399956360550:web:b498c38f52d87431c7dca7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // --- AUTH LOGIC ---
+        async function handleAuth(type) {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(!email || !pass) return alert("Credentials required.");
+
+            try {
+                if(type === 'signup') {
+                    await auth.createUserWithEmailAndPassword(email, pass);
+                } else {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function logout() {
+            auth.signOut();
+            location.reload();
+        }
+
+        // --- AUTH LISTENER ---
+        auth.onAuthStateChanged(user => {
+            const overlay = document.getElementById('auth-overlay');
+            const main = document.getElementById('main-content');
+            
+            if (user) {
+                overlay.style.display = 'none';
+                main.style.display = 'block';
+                setTimeout(() => main.style.opacity = "1", 50);
+                
+                // Set Greeting
+                const name = user.email.split('@')[0];
+                document.getElementById('greeting-title').innerText = `Welcome, Citizen ${name}`;
+            } else {
+                overlay.style.display = 'flex';
+                main.style.display = 'none';
+            }
+        });
+
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
