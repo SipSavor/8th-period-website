@@ -113,8 +113,8 @@
 
         <div class="input-group">
             <input type="text" id="username" placeholder="Your Name" onchange="updateProfile()">
-            <input type="text" id="join-id" placeholder="Friend's Host ID">
-            <button id="action-btn" class="action-btn">Join Chat</button>
+            <input type="text" id="join-id" placeholder="Friend's ID">
+            <button id="action-btn" class="action-btn">Connect</button>
             
             <div class="encryption-box">
                 <div style="font-size: 0.75rem; color: var(--success); margin-bottom: 5px;">🔒 E2E ENCRYPTION</div>
@@ -184,10 +184,8 @@
 
     // --- State ---
     const peer = new Peer();
-    let connections = [];
-    let members = {};
-    let isHost = true;
-    let currentHostId = null;
+    let connections = []; // Array of direct connections (Mesh)
+    let members = {}; // Dictionary of everyone in the room
     let chatHistory = JSON.parse(localStorage.getItem('p2p_chat_history_v7')) || [];
 
     // Load saved preferences
@@ -210,7 +208,7 @@
 
     async function securePackage(dataObj) {
         const key = await getCryptoKey();
-        if(!key) return { __raw: dataObj }; // Send unencrypted if no password set
+        if(!key) return { __raw: dataObj };
         
         const iv = crypto.getRandomValues(new Uint8Array(12));
         const encoded = new TextEncoder().encode(JSON.stringify(dataObj));
@@ -235,7 +233,7 @@
         return payload;
     }
 
-    // --- PeerJS Connections ---
+    // --- PeerJS & FULL MESH Logic ---
     peer.on('open', id => { 
         myIdDisplay.innerText = id; 
         members[id] = getMyProfile(); 
@@ -249,66 +247,106 @@
         setTimeout(() => myIdDisplay.innerText = original, 1000);
     };
 
-    function getMyProfile() { return { name: document.getElementById('username').value.trim() || "Guest_" + (peer.id ? peer.id.substring(0,4) : "") }; }
-    function updateProfile() { localStorage.setItem('p2p_username', document.getElementById('username').value); members[peer.id] = getMyProfile(); if(isHost) broadcastMembers(); }
+    function getMyProfile() { 
+        return { name: document.getElementById('username').value.trim() || "Guest_" + (peer.id ? peer.id.substring(0,4) : "") }; 
+    }
 
-    peer.on('connection', conn => { isHost = true; currentHostId = peer.id; setupConnection(conn); });
+    function updateProfile() { 
+        localStorage.setItem('p2p_username', document.getElementById('username').value); 
+        members[peer.id] = getMyProfile(); 
+        broadcastData({ type: 'HELO', profile: getMyProfile() }); // Tell everyone my new name
+        updateMemberList();
+    }
 
+    // When someone initiates a connection to US
+    peer.on('connection', conn => { 
+        setupConnection(conn); 
+    });
+
+    // When WE initiate a connection to someone
     document.getElementById('action-btn').onclick = () => {
         const targetId = document.getElementById('join-id').value.trim();
         if (!targetId || targetId === peer.id) return;
-        isHost = false; currentHostId = targetId;
+        
         setupConnection(peer.connect(targetId));
-        document.getElementById('action-btn').disabled = true;
         document.getElementById('action-btn').innerText = "Connected";
         if(window.innerWidth <= 768) toggleSidebar();
     };
 
+    // The core connection handler that builds the Mesh
     function setupConnection(conn) {
-        conn.on('open', () => {
-            connections.push(conn);
+        // Prevent duplicate connections if they spam click
+        if (connections.some(c => c.peer === conn.peer)) return;
+        connections.push(conn);
+
+        const onOpen = () => {
+            // Tell them who we are
             sendRawData(conn, { type: 'HELO', profile: getMyProfile() });
+            // Share our full member list so they can connect to anyone they are missing
+            sendRawData(conn, { type: 'MEMBER_LIST', list: members });
+        };
 
-            conn.on('data', async encryptedPayload => {
-                // Host Relay (Relay exact encrypted payload to preserve E2EE)
-                if (isHost && !encryptedPayload.__raw?.type) {
-                    connections.forEach(c => { if(c.peer !== conn.peer && c.open) c.send(encryptedPayload); });
-                }
+        if (conn.open) onOpen();
+        else conn.on('open', onOpen);
 
-                const data = await secureUnpackage(encryptedPayload);
+        conn.on('data', async encryptedPayload => {
+            const data = await secureUnpackage(encryptedPayload);
 
-                if (data.type === 'HELO') {
-                    members[conn.peer] = data.profile; renderSystemMessage(`${data.profile.name} joined.`);
-                    if (isHost) broadcastMembers();
-                } 
-                else if (data.type === 'CHAT') {
-                    renderMessageUI(data); saveToHistory(data);
-                    // Send Read Receipt automatically
-                    broadcastData({ type: 'READ_RECEIPT', msgId: data.msgId });
-                }
-                else if (data.type === 'READ_RECEIPT') markMessageRead(data.msgId);
-                else if (data.type === 'MEMBER_LIST') { members = data.list; currentHostId = data.hostId; updateMemberList(); }
-                else if (data.type === 'SYSTEM') renderSystemMessage(data.text);
-            });
+            if (data.type === 'HELO') {
+                members[conn.peer] = data.profile; 
+                renderSystemMessage(`${data.profile.name} joined.`);
+                updateMemberList();
+            } 
+            else if (data.type === 'MEMBER_LIST') {
+                // Combine their list with our list
+                members = { ...members, ...data.list };
+                updateMemberList();
+                
+                // MESH MAGIC: Connect to anyone on the list we aren't connected to yet!
+                Object.keys(members).forEach(id => {
+                    if (id !== peer.id && !connections.some(c => c.peer === id)) {
+                        console.log("Mesh networking: Reaching out to missing peer", id);
+                        setupConnection(peer.connect(id));
+                    }
+                });
+            }
+            else if (data.type === 'CHAT') {
+                renderMessageUI(data); 
+                saveToHistory(data);
+                sendRawData(conn, { type: 'READ_RECEIPT', msgId: data.msgId });
+            }
+            else if (data.type === 'READ_RECEIPT') {
+                markMessageRead(data.msgId);
+            }
+            else if (data.type === 'SYSTEM') {
+                renderSystemMessage(data.text);
+            }
         });
+
         conn.on('close', () => handleDisconnection(conn));
         conn.on('error', () => handleDisconnection(conn));
     }
 
-    function handleDisconnection(conn) { delete members[conn.peer]; connections = connections.filter(c => c.peer !== conn.peer); updateMemberList(); }
-    
-    function broadcastMembers() {
-        members[peer.id] = getMyProfile();
-        connections.forEach(c => { if(c.open) sendRawData(c, { type: 'MEMBER_LIST', list: members, hostId: peer.id }); });
-        updateMemberList();
+    // Safely remove a peer if they drop
+    function handleDisconnection(conn) { 
+        if (members[conn.peer]) {
+            renderSystemMessage(`${members[conn.peer].name} left.`);
+            delete members[conn.peer]; 
+        }
+        connections = connections.filter(c => c.peer !== conn.peer && c.open); 
+        updateMemberList(); 
     }
 
+    // Broadcasts an encrypted payload to ALL direct connections
     async function broadcastData(dataObj) {
         const payload = await securePackage(dataObj);
-        connections.forEach(c => c.open && c.send(payload));
+        connections.forEach(c => { if(c.open) c.send(payload); });
     }
     
-    function sendRawData(conn, dataObj) { conn.send({ __raw: dataObj }); }
+    // Sends raw (unencrypted) data, usually for system/handshake info
+    function sendRawData(conn, dataObj) { 
+        if (conn.open) conn.send({ __raw: dataObj }); 
+    }
 
     function updateMemberList() {
         memberListUI.innerHTML = '';
@@ -378,7 +416,6 @@
 
         let receiptHTML = isSentByMe ? `<span class="receipt ${data.read ? 'read' : ''}" id="receipt-${data.msgId}">${data.read ? '✓✓' : '✓'}</span>` : '';
 
-        // Safely escape text to prevent HTML injection
         const safeText = data.text ? data.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
 
         wrapper.innerHTML = `
@@ -399,6 +436,7 @@
     let localStream = null;
     let activeCalls = [];
     let pendingCall = null;
+    let isEndingCallLocal = false; // Flag to stop duplicate disconnect messages
 
     async function startVideoCall() {
         try {
@@ -411,29 +449,24 @@
                 return;
             }
 
+            // MESH: Call everyone directly!
             connections.forEach(conn => {
                 const call = peer.call(conn.peer, localStream);
                 setupCallEvents(call);
             });
         } catch(err) {
             console.error(err);
-            alert("Could not access Camera/Microphone. Make sure you are using a secure connection (HTTPS or localhost)!");
+            alert("Could not access Camera/Microphone. Are you using a local server (http://localhost)?");
         }
     }
 
-    // Replaced the 'confirm()' box with the custom HTML Modal
     peer.on('call', (call) => {
         pendingCall = call;
-        
-        // Show the caller's name in the modal
         const callerName = members[call.peer]?.name || "Unknown User";
         document.getElementById('caller-name').innerText = callerName;
-        
-        // Display the modal
         document.getElementById('incoming-call-overlay').style.display = 'flex';
     });
 
-    // Handle Modal "Accept"
     document.getElementById('accept-call-btn').onclick = async () => {
         document.getElementById('incoming-call-overlay').style.display = 'none';
         if (!pendingCall) return;
@@ -448,25 +481,26 @@
             setupCallEvents(pendingCall);
         } catch(err) {
             console.error("Failed to answer call:", err);
-            alert("Error: Could not access your camera to answer. Are you on a secure connection?");
+            alert("Error accessing your camera.");
         }
         pendingCall = null;
     };
 
-    // Handle Modal "Reject"
     document.getElementById('reject-call-btn').onclick = () => {
         document.getElementById('incoming-call-overlay').style.display = 'none';
         if (pendingCall) {
+            renderSystemMessage(`📞 You declined the call from ${members[pendingCall.peer]?.name || 'Someone'}.`);
             pendingCall.close();
             pendingCall = null;
         }
     };
 
-    // The fixed setupCallEvents function
     function setupCallEvents(call) {
         activeCalls.push(call);
+        let callAnswered = false;
         
         call.on('stream', remoteStream => {
+            callAnswered = true;
             let remoteVid = document.getElementById(`vid-${call.peer}`);
             
             if (!remoteVid) {
@@ -477,20 +511,33 @@
                 document.getElementById('remote-videos-container').appendChild(remoteVid);
             }
             
-            // ALWAYS reassign the stream to fix the PeerJS double-fire bug
             remoteVid.srcObject = remoteStream;
-            
-            // Explicitly call play() for strict browser policies
             remoteVid.onloadedmetadata = () => {
-                remoteVid.play().catch(err => {
-                    console.warn("Browser blocked autoplay. User interaction needed:", err);
-                });
+                remoteVid.play().catch(err => console.warn("Autoplay blocked:", err));
             };
         });
 
         call.on('close', () => {
             const vid = document.getElementById(`vid-${call.peer}`);
             if(vid) vid.remove();
+
+            if (!isEndingCallLocal) {
+                const peerName = members[call.peer]?.name || "Someone";
+                if (!callAnswered) {
+                    renderSystemMessage(`📞 ${peerName} declined the video call.`);
+                } else {
+                    renderSystemMessage(`📞 ${peerName} disconnected from the call.`);
+                }
+            }
+
+            // Cleanup if everyone leaves the call
+            const container = document.getElementById('remote-videos-container');
+            if (container.children.length <= 1 && localStream) {
+                document.getElementById('video-ui').style.display = 'none';
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                activeCalls = [];
+            }
         });
 
         call.on('error', err => {
@@ -509,10 +556,14 @@
     }
 
     function endCall() {
+        isEndingCallLocal = true;
+        renderSystemMessage(`📞 You ended the call.`);
+
         if(localStream) {
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
         }
+        
         activeCalls.forEach(call => call.close());
         activeCalls = [];
         document.getElementById('video-ui').style.display = 'none';
@@ -521,6 +572,8 @@
         Array.from(container.children).forEach(child => {
             if(child.id !== 'local-video') child.remove();
         });
+
+        setTimeout(() => { isEndingCallLocal = false; }, 1000); 
     }
 </script>
 </body>
