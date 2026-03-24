@@ -3,488 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>P2P Pro Secure Chat</title>
+    <title>Kingdom of 8th | Official Portal</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
     <style>
         :root {
-            --bg-color: #121212; --side-bar: #1e1e1e; --chat-bg: #181818;
-            --text-main: #e0e0e0; --accent: #0084ff; --received-bg: #333;
-            --success: #2ecc71; --danger: #e74c3c;
+            --primary: #818cf8;
+            --bg-main: #020617; 
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
-        body, html { margin: 0; padding: 0; height: 100dvh; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; }
-        .app-container { display: flex; height: 100dvh; width: 100vw; position: relative; }
-
-        /* Mobile Header */
-        .mobile-header { display: flex; background: var(--side-bar); padding: 12px 20px; align-items: center; border-bottom: 1px solid #333; z-index: 5; gap: 10px;}
-        .mobile-header h1 { margin: 0; font-size: 1.1rem; color: var(--accent); flex-grow: 1; text-align: center; }
-        #menu-toggle { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; }
-        .header-btn { background: #333; border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.1rem;}
-        .header-btn:hover { background: #444; }
-
-        /* Sidebar */
-        .sidebar { width: 280px; background: var(--side-bar); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #333; z-index: 20; transition: transform 0.3s ease; }
-        .sidebar h2 { font-size: 1.1rem; margin: 0 0 20px 0; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        
-        .section-label { font-size: 0.7rem; color: #888; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
-        .my-id-box { background: #2a2a2a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; margin-bottom: 20px; cursor: pointer; border: 1px dashed #555; text-align: center; word-break: break-all; color: var(--accent);}
-        
-        .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
-        input { background: #2a2a2a; border: 1px solid #444; color: white; padding: 12px; border-radius: 6px; outline: none; font-size: 0.95rem; }
-        .encryption-box { border-left: 3px solid var(--success); padding-left: 10px; margin-top: 5px;}
-        
-        button.action-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;}
-        button.action-btn:hover { filter: brightness(1.1); }
-        .danger-btn { background: #2a2a2a; color: var(--danger); border: 1px solid var(--danger); margin-top: 10px; font-size: 0.8rem; }
-        .danger-btn:hover { background: var(--danger); color: white; }
-
-        .member-section { flex-grow: 1; overflow-y: auto; border-top: 1px solid #333; pt: 15px; }
-        .member-item { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; margin-bottom: 12px; color: #bbb;}
-        .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
-
-        /* Video Call UI */
-        #video-ui { display: none; position: absolute; top: 70px; right: 20px; width: 260px; background: #000; border-radius: 12px; z-index: 50; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #333;}
-        .video-wrapper { position: relative; width: 100%; aspect-ratio: 3/4; background: #111; display: flex; flex-wrap: wrap;}
-        video { width: 100%; height: 100%; object-fit: cover; }
-        #local-video { position: absolute; bottom: 10px; right: 10px; width: 70px; height: 100px; border-radius: 8px; border: 2px solid #555; z-index: 2;}
-        .video-controls { display: flex; background: #222; padding: 10px; gap: 5px; justify-content: center;}
-        .video-controls button { flex: 1; padding: 8px; border-radius: 6px; border: none; color: white; cursor: pointer; font-weight: bold; font-size: 0.8rem;}
-        .control-btn { background: #333; }
-        #end-call-btn { background: var(--danger); }
-
-        /* Modals & Chat Elements */
-        .call-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
-        .call-modal { background: #1e1e1e; padding: 25px; border-radius: 12px; text-align: center; border: 1px solid #333; min-width: 250px; }
-        .call-btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .call-btn-group button { padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; flex: 1; }
-        #accept-call-btn { background: var(--success); }
-        #reject-call-btn { background: var(--danger); }
-
-        .main-chat { flex-grow: 1; display: flex; flex-direction: column; background: var(--chat-bg); position: relative; width: 100%;}
-        #chat-box { flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-
-        .msg-row { display: flex; gap: 10px; max-width: 75%; animation: fadeIn 0.2s ease; position: relative; }
-        .msg-row.sent { align-self: flex-end; flex-direction: row-reverse; }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #222; flex-shrink: 0; }
-        .msg-container { display: flex; flex-direction: column; }
-        .msg-row.sent .msg-container { align-items: flex-end; }
-        .msg-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; font-size: 0.8rem; }
-        .user-label { font-weight: 700; color: var(--accent); }
-        .timestamp { color: #888; font-size: 0.7rem; }
-        .receipt { font-size: 0.75rem; color: #888; margin-left: 4px; }
-        .receipt.read { color: var(--accent); }
-
-        .msg-bubble { padding: 10px 14px; border-radius: 15px; font-size: 0.95rem; word-break: break-word; line-height: 1.4; }
-        .msg-row.sent .msg-bubble { background: var(--accent); color: white; border-top-right-radius: 2px; }
-        .msg-row.received .msg-bubble { background: var(--received-bg); border-top-left-radius: 2px; }
-        .media-content { max-width: 100%; border-radius: 8px; margin-top: 5px; display: block; }
-        .system { align-self: center; background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 12px; color: #aaa; font-size: 0.8rem; margin: 5px 0; }
-
-        .bottom-container { background: var(--side-bar); border-top: 1px solid #333; padding: 10px 15px 15px 15px; display: flex; gap: 8px; align-items: center;}
-        #msg-input { flex-grow: 1; padding: 12px; font-size: 1rem; border-radius: 20px; background: #2a2a2a; border: 1px solid #444; color: white; outline: none;}
-        #attach-btn { background: #333; border: none; font-size: 1.2rem; padding: 10px 14px; border-radius: 50%; color: white; cursor: pointer;}
-        #send-btn { background: var(--accent); border: none; color: white; padding: 10px 18px; border-radius: 20px; font-weight: bold; cursor: pointer;}
-
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 260px; transform: translateX(-100%); box-shadow: 2px 0 15px rgba(0,0,0,0.5); }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay.open { display: block; }
-            .msg-row { max-width: 85%; }
-            #video-ui { width: 140px; right: 10px; top: 60px;}
-            #local-video { width: 40px; height: 60px; }
-            .video-controls { flex-direction: column; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-main); 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
         }
+
+        /* Login Screen */
+        #auth-overlay { 
+            position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .auth-card { 
+            background: var(--card-bg); padding: 40px; border-radius: 24px; 
+            border: 1px solid var(--card-border); width: 100%; max-width: 400px; text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Main Layout */
+        nav { padding: 1rem 5%; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
+        .app-container { display: flex; flex-grow: 1; overflow: hidden; }
+        
+        .sidebar { 
+            width: 300px; border-right: 1px solid var(--card-border); padding: 20px; 
+            display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.3);
+        }
+
+        #chat-box { 
+            flex-grow: 1; overflow-y: auto; padding: 25px; 
+            display: flex; flex-direction: column; gap: 12px; 
+        }
+
+        /* Message Bubbles */
+        .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; position: relative; line-height: 1.4; }
+        .sent { background: var(--primary); align-self: flex-end; color: #000; border-bottom-right-radius: 4px; font-weight: 500; }
+        .received { background: var(--card-bg); border: 1px solid var(--card-border); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-info { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: block; }
+
+        .input-area { padding: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; background: rgba(2, 6, 23, 0.8); }
+        input { 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); 
+            color: white; padding: 14px; border-radius: 12px; flex-grow: 1; outline: none;
+        }
+        button { background: var(--primary); border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 800; color: #000; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .peer-id-display { font-family: monospace; font-size: 11px; color: var(--primary); background: rgba(129, 140, 248, 0.1); padding: 10px; border-radius: 8px; margin-top: auto; cursor: pointer; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    <div class="sidebar" id="sidebar">
-        <h2>P2P Pro</h2>
-        
-        <div class="input-group">
-            <div class="section-label">Your Identity</div>
-            <input type="text" id="username" placeholder="Display Name" onchange="updateProfile()">
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h1 style="margin-bottom: 10px; letter-spacing: -1px;">Kingdom Portal</h1>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Enter credentials to access comms</p>
+            <input type="email" id="auth-email" placeholder="Citizen Email" style="width:100%; margin-bottom:12px;">
+            <input type="password" id="auth-pass" placeholder="Password" style="width:100%; margin-bottom:20px;">
+            <button onclick="handleAuth('login')" style="width:100%; margin-bottom:10px;">Login</button>
+            <button onclick="handleAuth('signup')" style="width:100%; background:none; color:var(--primary); border:1px solid var(--primary);">Register New Citizen</button>
+        </div>
+    </div>
+
+    <nav>
+        <div style="font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Kingdom of 8th</div>
+        <button onclick="logout()" style="background: var(--danger); color: white; padding: 5px 15px; font-size: 12px;">Logout</button>
+    </nav>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <h3 id="user-display" style="margin-bottom: 5px;">Citizen...</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Secure Connection Active</p>
             
-            <div class="section-label">Private Room Key</div>
-            <div class="encryption-box">
-                <input type="password" id="room-pass" placeholder="Password" style="width: 90%;">
+            <label style="font-size: 11px; color: var(--text-muted);">LINK TO PEER</label>
+            <input type="text" id="target-id" placeholder="Paste Citizen ID here" style="margin-top:5px;">
+            <button onclick="connectToPeer()" style="margin-top:10px; width: 100%;">Connect Line</button>
+            
+            <div class="peer-id-display" id="my-peer-id" onclick="copyMyId()">Initialize Peer...</div>
+        </div>
+
+        <div style="flex-grow:1; display:flex; flex-direction:column; background: rgba(0,0,0,0.2);">
+            <div id="chat-box"></div>
+            <div class="input-area">
+                <input type="text" id="msg-input" placeholder="Transmit to Kingdom..." autocomplete="off">
+                <button onclick="sendMessage()">Send</button>
             </div>
-        </div>
-
-        <div class="section-label">Invite Link</div>
-        <div class="my-id-box" id="my-id" title="Tap to copy invite link!">Initializing...</div>
-
-        <div class="member-section">
-            <div class="section-label" style="margin-top: 20px;">Members Online</div>
-            <div id="member-list"></div>
-        </div>
-
-        <button id="clear-history-btn" class="action-btn danger-btn">🗑️ Clear Chat History</button>
-    </div>
-
-    <div class="main-chat">
-        <div class="mobile-header">
-            <button id="menu-toggle">☰</button>
-            <h1>P2P Pro</h1>
-            <button class="header-btn" onclick="startVideoCall()" title="Start Video Call">📹</button>
-        </div>
-
-        <div id="video-ui">
-            <div class="video-wrapper" id="remote-videos-container">
-                <video id="local-video" autoplay muted playsinline></video>
-            </div>
-            <div class="video-controls">
-                <button id="camera-btn" class="control-btn" onclick="toggleCamera()">📷 Off</button>
-                <button id="mute-btn" class="control-btn" onclick="toggleMute()">🎙️ Mute</button>
-                <button id="end-call-btn" onclick="endCall()">❌ End</button>
-            </div>
-        </div>
-
-        <div class="call-modal-overlay" id="incoming-call-overlay">
-            <div class="call-modal">
-                <h3>Incoming Video Call</h3>
-                <p>From: <strong id="caller-name">Someone</strong></p>
-                <div class="call-btn-group">
-                    <button id="accept-call-btn">Accept</button>
-                    <button id="reject-call-btn">Reject</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="chat-box"></div>
-        <div class="bottom-container">
-            <input type="file" id="file-input" accept="image/*,video/*" hidden>
-            <button id="attach-btn" title="Attach Media">📎</button>
-            <input type="text" id="msg-input" placeholder="Message..." autocomplete="off">
-            <button id="send-btn">Send</button>
         </div>
     </div>
-</div>
 
 <script>
-    // --- Setup & Notifications ---
-    if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
-    function notifyUser(title, body) {
-        if (document.hidden && Notification.permission === "granted") new Notification(title, { body });
+    // YOUR CONFIG LOADED
+    const firebaseConfig = {
+        apiKey: "AIzaSyC9AQ8I79SzcOxhyT4-Z9qYVSr4Cv3njK0",
+        authDomain: "kingdom-of-8th-79341.firebaseapp.com",
+        databaseURL: "https://kingdom-of-8th-79341-default-rtdb.firebaseio.com",
+        projectId: "kingdom-of-8th-79341",
+        storageBucket: "kingdom-of-8th-79341.firebasestorage.app",
+        messagingSenderId: "399956360550",
+        appId: "1:399956360550:web:b498c38f52d87431c7dca7"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const rtdb = firebase.database();
+    
+    // PeerJS with Google Servers
+    const peer = new Peer({ 
+        config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' }]}
+    });
+
+    let currentUser = null;
+    let activeConnections = [];
+
+    // --- Authentication ---
+    async function handleAuth(type) {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        if(!email || !pass) return alert("Fill in all fields");
+        try {
+            if(type === 'signup') await auth.createUserWithEmailAndPassword(email, pass);
+            else await auth.signInWithEmailAndPassword(email, pass);
+        } catch(e) { alert(e.message); }
     }
 
-    // --- UI Logic ---
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); }
-    document.getElementById('menu-toggle').onclick = toggleSidebar;
-    overlay.onclick = toggleSidebar;
-
-    const chatBox = document.getElementById('chat-box');
-    const myIdDisplay = document.getElementById('my-id');
-    const memberListUI = document.getElementById('member-list');
-
-    // --- Peer State ---
-    const peer = new Peer();
-    let connections = []; 
-    let members = {}; 
-    let incomingFiles = {}; 
-    let chatHistory = JSON.parse(localStorage.getItem('p2p_chat_history_v7')) || [];
-
-    if(localStorage.getItem('p2p_username')) document.getElementById('username').value = localStorage.getItem('p2p_username');
-    if(localStorage.getItem('p2p_password')) document.getElementById('room-pass').value = localStorage.getItem('p2p_password');
-    document.getElementById('room-pass').addEventListener('change', (e) => localStorage.setItem('p2p_password', e.target.value));
-
-    chatHistory.forEach(msg => renderMessageUI(msg));
-    setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
-
-    // --- Encryption ---
-    async function getCryptoKey() {
-        const pass = document.getElementById('room-pass').value;
-        if (!pass) return null;
-        const enc = new TextEncoder();
-        const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(pass), {name: "PBKDF2"}, false, ["deriveKey"]);
-        return await crypto.subtle.deriveKey({name: "PBKDF2", salt: enc.encode("p2ppro_secure_salt"), iterations: 100000, hash: "SHA-256"}, keyMaterial, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
-    }
-
-    async function securePackage(dataObj) {
-        const key = await getCryptoKey();
-        if(!key) return { __raw: dataObj };
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const encoded = new TextEncoder().encode(JSON.stringify(dataObj));
-        const encrypted = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, encoded);
-        return { __encrypted: true, iv: Array.from(iv), data: Array.from(new Uint8Array(encrypted)) };
-    }
-
-    async function secureUnpackage(payload) {
-        if(payload.__raw) return payload.__raw;
-        if(payload.__encrypted) {
-            const key = await getCryptoKey();
-            if(!key) return { type: 'SYSTEM', text: '🔒 Encrypted message. Enter password.' };
-            try {
-                const ivArray = new Uint8Array(payload.iv);
-                const dataArray = new Uint8Array(payload.data);
-                const decrypted = await crypto.subtle.decrypt({name: "AES-GCM", iv: ivArray}, key, dataArray);
-                return JSON.parse(new TextDecoder().decode(decrypted));
-            } catch(e) { return { type: 'SYSTEM', text: '🔒 Decryption failed. Wrong password?' }; }
-        }
-        return payload;
-    }
-
-    // --- Connectivity ---
-    peer.on('open', id => { 
-        myIdDisplay.innerText = `${window.location.origin}${window.location.pathname}?join=${id}`; 
-        members[id] = getMyProfile(); 
-        updateMemberList(); 
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const joinId = urlParams.get('join');
-        if (joinId && joinId !== id) {
-            setupConnection(peer.connect(joinId));
-            window.history.replaceState({}, document.title, window.location.pathname);
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            currentUser = user;
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('user-display').innerText = user.email.split('@')[0];
+            loadChatHistory();
+        } else {
+            document.getElementById('auth-overlay').style.display = 'flex';
         }
     });
-    
-    myIdDisplay.onclick = () => { 
-        navigator.clipboard.writeText(myIdDisplay.innerText);
-        const original = myIdDisplay.innerText;
-        myIdDisplay.innerText = "Link Copied!";
-        setTimeout(() => myIdDisplay.innerText = original, 1500);
-    };
 
-    function getMyProfile() { 
-        return { name: document.getElementById('username').value.trim() || "User_" + (peer.id ? peer.id.substring(0,4) : ""), lastSeen: Date.now() }; 
+    function logout() { auth.signOut(); location.reload(); }
+
+    // --- Peer Connections (P2P) ---
+    peer.on('open', id => { 
+        document.getElementById('my-peer-id').innerText = "YOUR ID: " + id; 
+    });
+
+    peer.on('connection', conn => setupPeerEvents(conn));
+
+    function connectToPeer() {
+        const id = document.getElementById('target-id').value.trim();
+        if(id) setupPeerEvents(peer.connect(id));
     }
 
-    function updateProfile() { 
-        localStorage.setItem('p2p_username', document.getElementById('username').value); 
-        members[peer.id] = getMyProfile(); 
-        broadcastData({ type: 'HELO', profile: getMyProfile() }); 
-        updateMemberList();
-    }
-
-    peer.on('connection', conn => { setupConnection(conn); });
-
-    function setupConnection(conn) {
-        if (connections.some(c => c.peer === conn.peer)) return;
-        connections.push(conn);
-
-        const onOpen = () => {
-            sendRawData(conn, { type: 'HELO', profile: getMyProfile() });
-            sendRawData(conn, { type: 'MEMBER_LIST', list: members });
-        };
-        if (conn.open) onOpen(); else conn.on('open', onOpen);
-
-        conn.on('data', async encryptedPayload => {
-            const data = await secureUnpackage(encryptedPayload);
-
-            if (data.type === 'HELO') {
-                members[conn.peer] = data.profile; 
-                renderSystemMessage(`${data.profile.name} connected.`);
-                updateMemberList();
-            } 
-            else if (data.type === 'MEMBER_LIST') {
-                members = { ...members, ...data.list };
-                updateMemberList();
-                Object.keys(members).forEach(id => {
-                    if (id !== peer.id && !connections.some(c => c.peer === id)) setupConnection(peer.connect(id));
-                });
-            }
-            else if (data.type === 'CHAT') {
-                renderMessageUI(data); saveToHistory(data);
-                sendRawData(conn, { type: 'READ_RECEIPT', msgId: data.msgId });
-                notifyUser("Message", `${data.profile.name}: ${data.text || 'Shared media'}`);
-            }
-            else if (data.type === 'READ_RECEIPT') markMessageRead(data.msgId);
-            else if (data.type === 'PING') { members[conn.peer].lastSeen = Date.now(); sendRawData(conn, { type: 'PONG' }); }
-            else if (data.type === 'PONG') { members[conn.peer].lastSeen = Date.now(); }
-            else if (data.type === 'FILE_CHUNK') handleFileChunk(data, conn);
+    function setupPeerEvents(conn) {
+        activeConnections.push(conn);
+        conn.on('data', data => {
+            // Received P2P message
+            renderMessage(data.user, data.text, 'received');
         });
-
-        conn.on('close', () => handleDisconnection(conn));
-        conn.on('error', () => handleDisconnection(conn));
-    }
-
-    function handleDisconnection(conn) { 
-        if (members[conn.peer]) {
-            renderSystemMessage(`${members[conn.peer].name} left.`);
-            delete members[conn.peer]; 
-        }
-        connections = connections.filter(c => c.peer !== conn.peer); 
-        updateMemberList(); 
-    }
-
-    // Heartbeat
-    setInterval(() => {
-        broadcastData({ type: 'PING' });
-        const now = Date.now();
-        Object.keys(members).forEach(id => {
-            if (id !== peer.id && members[id].lastSeen && (now - members[id].lastSeen > 35000)) {
-                handleDisconnection({peer: id});
-            }
-        });
-    }, 15000);
-
-    async function broadcastData(dataObj) {
-        const payload = await securePackage(dataObj);
-        connections.forEach(c => { if(c.open) c.send(payload); });
-    }
-    function sendRawData(conn, dataObj) { if (conn.open) conn.send({ __raw: dataObj }); }
-
-    function updateMemberList() {
-        memberListUI.innerHTML = '';
-        Object.keys(members).forEach(id => {
-            const el = document.createElement('div'); el.className = 'member-item';
-            el.innerHTML = `<div class="status-dot"></div> <span>${members[id].name} ${id === peer.id ? '(You)' : ''}</span>`;
-            memberListUI.appendChild(el);
+        conn.on('close', () => {
+            activeConnections = activeConnections.filter(c => c.peer !== conn.peer);
         });
     }
 
-    // --- Messages & Files ---
-    function markMessageRead(msgId) {
-        const receiptEl = document.getElementById(`receipt-${msgId}`);
-        if(receiptEl) { receiptEl.innerText = "✓✓"; receiptEl.classList.add('read'); }
-    }
-
-    document.getElementById('attach-btn').onclick = () => document.getElementById('file-input').click();
-    document.getElementById('file-input').onchange = async function() {
-        const file = this.files[0]; if(!file) return;
-        if(file.size > 10 * 1024 * 1024) return alert("Max 10MB file.");
-        
-        const msgId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-        renderSystemMessage(`Sending ${file.name}...`);
-        
-        const buffer = await file.arrayBuffer();
-        const chunkSize = 64 * 1024;
-        const totalChunks = Math.ceil(buffer.byteLength / chunkSize);
-        
-        for (let i = 0; i < totalChunks; i++) {
-            const chunk = buffer.slice(i * chunkSize, (i + 1) * chunkSize);
-            broadcastData({ type: 'FILE_CHUNK', msgId, chunkIndex: i, totalChunks, fileType: file.type, data: Array.from(new Uint8Array(chunk)) });
-        }
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            const data = { type: 'CHAT', msgId, senderId: peer.id, profile: getMyProfile(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), text: '', mediaData: e.target.result, mediaType: file.type.startsWith('video') ? 'video' : 'image', read: false };
-            renderMessageUI(data); saveToHistory(data);
-        };
-        reader.readAsDataURL(file);
-    };
-
-    function handleFileChunk(data, conn) {
-        if (!incomingFiles[data.msgId]) incomingFiles[data.msgId] = { chunks: [], received: 0 };
-        incomingFiles[data.msgId].chunks[data.chunkIndex] = new Uint8Array(data.data);
-        incomingFiles[data.msgId].received++;
-        
-        if (incomingFiles[data.msgId].received === data.totalChunks) {
-            const totalLength = incomingFiles[data.msgId].chunks.reduce((acc, val) => acc + val.length, 0);
-            const combined = new Uint8Array(totalLength);
-            let offset = 0;
-            incomingFiles[data.msgId].chunks.forEach(chunk => { combined.set(chunk, offset); offset += chunk.length; });
-            
-            const reader = new FileReader();
-            reader.onload = e => {
-                const chatData = { type: 'CHAT', msgId: data.msgId, senderId: conn.peer, profile: members[conn.peer], time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), text: '', mediaData: e.target.result, mediaType: data.fileType.startsWith('video') ? 'video' : 'image', read: false };
-                renderMessageUI(chatData); saveToHistory(chatData);
-            };
-            reader.readAsDataURL(new Blob([combined], { type: data.fileType }));
-            delete incomingFiles[data.msgId];
-        }
-    }
-
+    // --- Database & Messaging ---
     function sendMessage() {
-        const input = document.getElementById('msg-input');
-        if (!input.value.trim()) return;
-        const msgId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-        const data = { type: 'CHAT', msgId, senderId: peer.id, profile: getMyProfile(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), text: input.value.trim(), mediaData: null, mediaType: 'text', read: false };
-        broadcastData(data); renderMessageUI(data); saveToHistory(data);
-        input.value = "";
+        const text = document.getElementById('msg-input').value;
+        if(!text || !currentUser) return;
+
+        const msgData = {
+            user: currentUser.email.split('@')[0],
+            text: text,
+            timestamp: Date.now()
+        };
+
+        // 1. Save to Firebase Realtime Database (Permanent Storage)
+        rtdb.ref('messages').push(msgData);
+
+        // 2. Broadcast to connected Peers (Instant P2P)
+        activeConnections.forEach(c => {
+            if(c.open) c.send(msgData);
+        });
+
+        document.getElementById('msg-input').value = '';
     }
 
-    document.getElementById('clear-history-btn').onclick = () => { if(confirm("Clear history?")) { chatHistory = []; localStorage.removeItem('p2p_chat_history_v7'); chatBox.innerHTML = ''; }};
-    function saveToHistory(data) { chatHistory.push(data); if (chatHistory.length > 200) chatHistory.shift(); localStorage.setItem('p2p_chat_history_v7', JSON.stringify(chatHistory)); }
-
-    function renderSystemMessage(text) {
-        const wrapper = document.createElement('div'); wrapper.className = `system`; wrapper.innerText = text;
-        chatBox.appendChild(wrapper); chatBox.scrollTop = chatBox.scrollHeight;
+    function loadChatHistory() {
+        // Listen for new messages in the cloud
+        rtdb.ref('messages').limitToLast(50).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            // Check if it's our own message or someone else's to style it
+            const type = (data.user === currentUser.email.split('@')[0]) ? 'sent' : 'received';
+            
+            // To prevent double-rendering when P2P is also active, we clear and re-render or check IDs
+            // For simplicity in this version, we'll just render from DB
+            renderMessage(data.user, data.text, type);
+        });
     }
 
-    function renderMessageUI(data) {
-        const isSentByMe = data.senderId === peer.id;
-        const typeClass = isSentByMe ? "sent" : "received";
-        const wrapper = document.createElement('div'); wrapper.className = `msg-row ${typeClass}`;
-        const avatarUrl = `https://api.dicebear.com/9.x/bottts/svg?seed=${data.senderId}&backgroundColor=transparent`;
-        let mediaHTML = data.mediaType === 'image' ? `<img src="${data.mediaData}" class="media-content">` : (data.mediaType === 'video' ? `<video src="${data.mediaData}" class="media-content" controls></video>` : '');
-        let receiptHTML = isSentByMe ? `<span class="receipt" id="receipt-${data.msgId}">✓</span>` : '';
-        const safeText = data.text ? data.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-
-        wrapper.innerHTML = `
-            <img src="${avatarUrl}" class="avatar">
-            <div class="msg-container">
-                <div class="msg-header"><span class="user-label">${data.profile.name}</span><span class="timestamp">${data.time}${receiptHTML}</span></div>
-                <div class="msg-bubble">${data.mediaType === 'text' ? safeText : mediaHTML}</div>
-            </div>`;
-        chatBox.appendChild(wrapper);
+    function renderMessage(user, text, type) {
+        const chatBox = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerHTML = `<span class="msg-info">${user}</span>${text}`;
+        chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    document.getElementById('send-btn').onclick = sendMessage;
-    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
-
-    // --- Calling ---
-    let localStream = null;
-    let activeCalls = [];
-    async function startVideoCall() {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('local-video').srcObject = localStream;
-            document.getElementById('video-ui').style.display = 'flex';
-            connections.forEach(conn => setupCallEvents(peer.call(conn.peer, localStream)));
-        } catch(err) { alert("Camera access denied."); }
+    function copyMyId() {
+        const idText = document.getElementById('my-peer-id').innerText.replace("YOUR ID: ", "");
+        navigator.clipboard.writeText(idText);
+        alert("Citizen ID Copied to Clipboard!");
     }
 
-    peer.on('call', call => {
-        document.getElementById('caller-name').innerText = members[call.peer]?.name || "Unknown";
-        document.getElementById('incoming-call-overlay').style.display = 'flex';
-        document.getElementById('accept-call-btn').onclick = async () => {
-            document.getElementById('incoming-call-overlay').style.display = 'none';
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('local-video').srcObject = localStream;
-            document.getElementById('video-ui').style.display = 'flex';
-            call.answer(localStream);
-            setupCallEvents(call);
-        };
-        document.getElementById('reject-call-btn').onclick = () => { document.getElementById('incoming-call-overlay').style.display = 'none'; call.close(); };
+    document.getElementById('msg-input').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') sendMessage();
     });
-
-    function setupCallEvents(call) {
-        activeCalls.push(call);
-        call.on('stream', stream => {
-            let vid = document.getElementById(`vid-${call.peer}`);
-            if (!vid) {
-                vid = document.createElement('video'); vid.id = `vid-${call.peer}`; vid.autoplay = true; vid.playsInline = true;
-                document.getElementById('remote-videos-container').appendChild(vid);
-            }
-            vid.srcObject = stream;
-        });
-        call.on('close', () => { 
-            const vid = document.getElementById(`vid-${call.peer}`);
-            if(vid) vid.remove();
-        });
-    }
-
-    function toggleMute() {
-        const track = localStream.getAudioTracks()[0];
-        track.enabled = !track.enabled;
-        document.getElementById('mute-btn').innerText = track.enabled ? '🎙️ Mute' : '🔇 Unmute';
-    }
-    function toggleCamera() {
-        const track = localStream.getVideoTracks()[0];
-        track.enabled = !track.enabled;
-        document.getElementById('camera-btn').innerText = track.enabled ? '📷 Off' : '🚫 On';
-    }
-    function endCall() {
-        if(localStream) localStream.getTracks().forEach(t => t.stop());
-        activeCalls.forEach(c => c.close());
-        document.getElementById('video-ui').style.display = 'none';
-    }
 </script>
 </body>
 </html>
