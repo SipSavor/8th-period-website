@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kingdom of 8th | Official Portal</title>
+    <title>Kingdom of 8th | Secure Comms</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --primary: #818cf8;
@@ -18,34 +20,18 @@
             --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --success: #10b981;
-            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg-main); 
-            color: var(--text-main); 
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
+            background: var(--bg-main); color: var(--text-main); 
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
         }
 
-        /* Login Screen */
-        #auth-overlay { 
-            position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        .auth-card { 
-            background: var(--card-bg); padding: 40px; border-radius: 24px; 
-            border: 1px solid var(--card-border); width: 100%; max-width: 400px; text-align: center;
-            backdrop-filter: blur(20px);
-        }
+        nav { padding: 1rem 5%; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(10px); }
+        .nav-logo { font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); text-decoration: none; }
 
-        /* Main Layout */
-        nav { padding: 1rem 5%; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
         .app-container { display: flex; flex-grow: 1; overflow: hidden; }
         
         .sidebar { 
@@ -53,69 +39,52 @@
             display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.3);
         }
 
-        #chat-box { 
-            flex-grow: 1; overflow-y: auto; padding: 25px; 
-            display: flex; flex-direction: column; gap: 12px; 
-        }
+        #chat-box { flex-grow: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.2); }
 
-        /* Message Bubbles */
-        .msg { padding: 12px 18px; border-radius: 18px; max-width: 75%; position: relative; line-height: 1.4; }
-        .sent { background: var(--primary); align-self: flex-end; color: #000; border-bottom-right-radius: 4px; font-weight: 500; }
+        /* Bubbles */
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; position: relative; animation: fadeIn 0.3s ease; }
+        .sent { background: var(--primary); align-self: flex-end; color: #000; border-bottom-right-radius: 4px; }
         .received { background: var(--card-bg); border: 1px solid var(--card-border); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-info { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: block; }
+        .msg-user { font-size: 10px; font-weight: 800; margin-bottom: 4px; display: block; opacity: 0.8; }
 
-        .input-area { padding: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; background: rgba(2, 6, 23, 0.8); }
-        input { 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); 
-            color: white; padding: 14px; border-radius: 12px; flex-grow: 1; outline: none;
-        }
-        button { background: var(--primary); border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 800; color: #000; transition: 0.2s; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .input-area { padding: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; background: var(--bg-main); }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white; padding: 14px; border-radius: 12px; flex-grow: 1; outline: none; }
+        button { background: var(--primary); border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 800; color: #000; }
 
-        .peer-id-display { font-family: monospace; font-size: 11px; color: var(--primary); background: rgba(129, 140, 248, 0.1); padding: 10px; border-radius: 8px; margin-top: auto; cursor: pointer; text-align: center; }
+        .id-badge { font-family: monospace; font-size: 10px; color: var(--primary); background: rgba(129, 140, 248, 0.1); padding: 8px; border-radius: 6px; cursor: pointer; margin-top: auto; text-align: center; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="auth-overlay">
-        <div class="auth-card">
-            <h1 style="margin-bottom: 10px; letter-spacing: -1px;">Kingdom Portal</h1>
-            <p style="color: var(--text-muted); margin-bottom: 25px;">Enter credentials to access comms</p>
-            <input type="email" id="auth-email" placeholder="Citizen Email" style="width:100%; margin-bottom:12px;">
-            <input type="password" id="auth-pass" placeholder="Password" style="width:100%; margin-bottom:20px;">
-            <button onclick="handleAuth('login')" style="width:100%; margin-bottom:10px;">Login</button>
-            <button onclick="handleAuth('signup')" style="width:100%; background:none; color:var(--primary); border:1px solid var(--primary);">Register New Citizen</button>
-        </div>
-    </div>
-
     <nav>
-        <div style="font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Kingdom of 8th</div>
-        <button onclick="logout()" style="background: var(--danger); color: white; padding: 5px 15px; font-size: 12px;">Logout</button>
+        <a href="index.html" class="nav-logo">Kingdom of 8th</a>
+        <div id="status" style="font-size: 12px; color: var(--text-muted);">Syncing Identity...</div>
     </nav>
 
     <div class="app-container">
         <div class="sidebar">
-            <h3 id="user-display" style="margin-bottom: 5px;">Citizen...</h3>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Secure Connection Active</p>
+            <h3 id="citizen-name" style="margin-bottom: 20px;">Loading Profile...</h3>
             
-            <label style="font-size: 11px; color: var(--text-muted);">LINK TO PEER</label>
-            <input type="text" id="target-id" placeholder="Paste Citizen ID here" style="margin-top:5px;">
-            <button onclick="connectToPeer()" style="margin-top:10px; width: 100%;">Connect Line</button>
+            <label style="font-size: 11px; color: var(--text-muted); font-weight: 600;">LINK TO CITIZEN</label>
+            <input type="text" id="target-id" placeholder="Paste ID here" style="margin-top: 8px; font-size: 12px;">
+            <button onclick="connectToPeer()" style="margin-top: 10px; width: 100%; font-size: 13px;">Establish Link</button>
             
-            <div class="peer-id-display" id="my-peer-id" onclick="copyMyId()">Initialize Peer...</div>
+            <div class="id-badge" id="my-peer-id" onclick="copyId()">ID: Generating...</div>
         </div>
 
-        <div style="flex-grow:1; display:flex; flex-direction:column; background: rgba(0,0,0,0.2);">
+        <div style="flex-grow: 1; display: flex; flex-direction: column;">
             <div id="chat-box"></div>
             <div class="input-area">
-                <input type="text" id="msg-input" placeholder="Transmit to Kingdom..." autocomplete="off">
+                <input type="text" id="msg-input" placeholder="Secure transmission..." autocomplete="off">
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
 
 <script>
-    // YOUR CONFIG LOADED
+    // --- FIREBASE CONFIG (MATCHES YOURS) ---
     const firebaseConfig = {
         apiKey: "AIzaSyC9AQ8I79SzcOxhyT4-Z9qYVSr4Cv3njK0",
         authDomain: "kingdom-of-8th-79341.firebaseapp.com",
@@ -129,115 +98,83 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const rtdb = firebase.database();
-    
-    // PeerJS with Google Servers
-    const peer = new Peer({ 
-        config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' }]}
-    });
 
+    // --- PEER SETUP ---
+    const peer = new Peer({ config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]}});
     let currentUser = null;
     let activeConnections = [];
 
-    // --- Authentication ---
-    async function handleAuth(type) {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        if(!email || !pass) return alert("Fill in all fields");
-        try {
-            if(type === 'signup') await auth.createUserWithEmailAndPassword(email, pass);
-            else await auth.signInWithEmailAndPassword(email, pass);
-        } catch(e) { alert(e.message); }
-    }
-
+    // Check Auth State
     auth.onAuthStateChanged(user => {
-        if(user) {
-            currentUser = user;
-            document.getElementById('auth-overlay').style.display = 'none';
-            document.getElementById('user-display').innerText = user.email.split('@')[0];
-            loadChatHistory();
+        if (!user) {
+            window.location.href = "index.html"; // Kick out if not logged in
         } else {
-            document.getElementById('auth-overlay').style.display = 'flex';
+            currentUser = user;
+            document.getElementById('citizen-name').innerText = user.displayName || "Citizen";
+            document.getElementById('status').innerText = "Encrypted Connection Online";
+            loadMessages();
         }
     });
 
-    function logout() { auth.signOut(); location.reload(); }
-
-    // --- Peer Connections (P2P) ---
-    peer.on('open', id => { 
-        document.getElementById('my-peer-id').innerText = "YOUR ID: " + id; 
-    });
-
-    peer.on('connection', conn => setupPeerEvents(conn));
-
-    function connectToPeer() {
-        const id = document.getElementById('target-id').value.trim();
-        if(id) setupPeerEvents(peer.connect(id));
-    }
-
-    function setupPeerEvents(conn) {
-        activeConnections.push(conn);
-        conn.on('data', data => {
-            // Received P2P message
-            renderMessage(data.user, data.text, 'received');
-        });
-        conn.on('close', () => {
-            activeConnections = activeConnections.filter(c => c.peer !== conn.peer);
-        });
-    }
-
-    // --- Database & Messaging ---
+    // --- MESSAGING LOGIC ---
     function sendMessage() {
-        const text = document.getElementById('msg-input').value;
-        if(!text || !currentUser) return;
+        const text = document.getElementById('msg-input').value.trim();
+        if (!text || !currentUser) return;
 
         const msgData = {
-            user: currentUser.email.split('@')[0],
+            user: currentUser.displayName || currentUser.email.split('@')[0],
             text: text,
             timestamp: Date.now()
         };
 
-        // 1. Save to Firebase Realtime Database (Permanent Storage)
+        // 1. Permanent Cloud Save
         rtdb.ref('messages').push(msgData);
 
-        // 2. Broadcast to connected Peers (Instant P2P)
-        activeConnections.forEach(c => {
-            if(c.open) c.send(msgData);
-        });
+        // 2. Direct P2P Relay (Optional but keeps it fast)
+        activeConnections.forEach(c => { if(c.open) c.send(msgData); });
 
         document.getElementById('msg-input').value = '';
     }
 
-    function loadChatHistory() {
-        // Listen for new messages in the cloud
-        rtdb.ref('messages').limitToLast(50).on('child_added', (snapshot) => {
-            const data = snapshot.val();
-            // Check if it's our own message or someone else's to style it
-            const type = (data.user === currentUser.email.split('@')[0]) ? 'sent' : 'received';
-            
-            // To prevent double-rendering when P2P is also active, we clear and re-render or check IDs
-            // For simplicity in this version, we'll just render from DB
-            renderMessage(data.user, data.text, type);
+    function loadMessages() {
+        // Listen for new messages in RTDB
+        rtdb.ref('messages').limitToLast(100).on('child_added', (snap) => {
+            const data = snap.val();
+            const isMe = data.user === (currentUser.displayName || currentUser.email.split('@')[0]);
+            renderMsg(data.user, data.text, isMe ? 'sent' : 'received');
         });
     }
 
-    function renderMessage(user, text, type) {
-        const chatBox = document.getElementById('chat-box');
+    function renderMsg(user, text, type) {
+        const box = document.getElementById('chat-box');
         const div = document.createElement('div');
         div.className = `msg ${type}`;
-        div.innerHTML = `<span class="msg-info">${user}</span>${text}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        div.innerHTML = `<span class="msg-user">${user}</span>${text}`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     }
 
-    function copyMyId() {
-        const idText = document.getElementById('my-peer-id').innerText.replace("YOUR ID: ", "");
-        navigator.clipboard.writeText(idText);
-        alert("Citizen ID Copied to Clipboard!");
+    // --- PEER CONNECTIVITY ---
+    peer.on('open', id => { document.getElementById('my-peer-id').innerText = "ID: " + id; });
+    peer.on('connection', conn => setupPeer(conn));
+
+    function connectToPeer() {
+        const tid = document.getElementById('target-id').value.trim();
+        if(tid) setupPeer(peer.connect(tid));
     }
 
-    document.getElementById('msg-input').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') sendMessage();
-    });
+    function setupPeer(conn) {
+        activeConnections.push(conn);
+        conn.on('data', data => renderMsg(data.user, data.text, 'received'));
+    }
+
+    function copyId() {
+        const rawId = document.getElementById('my-peer-id').innerText.replace("ID: ", "");
+        navigator.clipboard.writeText(rawId);
+        alert("Citizen ID Copied!");
+    }
+
+    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
 </script>
 </body>
 </html>
