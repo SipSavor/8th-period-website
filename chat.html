@@ -48,6 +48,15 @@
         #mute-btn { background: #333; }
         #end-call-btn { background: var(--danger); }
 
+        /* Incoming Call Modal */
+        .call-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
+        .call-modal { background: #1e1e1e; padding: 25px; border-radius: 12px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 250px; }
+        .call-modal h3 { margin-top: 0; color: var(--accent); }
+        .call-btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        .call-btn-group button { padding: 10px 20px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; flex: 1; }
+        #accept-call-btn { background: var(--success); }
+        #reject-call-btn { background: var(--danger); }
+
         /* Main Chat */
         .sidebar-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 15; }
         .main-chat { flex-grow: 1; display: flex; flex-direction: column; background: var(--chat-bg); position: relative; width: 100%;}
@@ -135,6 +144,17 @@
             <div class="video-controls">
                 <button id="mute-btn" onclick="toggleMute()">🎙️ Mute</button>
                 <button id="end-call-btn" onclick="endCall()">❌ End</button>
+            </div>
+        </div>
+
+        <div class="call-modal-overlay" id="incoming-call-overlay">
+            <div class="call-modal">
+                <h3>Incoming Video Call</h3>
+                <p>From: <strong id="caller-name">Someone</strong></p>
+                <div class="call-btn-group">
+                    <button id="accept-call-btn">Accept</button>
+                    <button id="reject-call-btn">Reject</button>
+                </div>
             </div>
         </div>
 
@@ -378,10 +398,10 @@
     // --- WebRTC Video & Audio Calling ---
     let localStream = null;
     let activeCalls = [];
+    let pendingCall = null;
 
     async function startVideoCall() {
         try {
-            // Force the browser to ask for permissions
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('local-video').srcObject = localStream;
             document.getElementById('video-ui').style.display = 'flex';
@@ -391,51 +411,81 @@
                 return;
             }
 
-            // Call all currently connected peers
             connections.forEach(conn => {
                 const call = peer.call(conn.peer, localStream);
                 setupCallEvents(call);
             });
         } catch(err) {
             console.error(err);
-            alert("Could not access Camera/Microphone. Make sure you are using HTTPS!");
+            alert("Could not access Camera/Microphone. Make sure you are using a secure connection (HTTPS or localhost)!");
         }
     }
 
-    // When someone else calls YOU
-    peer.on('call', async (call) => {
-        const wantsToAnswer = confirm(`Incoming Video Call from ${call.peer}. Answer?`);
-        if(!wantsToAnswer) return;
+    // Replaced the 'confirm()' box with the custom HTML Modal
+    peer.on('call', (call) => {
+        pendingCall = call;
+        
+        // Show the caller's name in the modal
+        const callerName = members[call.peer]?.name || "Unknown User";
+        document.getElementById('caller-name').innerText = callerName;
+        
+        // Display the modal
+        document.getElementById('incoming-call-overlay').style.display = 'flex';
+    });
+
+    // Handle Modal "Accept"
+    document.getElementById('accept-call-btn').onclick = async () => {
+        document.getElementById('incoming-call-overlay').style.display = 'none';
+        if (!pendingCall) return;
 
         try {
-            // Get our own camera/mic to send back
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localStream = stream;
             document.getElementById('local-video').srcObject = localStream;
             document.getElementById('video-ui').style.display = 'flex';
             
-            // Answer the call with our video stream
-            call.answer(stream);
-            setupCallEvents(call);
+            pendingCall.answer(stream);
+            setupCallEvents(pendingCall);
         } catch(err) {
             console.error("Failed to answer call:", err);
-            alert("Error: Could not access your camera to answer. Are you on a secure HTTPS connection?");
+            alert("Error: Could not access your camera to answer. Are you on a secure connection?");
         }
-    });
+        pendingCall = null;
+    };
 
+    // Handle Modal "Reject"
+    document.getElementById('reject-call-btn').onclick = () => {
+        document.getElementById('incoming-call-overlay').style.display = 'none';
+        if (pendingCall) {
+            pendingCall.close();
+            pendingCall = null;
+        }
+    };
+
+    // The fixed setupCallEvents function
     function setupCallEvents(call) {
         activeCalls.push(call);
         
-        // When we receive their video stream
         call.on('stream', remoteStream => {
-            if(document.getElementById(`vid-${call.peer}`)) return; 
+            let remoteVid = document.getElementById(`vid-${call.peer}`);
             
-            const remoteVid = document.createElement('video');
-            remoteVid.id = `vid-${call.peer}`;
-            remoteVid.autoplay = true;
-            remoteVid.playsInline = true; // Crucial for iOS
+            if (!remoteVid) {
+                remoteVid = document.createElement('video');
+                remoteVid.id = `vid-${call.peer}`;
+                remoteVid.autoplay = true;
+                remoteVid.playsInline = true;
+                document.getElementById('remote-videos-container').appendChild(remoteVid);
+            }
+            
+            // ALWAYS reassign the stream to fix the PeerJS double-fire bug
             remoteVid.srcObject = remoteStream;
-            document.getElementById('remote-videos-container').appendChild(remoteVid);
+            
+            // Explicitly call play() for strict browser policies
+            remoteVid.onloadedmetadata = () => {
+                remoteVid.play().catch(err => {
+                    console.warn("Browser blocked autoplay. User interaction needed:", err);
+                });
+            };
         });
 
         call.on('close', () => {
@@ -467,7 +517,6 @@
         activeCalls = [];
         document.getElementById('video-ui').style.display = 'none';
         
-        // Clear all remote videos from the UI
         const container = document.getElementById('remote-videos-container');
         Array.from(container.children).forEach(child => {
             if(child.id !== 'local-video') child.remove();
