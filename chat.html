@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Group Chat + Member List</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --side-bar: #1e1e1e;
+            --chat-bg: #181818;
+            --text-main: #e0e0e0;
+            --accent: #0084ff;
+            --received-bg: #333;
+            --success: #2ecc71;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; }
+        .app-container { display: flex; height: 100vh; width: 100vw; }
+
+        /* Sidebar */
+        .sidebar { 
+            width: 280px; background: var(--side-bar); padding: 20px; 
+            display: flex; flex-direction: column; border-right: 1px solid #333;
+        }
+        .sidebar h2 { font-size: 1.1rem; margin: 0 0 20px 0; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .my-id-box { background: #2a2a2a; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; margin-bottom: 20px; cursor: pointer; border: 1px dashed #555; overflow: hidden; text-overflow: ellipsis; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; }
+        input { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; outline: none; font-size: 0.9rem; }
+        button { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #444; opacity: 0.6; }
+
+        /* Member List */
+        .member-section { flex-grow: 1; overflow-y: auto; }
+        .member-section h3 { font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 10px; }
+        .member-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; margin-bottom: 8px; color: #bbb; }
+        .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+
+        /* Main Chat */
+        .main-chat { flex-grow: 1; display: flex; flex-direction: column; background: var(--chat-bg); }
+        #chat-box { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Bubbles */
+        .msg { max-width: 70%; padding: 10px 14px; border-radius: 15px; font-size: 0.92rem; position: relative; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .user-label { font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 3px; color: var(--accent); }
+        .sent { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
+        .sent .user-label { color: #cce6ff; }
+        .received { align-self: flex-start; background: var(--received-bg); border-bottom-left-radius: 2px; }
+        .system { align-self: center; background: transparent; color: #666; font-size: 0.75rem; }
+
+        .message-input-area { padding: 20px; background: var(--side-bar); border-top: 1px solid #333; display: flex; gap: 10px; }
+        #msg-input { flex-grow: 1; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="sidebar">
+        <h2>P2P Group</h2>
+        <div style="font-size: 0.7rem; color: #888; margin-bottom: 5px;">YOUR ID (Click to copy)</div>
+        <div class="my-id-box" id="my-id">Initializing...</div>
+
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Your Name">
+            <input type="text" id="join-id" placeholder="Friend's Host ID">
+            <button id="action-btn">Join Chat</button>
+        </div>
+        
+        <div class="member-section">
+            <h3>Members Online</h3>
+            <div id="member-list">
+                </div>
+        </div>
+    </div>
+
+    <div class="main-chat">
+        <div id="chat-box">
+            <div class="msg system">Ready to connect.</div>
+        </div>
+        <div class="message-input-area">
+            <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const peer = new Peer();
+    let connections = [];
+    let members = {}; // ID -> Username map
+    let isHost = true;
+
+    const myIdDisplay = document.getElementById('my-id');
+    const chatBox = document.getElementById('chat-box');
+    const memberListUI = document.getElementById('member-list');
+    const usernameInput = document.getElementById('username');
+
+    peer.on('open', id => myIdDisplay.innerText = id);
+
+    // Copy ID logic
+    myIdDisplay.onclick = () => {
+        navigator.clipboard.writeText(myIdDisplay.innerText);
+        alert("ID copied to clipboard!");
+    };
+
+    // --- CONNECTION HANDLERS ---
+    peer.on('connection', conn => {
+        isHost = true;
+        setupConnection(conn);
+    });
+
+    document.getElementById('action-btn').onclick = () => {
+        const targetId = document.getElementById('join-id').value;
+        if (!targetId) return;
+        isHost = false;
+        setupConnection(peer.connect(targetId));
+        document.getElementById('action-btn').disabled = true;
+    };
+
+    function setupConnection(conn) {
+        conn.on('open', () => {
+            connections.push(conn);
+            
+            // Send our username immediately upon connecting
+            const myName = usernameInput.value || "Guest_" + peer.id.substring(0,4);
+            conn.send({ type: 'HELO', user: myName });
+
+            conn.on('data', data => {
+                if (data.type === 'HELO') {
+                    members[conn.peer] = data.user;
+                    updateMemberList();
+                    if (isHost) broadcastMembers();
+                } 
+                else if (data.type === 'CHAT') {
+                    addMessage(data.user, data.text, "received");
+                    if (isHost) relayMessage(conn, data);
+                }
+                else if (data.type === 'MEMBER_LIST') {
+                    members = data.list;
+                    updateMemberList();
+                }
+            });
+        });
+
+        conn.on('close', () => {
+            delete members[conn.peer];
+            connections = connections.filter(c => c.peer !== conn.peer);
+            updateMemberList();
+            if (isHost) broadcastMembers();
+        });
+    }
+
+    // --- HELPERS ---
+    function broadcastMembers() {
+        const myName = usernameInput.value || "Host";
+        const list = { ...members, [peer.id]: myName };
+        connections.forEach(c => c.send({ type: 'MEMBER_LIST', list }));
+        updateMemberList(list);
+    }
+
+    function relayMessage(senderConn, data) {
+        connections.forEach(c => {
+            if (c.peer !== senderConn.peer) c.send(data);
+        });
+    }
+
+    function updateMemberList(externalList = null) {
+        const listToUse = externalList || members;
+        memberListUI.innerHTML = '';
+        Object.values(listToUse).forEach(name => {
+            const el = document.createElement('div');
+            el.className = 'member-item';
+            el.innerHTML = `<div class="status-dot"></div> ${name}`;
+            memberListUI.appendChild(el);
+        });
+    }
+
+    function sendMessage() {
+        const text = document.getElementById('msg-input').value;
+        const user = usernameInput.value || "Guest";
+        if (!text) return;
+
+        const data = { type: 'CHAT', user, text };
+        connections.forEach(c => c.open && c.send(data));
+        addMessage("Me", text, "sent");
+        document.getElementById('msg-input').value = "";
+    }
+
+    function addMessage(user, text, type) {
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerHTML = type === 'system' ? text : `<span class="user-label">${user}</span>${text}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById('send-btn').onclick = sendMessage;
+    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+</script>
+</body>
+</html>
