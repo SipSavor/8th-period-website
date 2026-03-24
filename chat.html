@@ -82,6 +82,7 @@
         #send-btn { background: var(--accent); border: none; color: white; padding: 10px 18px; border-radius: 20px; font-weight: bold; cursor: pointer;}
 
         @media (max-width: 768px) {
+            .mobile-header { display: flex; }
             .sidebar h2 { display: none; }
             .sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 260px; transform: translateX(-100%); box-shadow: 2px 0 15px rgba(0,0,0,0.5); }
             .sidebar.open { transform: translateX(0); }
@@ -99,7 +100,7 @@
     <div class="sidebar" id="sidebar">
         <h2>P2P Pro</h2>
         <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">YOUR ID</div>
-        <div class="my-id-box" id="my-id">Initializing...</div>
+        <div class="my-id-box" id="my-id" title="Tap to copy!">Initializing...</div>
 
         <div class="input-group">
             <input type="text" id="username" placeholder="Your Name" onchange="updateProfile()">
@@ -141,7 +142,7 @@
         <div class="bottom-container">
             <div class="message-input-area">
                 <input type="file" id="file-input" accept="image/*,video/*" hidden>
-                <button id="attach-btn">📎</button>
+                <button id="attach-btn" title="Attach Media">📎</button>
                 <input type="text" id="msg-input" placeholder="Message..." autocomplete="off">
                 <button id="send-btn">Send</button>
             </div>
@@ -150,7 +151,7 @@
 </div>
 
 <script>
-    // --- UI Logic ---
+    // --- UI & Mobile Sidebar Logic ---
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); }
@@ -167,18 +168,18 @@
     let members = {};
     let isHost = true;
     let currentHostId = null;
-    let chatHistory = JSON.parse(localStorage.getItem('p2p_chat_history_v6')) || [];
+    let chatHistory = JSON.parse(localStorage.getItem('p2p_chat_history_v7')) || [];
 
+    // Load saved preferences
     if(localStorage.getItem('p2p_username')) document.getElementById('username').value = localStorage.getItem('p2p_username');
     if(localStorage.getItem('p2p_password')) document.getElementById('room-pass').value = localStorage.getItem('p2p_password');
-    
     document.getElementById('room-pass').addEventListener('change', (e) => localStorage.setItem('p2p_password', e.target.value));
 
-    // Load History
+    // Render History on load
     chatHistory.forEach(msg => renderMessageUI(msg));
     setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
 
-    // --- Cryptography (E2EE) ---
+    // --- Cryptography (E2E Encryption) ---
     async function getCryptoKey() {
         const pass = document.getElementById('room-pass').value;
         if (!pass) return null;
@@ -194,7 +195,7 @@
         const iv = crypto.getRandomValues(new Uint8Array(12));
         const encoded = new TextEncoder().encode(JSON.stringify(dataObj));
         const encrypted = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, encoded);
-        return { __encrypted: true, iv: iv, data: encrypted };
+        return { __encrypted: true, iv: Array.from(iv), data: Array.from(new Uint8Array(encrypted)) };
     }
 
     async function secureUnpackage(payload) {
@@ -203,7 +204,9 @@
             const key = await getCryptoKey();
             if(!key) return { type: 'SYSTEM', text: '🔒 Encrypted message received. Enter password to view.' };
             try {
-                const decrypted = await crypto.subtle.decrypt({name: "AES-GCM", iv: new Uint8Array(payload.iv)}, key, payload.data);
+                const ivArray = new Uint8Array(payload.iv);
+                const dataArray = new Uint8Array(payload.data);
+                const decrypted = await crypto.subtle.decrypt({name: "AES-GCM", iv: ivArray}, key, dataArray);
                 return JSON.parse(new TextDecoder().decode(decrypted));
             } catch(e) {
                 return { type: 'SYSTEM', text: '🔒 Failed to decrypt message. Wrong password?' };
@@ -213,10 +216,21 @@
     }
 
     // --- PeerJS Connections ---
-    peer.on('open', id => { myIdDisplay.innerText = id; members[id] = getMyProfile(); updateMemberList(); });
-    myIdDisplay.onclick = () => { navigator.clipboard.writeText(myIdDisplay.innerText); };
+    peer.on('open', id => { 
+        myIdDisplay.innerText = id; 
+        members[id] = getMyProfile(); 
+        updateMemberList(); 
+    });
+    
+    myIdDisplay.onclick = () => { 
+        navigator.clipboard.writeText(myIdDisplay.innerText);
+        const original = myIdDisplay.innerText;
+        myIdDisplay.innerText = "Copied!";
+        setTimeout(() => myIdDisplay.innerText = original, 1000);
+    };
 
     function getMyProfile() { return { name: document.getElementById('username').value.trim() || "Guest_" + (peer.id ? peer.id.substring(0,4) : "") }; }
+    function updateProfile() { localStorage.setItem('p2p_username', document.getElementById('username').value); members[peer.id] = getMyProfile(); if(isHost) broadcastMembers(); }
 
     peer.on('connection', conn => { isHost = true; currentHostId = peer.id; setupConnection(conn); });
 
@@ -258,6 +272,7 @@
             });
         });
         conn.on('close', () => handleDisconnection(conn));
+        conn.on('error', () => handleDisconnection(conn));
     }
 
     function handleDisconnection(conn) { delete members[conn.peer]; connections = connections.filter(c => c.peer !== conn.peer); updateMemberList(); }
@@ -273,7 +288,6 @@
         connections.forEach(c => c.open && c.send(payload));
     }
     
-    // For system commands that don't need encryption (like HELO and MEMBER_LIST)
     function sendRawData(conn, dataObj) { conn.send({ __raw: dataObj }); }
 
     function updateMemberList() {
@@ -292,14 +306,14 @@
             receiptEl.innerText = "✓✓";
             receiptEl.classList.add('read');
         }
-        // Save read state to history
         const msg = chatHistory.find(m => m.msgId === msgId);
-        if(msg) { msg.read = true; localStorage.setItem('p2p_chat_history_v6', JSON.stringify(chatHistory)); }
+        if(msg) { msg.read = true; localStorage.setItem('p2p_chat_history_v7', JSON.stringify(chatHistory)); }
     }
 
     document.getElementById('attach-btn').onclick = () => document.getElementById('file-input').click();
     document.getElementById('file-input').onchange = function() {
         const file = this.files[0]; if(!file) return;
+        if(file.size > 5 * 1024 * 1024) return alert("Max 5MB file size.");
         const reader = new FileReader();
         reader.onload = e => sendPacket(e.target.result, file.type.startsWith('video') ? 'video' : 'image');
         reader.readAsDataURL(file); this.value = '';
@@ -313,7 +327,7 @@
     }
 
     function sendPacket(content, mediaType = 'text') {
-        const msgId = Date.now().toString(36);
+        const msgId = Date.now().toString(36) + Math.random().toString(36).substr(2);
         const data = { 
             type: 'CHAT', msgId, senderId: peer.id, 
             profile: getMyProfile(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
@@ -323,9 +337,9 @@
         renderMessageUI(data); saveToHistory(data);
     }
 
-    document.getElementById('clear-history-btn').onclick = () => { if(confirm("Clear history?")) { chatHistory = []; localStorage.removeItem('p2p_chat_history_v6'); chatBox.innerHTML = ''; }};
+    document.getElementById('clear-history-btn').onclick = () => { if(confirm("Clear local history?")) { chatHistory = []; localStorage.removeItem('p2p_chat_history_v7'); chatBox.innerHTML = ''; }};
 
-    function saveToHistory(data) { chatHistory.push(data); if (chatHistory.length > 200) chatHistory.shift(); localStorage.setItem('p2p_chat_history_v6', JSON.stringify(chatHistory)); }
+    function saveToHistory(data) { chatHistory.push(data); if (chatHistory.length > 200) chatHistory.shift(); localStorage.setItem('p2p_chat_history_v7', JSON.stringify(chatHistory)); }
 
     function renderSystemMessage(text) {
         const wrapper = document.createElement('div'); wrapper.className = `system`; wrapper.innerText = text;
@@ -344,11 +358,14 @@
 
         let receiptHTML = isSentByMe ? `<span class="receipt ${data.read ? 'read' : ''}" id="receipt-${data.msgId}">${data.read ? '✓✓' : '✓'}</span>` : '';
 
+        // Safely escape text to prevent HTML injection
+        const safeText = data.text ? data.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
         wrapper.innerHTML = `
             <img src="${avatarUrl}" class="avatar" alt="avatar">
             <div class="msg-container">
                 <div class="msg-header"><span class="user-label">${data.profile.name}</span><span class="timestamp">${data.time}${receiptHTML}</span></div>
-                <div class="msg-bubble">${data.mediaType === 'text' ? data.text : mediaHTML}</div>
+                <div class="msg-bubble">${data.mediaType === 'text' ? safeText : mediaHTML}</div>
             </div>`;
         
         chatBox.appendChild(wrapper);
@@ -364,47 +381,70 @@
 
     async function startVideoCall() {
         try {
+            // Force the browser to ask for permissions
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('local-video').srcObject = localStream;
             document.getElementById('video-ui').style.display = 'flex';
             
+            if (connections.length === 0) {
+                alert("No one is in the room to call!");
+                return;
+            }
+
             // Call all currently connected peers
             connections.forEach(conn => {
                 const call = peer.call(conn.peer, localStream);
                 setupCallEvents(call);
             });
         } catch(err) {
-            alert("Could not access Camera/Microphone.");
+            console.error(err);
+            alert("Could not access Camera/Microphone. Make sure you are using HTTPS!");
         }
     }
 
-    peer.on('call', call => {
-        if(!confirm("Incoming Video Call. Answer?")) return;
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    // When someone else calls YOU
+    peer.on('call', async (call) => {
+        const wantsToAnswer = confirm(`Incoming Video Call from ${call.peer}. Answer?`);
+        if(!wantsToAnswer) return;
+
+        try {
+            // Get our own camera/mic to send back
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localStream = stream;
             document.getElementById('local-video').srcObject = localStream;
             document.getElementById('video-ui').style.display = 'flex';
+            
+            // Answer the call with our video stream
             call.answer(stream);
             setupCallEvents(call);
-        });
+        } catch(err) {
+            console.error("Failed to answer call:", err);
+            alert("Error: Could not access your camera to answer. Are you on a secure HTTPS connection?");
+        }
     });
 
     function setupCallEvents(call) {
         activeCalls.push(call);
+        
+        // When we receive their video stream
         call.on('stream', remoteStream => {
-            // Check if video element for this peer already exists
             if(document.getElementById(`vid-${call.peer}`)) return; 
             
             const remoteVid = document.createElement('video');
             remoteVid.id = `vid-${call.peer}`;
             remoteVid.autoplay = true;
-            remoteVid.playsInline = true;
+            remoteVid.playsInline = true; // Crucial for iOS
             remoteVid.srcObject = remoteStream;
             document.getElementById('remote-videos-container').appendChild(remoteVid);
         });
+
         call.on('close', () => {
             const vid = document.getElementById(`vid-${call.peer}`);
             if(vid) vid.remove();
+        });
+
+        call.on('error', err => {
+            console.error("Call error:", err);
         });
     }
 
@@ -419,12 +459,15 @@
     }
 
     function endCall() {
-        if(localStream) localStream.getTracks().forEach(track => track.stop());
+        if(localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
         activeCalls.forEach(call => call.close());
         activeCalls = [];
         document.getElementById('video-ui').style.display = 'none';
         
-        // Remove all remote videos except the local one
+        // Clear all remote videos from the UI
         const container = document.getElementById('remote-videos-container');
         Array.from(container.children).forEach(child => {
             if(child.id !== 'local-video') child.remove();
