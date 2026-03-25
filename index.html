@@ -336,25 +336,26 @@
 
         // --- Auth Functions ---
         window.handleSignUp = async () => {
-            // Grab the name, email, and password from the boxes
             const name = document.getElementById('citizen-name').value.trim();
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
             
-            // Make sure they actually typed a name!
             if(!name) return alert("Please enter your Citizen Name to register.");
             if(!email || !pass) return alert("Please enter an email and password.");
             
             try {
-                // Create the account in Firebase Auth
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
                 
-                // Save their Name, Email, Role, and a default Rank to the Database
+                // Generate a random 6-digit Comms ID
+                const newCommsId = Math.floor(100000 + Math.random() * 900000).toString();
+
                 await setDoc(doc(db, "users", res.user.uid), { 
                     email: email, 
                     role: "citizen",
-                    name: name,         // <--- SAVES THE NAME
-                    rank: "Citizen"     // <--- SETS A DEFAULT RANK FOR THE CHAT APP
+                    name: name,
+                    rank: "Citizen",
+                    commsId: newCommsId, // <-- Gives them their phone number
+                    contacts: []         // <-- Gives them an empty contact book
                 });
                 
                 alert(`Welcome to the Kingdom, ${name}! You are now a registered citizen.`);
