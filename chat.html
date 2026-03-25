@@ -14,7 +14,6 @@
             --bg-main: #020617; --card-bg: rgba(30, 41, 59, 0.4);
             --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc; --text-muted: #94a3b8;
-            --danger: #ef4444; --danger-hover: #b91c1c;
             --msg-sent: #818cf8; --msg-received: #334155;
         }
 
@@ -52,17 +51,8 @@
         .chat-header {
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 20px 20px 0 0; padding: 20px; backdrop-filter: blur(12px);
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: none;
+            border-bottom: none; text-align: center;
         }
-
-        .channel-selector {
-            background: rgba(0,0,0,0.5); border: 1px solid var(--card-border);
-            color: white; padding: 10px 16px; border-radius: 12px; font-family: inherit;
-            font-size: 1rem; font-weight: 600; outline: none; cursor: pointer;
-            width: 100%; max-width: 300px;
-        }
-        .channel-selector option { background: var(--bg-main); color: white; }
 
         .chat-box {
             background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border);
@@ -82,16 +72,9 @@
         .msg-row.sent .msg-bubble { background: var(--msg-sent); color: #000; border-bottom-right-radius: 4px; }
         .msg-row.received .msg-bubble { background: var(--msg-received); color: #fff; border-bottom-left-radius: 4px; }
 
-        .msg-info { font-size: 0.75rem; opacity: 0.8; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px;}
+        .msg-info { font-size: 0.75rem; opacity: 0.8; margin-bottom: 4px; display: block; }
         .msg-row.sent .msg-info { color: rgba(0,0,0,0.6); }
         .msg-row.received .msg-info { color: var(--text-muted); }
-
-        .delete-btn {
-            background: var(--danger); color: white; border: none; border-radius: 6px;
-            cursor: pointer; padding: 2px 6px; font-size: 0.75rem; margin-left: 10px;
-            transition: 0.2s; display: none; /* Hidden by default */
-        }
-        .delete-btn:hover { background: var(--danger-hover); }
 
         /* --- INPUT AREA --- */
         .chat-input-area {
@@ -153,13 +136,8 @@
             </div>
 
             <div class="chat-header">
-                <div>
-                    <h2 style="font-size: 1.25rem;">Town Square</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);" id="channel-desc">Public communications channel.</p>
-                </div>
-                <select class="channel-selector" id="channel-select" onchange="switchChannel()">
-                    <option value="global">🌍 Global Chat</option>
-                    </select>
+                <h2 style="font-size: 1.25rem;">Global Town Square</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Public communications channel for all citizens.</p>
             </div>
 
             <div class="chat-box" id="messages-container">
@@ -180,8 +158,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // NEW: Imported deleteDoc to allow Admins to remove messages
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
@@ -199,9 +176,6 @@
 
         let currentUser = null;
         let currentUserData = null;
-        let isAdmin = false;
-        let currentChannel = "global";
-        let unsubscribeChat = null; // Holds the active chat listener
 
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
@@ -215,20 +189,15 @@
                 authBtn.textContent = "Disconnect";
                 overlay.style.display = "none";
 
-                // Fetch user data for Rank & Name
+                // Fetch user data for Name
                 const userSnap = await getDoc(doc(db, "users", user.uid));
                 if (userSnap.exists()) {
                     currentUserData = userSnap.data();
-                    if (currentUserData.role === "web team" || currentUserData.role === "chancellor") {
-                        isAdmin = true;
-                    }
                 }
                 
-                populateUserDropdown();
                 startChatListener();
             } else {
                 currentUser = null;
-                isAdmin = false;
                 authBtn.textContent = "Log In";
                 overlay.style.display = "flex";
             }
@@ -239,86 +208,35 @@
             else { window.location.href = "index.html"; }
         };
 
-        // --- DIRECT MESSAGING LOGIC ---
-        async function populateUserDropdown() {
-            const select = document.getElementById('channel-select');
-            const usersSnap = await getDocs(collection(db, "users"));
-            
-            usersSnap.forEach((doc) => {
-                if (doc.id !== currentUser.uid) { // Don't list yourself
-                    const opt = document.createElement('option');
-                    opt.value = doc.id; // We store the UID as the value
-                    opt.textContent = `🔒 DM: ${doc.data().name}`;
-                    select.appendChild(opt);
-                }
-            });
-        }
-
-        window.switchChannel = () => {
-            const select = document.getElementById('channel-select');
-            const desc = document.getElementById('channel-desc');
-            
-            if (select.value === "global") {
-                currentChannel = "global";
-                desc.textContent = "Public communications channel.";
-            } else {
-                // To create a unique, consistent room ID between two people, 
-                // we sort their UIDs alphabetically and combine them.
-                const otherUid = select.value;
-                const myUid = currentUser.uid;
-                currentChannel = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
-                
-                const otherName = select.options[select.selectedIndex].text.replace("🔒 DM: ", "");
-                desc.textContent = `Encrypted private channel with ${otherName}.`;
-            }
-            
-            startChatListener(); // Restart the listener for the new channel
-        };
-
-        // --- CHAT LISTENER & MODERATION ---
+        // --- CHAT LISTENER ---
         function startChatListener() {
-            if (unsubscribeChat) unsubscribeChat(); // Stop listening to old channel
             const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = ""; // Clear old messages
-
-            // Simple query sorted by time. We filter by channel locally to avoid complex Firebase Indexing rules.
             const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
             
-            unsubscribeChat = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = ""; // Clear UI before redrawing
+            onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = ""; 
                 
                 snapshot.forEach((docSnap) => {
                     const msg = docSnap.data();
+                    const isMe = msg.senderId === currentUser.uid;
                     
-                    // Only render if the message belongs to the current room
-                    if (msg.channel === currentChannel) {
-                        const isMe = msg.senderId === currentUser.uid;
-                        
-                        const row = document.createElement('div');
-                        row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
-                        
-                        // Add Delete button if Admin (and not rendering their own message to save space, though you could!)
-                        const deleteBtnHTML = isAdmin ? `<button class="delete-btn" style="display:inline-block;" onclick="deleteMessage('${docSnap.id}')">🗑️</button>` : '';
-
-                        row.innerHTML = `
-                            <div class="msg-bubble">
-                                <div class="msg-info">
-                                    <strong>${msg.senderName}</strong>
-                                    ${deleteBtnHTML}
-                                </div>
-                                <div>${msg.text}</div>
-                            </div>
-                        `;
-                        messagesContainer.appendChild(row);
-                    }
+                    const row = document.createElement('div');
+                    row.className = `msg-row ${isMe ? 'sent' : 'received'}`;
+                    
+                    row.innerHTML = `
+                        <div class="msg-bubble">
+                            <div class="msg-info"><strong>${msg.senderName}</strong></div>
+                            <div>${msg.text}</div>
+                        </div>
+                    `;
+                    messagesContainer.appendChild(row);
                 });
                 
-                // Auto-scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
 
-        // --- SENDING & DELETING MESSAGES ---
+        // --- SENDING MESSAGES ---
         window.handleEnter = (e) => { if(e.key === 'Enter') sendMessage(); };
 
         window.sendMessage = async () => {
@@ -329,14 +247,13 @@
             if (!text || !currentUser) return;
             
             btn.disabled = true;
-            input.value = ""; // Clear input immediately for UX
+            input.value = ""; 
 
             try {
                 await addDoc(collection(db, "messages"), {
                     text: text,
                     senderId: currentUser.uid,
-                    senderName: currentUserData.name || "Citizen",
-                    channel: currentChannel, // "global" or the DM combined ID
+                    senderName: currentUserData?.name || "Citizen",
                     timestamp: serverTimestamp()
                 });
             } catch (error) {
@@ -346,19 +263,6 @@
             btn.disabled = false;
             input.focus();
         };
-
-        window.deleteMessage = async (messageId) => {
-            if (!isAdmin) return;
-            if (confirm("Are you sure you want to delete this message by royal decree?")) {
-                try {
-                    await deleteDoc(doc(db, "messages", messageId));
-                } catch (error) {
-                    console.error("Error deleting message: ", error);
-                    alert("Failed to delete message. Check your permissions.");
-                }
-            }
-        };
-
     </script>
 </body>
 </html>
