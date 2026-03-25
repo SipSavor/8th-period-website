@@ -135,7 +135,7 @@
             <a href="index.html">Home</a>
             <a href="constitution.html">Constitution</a>
             <a href="ranks.html">Ranks</a>
-            <a href="chat.html">Secure Chat</a>
+            <a href="chat.html" class="protected-link">Secure Chat 🔒</a>
         </div>
     </nav>
 
@@ -182,9 +182,9 @@
                 <p>Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
             </a>
 
-            <a href="chat.html" class="portal-card">
+            <a href="chat.html" class="portal-card protected-link">
                 <div class="icon-circle">💬</div>
-                <h2>Secure Chat</h2>
+                <h2>Secure Chat 🔒</h2>
                 <p>Encrypted real-time communication. Connect with fellow citizens and officials.</p>
             </a>
 
@@ -194,9 +194,9 @@
                 <p>Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
             </a>
 
-            <a href="links.html" class="portal-card">
+            <a href="links.html" class="portal-card protected-link">
                 <div class="icon-circle">🔗</div>
-                <h2>Resources</h2>
+                <h2>Resources 🔒</h2>
                 <p>Essential voting forms, classroom portals, and external kingdom documents.</p>
             </a>
         </div>
@@ -226,11 +226,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- Global Auth State ---
+        // We use this variable to check if the user is allowed to click protected links
+        window.isLoggedIn = false;
+
+        // --- Link Protection Logic ---
+        const protectedLinks = document.querySelectorAll('.protected-link');
+        protectedLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                if (!window.isLoggedIn) {
+                    event.preventDefault(); // Stop them from going to the page
+                    alert("⚠️ Access Denied: You must log in to access this sector.");
+                    window.openModal(); // Automatically open the login box
+                }
+            });
+        });
+
         // --- Modal UI Controls ---
         window.openModal = () => document.getElementById('auth-modal').classList.add('active');
         window.closeModal = () => document.getElementById('auth-modal').classList.remove('active');
         
-        // Close modal if user clicks the dark background outside the box
         window.onclick = function(event) {
             const modal = document.getElementById('auth-modal');
             if (event.target === modal) {
@@ -251,7 +266,7 @@
                     role: "citizen"
                 });
                 alert("Welcome to the Kingdom! You are now a registered citizen.");
-                closeModal(); // Close pop-up on success
+                closeModal();
             } catch (error) { 
                 alert(error.message); 
             }
@@ -264,7 +279,7 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
-                closeModal(); // Close pop-up on success
+                closeModal();
             } catch (error) { 
                 alert("Login failed: " + error.message); 
             }
@@ -283,7 +298,8 @@
             const logoutBtn = document.getElementById('logout-btn');
 
             if (user) {
-                // Logged in UI state
+                // User is logged in
+                window.isLoggedIn = true; 
                 openAuthBtn.style.display = "none";
                 logoutBtn.style.display = "inline-block";
                 roleDisplay.textContent = "Loading your citizen profile...";
@@ -311,13 +327,13 @@
                 }
 
             } else {
-                // Logged out UI state
+                // User is logged out
+                window.isLoggedIn = false;
                 openAuthBtn.style.display = "inline-block";
                 logoutBtn.style.display = "none";
                 adminPanel.style.display = "none";
                 roleDisplay.textContent = "Log in to access kingdom resources and secure communications.";
                 
-                // Clear input fields when logging out
                 document.getElementById('email').value = "";
                 document.getElementById('password').value = "";
             }
