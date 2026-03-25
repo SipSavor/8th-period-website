@@ -117,14 +117,14 @@
     <nav>
         <div class="nav-logo">Kingdom of 8th</div>
         <div class="nav-links">
-            <a href="index.html">Home</a>
+            <a href="index.html">Portal</a>
             <a href="news.html">News</a>
             <a href="constitution.html">Constitution</a>
             <a href="ranks.html">Ranks</a>
             <a href="chat.html">Secure Chat 🔒</a>
             <a href="economy.html">Economy</a>
             <a href="links.html">Links</a>
-            <a href="admin.html" id="nav-admin-link" style="color: var(--accent); display: none;">Admin Panel</a>
+            <a href="#" id="auth-status-btn" onclick="handleAuthClick()">Log In</a>
         </div>
     </nav>
 
@@ -136,7 +136,7 @@
     <main class="news-container">
 
         <div id="admin-panel" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); padding: 24px; border-radius: 20px; text-align: center; margin-bottom: 24px;">
-            <h3 style="color: var(--accent); margin-bottom: 12px; font-size: 1.5rem;">📰 Web Team Control Panel</h3>
+            <h3 style="color: var(--accent); margin-bottom: 12px; font-size: 1.5rem;">📰 Royal Control Panel</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px;">You have permission to modify the national news.</p>
             <button id="edit-toggle-btn" onclick="toggleEditMode()" class="auth-btn btn-primary">Edit News</button>
             <button id="save-content-btn" onclick="saveContent()" class="auth-btn btn-save">Publish Update</button>
@@ -162,7 +162,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // NEW: Imported signOut to handle the universal login/logout button
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -181,6 +182,7 @@
         const db = getFirestore(app);
 
         window.isEditMode = false;
+        let currentUser = null; // Track login state globally
 
         // --- Fetch Database Content on Page Load ---
         window.addEventListener('DOMContentLoaded', async () => {
@@ -204,23 +206,37 @@
             }
         });
 
-        // --- Verify Web Team Status for Admin Panel & Nav Link ---
+        // --- Verify Role & Handle Auth Button ---
         onAuthStateChanged(auth, async (user) => {
             const adminPanel = document.getElementById('admin-panel');
-            const adminLink = document.getElementById('nav-admin-link');
+            const authBtn = document.getElementById('auth-status-btn');
             
             if (user) {
+                currentUser = user;
+                if (authBtn) authBtn.textContent = "Disconnect";
+                
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists() && docSnap.data().role === "web team") {
+                    // Check if user is Web Team OR Chancellor
+                    if (docSnap.exists() && (docSnap.data().role === "web team" || docSnap.data().role === "chancellor")) {
                         if (adminPanel) adminPanel.style.display = "block";
-                        if (adminLink) adminLink.style.display = "inline";
                     }
                 } catch (error) { console.error("Error verifying role"); }
             } else {
-                if (adminLink) adminLink.style.display = "none";
+                currentUser = null;
+                if (authBtn) authBtn.textContent = "Log In";
+                if (adminPanel) adminPanel.style.display = "none";
             }
         });
+
+        // Universal Navigation Click Handler
+        window.handleAuthClick = () => {
+            if (currentUser) {
+                signOut(auth).then(() => window.location.reload());
+            } else {
+                window.location.href = "index.html"; // Send to Portal to log in
+            }
+        };
 
         // --- Web Team Editing Functions ---
         window.toggleEditMode = () => {
