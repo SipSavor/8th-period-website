@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Comms | Kingdom of 8th Period</title>
+    <title>Direct Messages | Kingdom of 8th Period</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,7 +29,6 @@
             background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
         }
 
-        /* --- NAVIGATION --- */
         nav {
             background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(20px);
             padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center;
@@ -45,41 +44,48 @@
         .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; margin-left: 1.5rem; transition: 0.3s;}
         .nav-links a:hover { color: var(--text-main); }
 
-        /* --- CHAT LAYOUT --- */
         .chat-wrapper { display: flex; gap: 24px; padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; height: calc(100vh - 70px); }
 
+        /* --- CONTACTS SIDEBAR --- */
         .sidebar {
-            width: 300px; background: var(--surface-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; padding: 24px; backdrop-filter: blur(12px); display: flex; flex-direction: column; gap: 20px;
+            width: 320px; background: var(--surface-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 24px 0; backdrop-filter: blur(12px); display: flex; flex-direction: column;
         }
 
+        .sidebar-header { padding: 0 24px 16px; border-bottom: 1px solid var(--card-border); margin-bottom: 16px; }
+        .sidebar-header h3 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px;}
+        .identity-badge {
+            background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--accent); padding: 8px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 0.8rem;
+        }
+
+        .contacts-list { flex: 1; overflow-y: auto; padding: 0 12px; }
+        .contact-item {
+            padding: 16px; border-radius: 12px; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; gap: 4px; border: 1px solid transparent;
+        }
+        .contact-item:hover { background: rgba(255, 255, 255, 0.05); }
+        .contact-item.active { background: rgba(129, 140, 248, 0.15); border-color: rgba(129, 140, 248, 0.3); }
+        .contact-name { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+        .contact-rank { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- CHAT AREA --- */
         .chat-main {
             flex: 1; background: var(--surface-bg); border: 1px solid var(--card-border);
             border-radius: 20px; backdrop-filter: blur(12px); display: flex; flex-direction: column; overflow: hidden;
         }
 
-        h3 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 12px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px;}
-
-        /* --- IDENTITY TAG --- */
-        .identity-badge {
-            background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--accent); padding: 12px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 0.9rem;
+        .chat-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
+            font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;
         }
 
-        .server-status {
-            background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3);
-            color: #34d399; padding: 12px; border-radius: 12px; text-align: center; font-weight: 600; font-size: 0.85rem;
-        }
-
-        /* --- MESSAGES AREA --- */
         #chat-box { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
-        .message { padding: 12px 16px; border-radius: 12px; max-width: 80%; line-height: 1.5; font-size: 0.95rem; }
-        .message.system { background: rgba(255,255,255,0.05); color: var(--text-muted); align-self: center; text-align: center; font-style: italic; font-size: 0.8rem; }
-        .message.them { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); align-self: flex-start; border-bottom-left-radius: 2px;}
-        .message.me { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); align-self: flex-end; border-bottom-right-radius: 2px; }
-        
-        .msg-author { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+        .message { padding: 12px 16px; border-radius: 12px; max-width: 75%; line-height: 1.5; font-size: 0.95rem; }
+        .message.system { background: transparent; color: var(--text-muted); align-self: center; text-align: center; font-style: italic; font-size: 0.85rem; }
+        .message.them { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.15); align-self: flex-start; border-bottom-left-radius: 4px;}
+        .message.me { background: var(--primary); color: #020617; font-weight: 500; align-self: flex-end; border-bottom-right-radius: 4px; }
 
         .input-area { padding: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 12px; background: rgba(0,0,0,0.2); }
         .input-area input { flex: 1; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); border-radius: 10px; color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; transition: 0.2s;}
@@ -93,7 +99,7 @@
 <body>
 
     <nav>
-        <div class="nav-logo">Kingdom Comms</div>
+        <div class="nav-logo">Kingdom Messages</div>
         <div class="nav-links">
             <a href="index.html">Portal</a>
             <a href="news.html">News</a>
@@ -105,23 +111,27 @@
 
     <div class="chat-wrapper">
         <div class="sidebar">
-            <div>
-                <h3>Verified Identity</h3>
-                <div class="identity-badge" id="display-name">Verifying Security Clearance...</div>
+            <div class="sidebar-header">
+                <h3>Your Identity</h3>
+                <div class="identity-badge" id="display-name">Verifying...</div>
             </div>
-
-            <div>
-                <h3>Network Status</h3>
-                <div class="server-status">🟢 Global Server Online<br><br><span style="color: var(--text-muted); font-size: 0.75rem;">Messages are permanently recorded by the Crown.</span></div>
+            <div class="sidebar-header" style="border: none; padding-bottom: 0;">
+                <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Citizens Directory</h3>
+            </div>
+            <div class="contacts-list" id="contacts-list">
+                <div style="padding: 16px; color: var(--text-muted); text-align: center; font-size: 0.9rem;">Loading citizens...</div>
             </div>
         </div>
 
         <div class="chat-main">
+            <div class="chat-header" id="chat-header">
+                Select a citizen to begin messaging
+            </div>
             <div id="chat-box">
-                <div class="message system">Establishing connection to Kingdom servers...</div>
+                <div class="message system">Select a contact from the directory to view your conversation history.</div>
             </div>
             <div class="input-area">
-                <input type="text" id="message-input" placeholder="Transmit a message to the realm..." disabled onkeypress="handleEnter(event)">
+                <input type="text" id="message-input" placeholder="Type a message..." disabled onkeypress="handleEnter(event)">
                 <button id="send-btn" onclick="sendMessage()" disabled>Send</button>
             </div>
         </div>
@@ -130,7 +140,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
@@ -146,26 +156,24 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let myOfficialTitle = "";
-        let currentUserUid = "";
+        let currentUser = null;
+        let selectedUser = null; 
+        let currentChatId = null;
+        let unsubscribeChat = null; // Keeps track of the live listener so we can turn it off when switching chats
 
-        // --- SECURITY CHECK ---
+        // --- SECURITY & INIT ---
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "index.html"; 
             } else {
-                currentUserUid = user.uid;
+                currentUser = user;
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        myOfficialTitle = `${data.name} [${data.rank}]`;
-                        document.getElementById('display-name').innerText = myOfficialTitle;
+                        document.getElementById('display-name').innerText = `${data.name} [${data.rank}]`;
                         
-                        // Unlock the input box and load the chat
-                        document.getElementById('message-input').disabled = false;
-                        document.getElementById('send-btn').disabled = false;
-                        listenForMessages(); 
+                        loadCitizensDirectory(); // Load the sidebar
                     }
                 } catch (error) {
                     console.error("Identity Error:", error);
@@ -173,63 +181,116 @@
             }
         });
 
-        window.logout = () => {
-            signOut(auth).then(() => { window.location.href = "index.html"; });
+        window.logout = () => signOut(auth).then(() => { window.location.href = "index.html"; });
+
+        // --- LOAD SIDEBAR CONTACTS ---
+        async function loadCitizensDirectory() {
+            const contactsList = document.getElementById('contacts-list');
+            contactsList.innerHTML = ""; // Clear loading text
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                
+                querySnapshot.forEach((docSnap) => {
+                    const userData = docSnap.data();
+                    const userUid = docSnap.id;
+
+                    // Don't show ourselves in the contacts list
+                    if (userUid === currentUser.uid) return; 
+
+                    const contactDiv = document.createElement('div');
+                    contactDiv.className = 'contact-item';
+                    contactDiv.id = `contact-${userUid}`;
+                    contactDiv.innerHTML = `
+                        <div class="contact-name">${userData.name || "Unknown Citizen"}</div>
+                        <div class="contact-rank">${userData.rank || "Peasant"}</div>
+                    `;
+
+                    // When clicked, open the DM channel with this user
+                    contactDiv.onclick = () => openChat(userUid, userData.name);
+                    
+                    contactsList.appendChild(contactDiv);
+                });
+            } catch (error) {
+                console.error("Error loading citizens:", error);
+                contactsList.innerHTML = `<div style="padding: 16px; color: var(--danger);">Error loading directory.</div>`;
+            }
+        }
+
+        // --- OPEN A DIRECT MESSAGE ---
+        window.openChat = (targetUid, targetName) => {
+            // UI Updates
+            document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`contact-${targetUid}`).classList.add('active');
+            document.getElementById('chat-header').innerHTML = `Messaging <strong>${targetName}</strong>`;
+            
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('message-input').focus();
+
+            selectedUser = { uid: targetUid, name: targetName };
+            
+            // Create a unique Room ID based on both User IDs. 
+            // Sorting them guarantees the ID is the same regardless of who clicks who.
+            currentChatId = currentUser.uid < targetUid 
+                ? `${currentUser.uid}_${targetUid}` 
+                : `${targetUid}_${currentUser.uid}`;
+
+            listenForMessages();
         };
 
-        // --- REAL-TIME FIRESTORE CHAT ---
+        // --- REAL-TIME LISTENER FOR THIS SPECIFIC CHAT ---
         function listenForMessages() {
             const chatBox = document.getElementById('chat-box');
             
-            // Look at the "messages" collection, sort them by oldest to newest
-            const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+            // If we are already listening to another chat, stop listening to it
+            if (unsubscribeChat) {
+                unsubscribeChat();
+            }
 
-            // onSnapshot runs immediately, AND whenever a new message is added by ANYONE
-            onSnapshot(q, (snapshot) => {
-                chatBox.innerHTML = ""; // Clear the box before redrawing
+            // Look inside a specific "chats/CHAT_ID/messages" folder
+            const messagesRef = collection(db, "chats", currentChatId, "messages");
+            const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                chatBox.innerHTML = ""; // Clear box
                 
                 if(snapshot.empty) {
-                    chatBox.innerHTML = `<div class="message system">The realm is quiet. Be the first to speak.</div>`;
+                    chatBox.innerHTML = `<div class="message system">This is the beginning of your secure comms with ${selectedUser.name}.</div>`;
                     return;
                 }
 
                 snapshot.forEach((doc) => {
                     const msgData = doc.data();
-                    // Check if WE sent the message, or if THEY sent it, to color it correctly
-                    const type = msgData.uid === currentUserUid ? 'me' : 'them';
+                    const type = msgData.senderId === currentUser.uid ? 'me' : 'them';
                     
                     const msgDiv = document.createElement('div');
                     msgDiv.className = `message ${type}`;
-                    msgDiv.innerHTML = `
-                        <div class="msg-author">${msgData.author}</div>
-                        <div>${msgData.text}</div>
-                    `;
+                    msgDiv.innerText = msgData.text; // Just simple text bubbles, like iMessage
                     chatBox.appendChild(msgDiv);
                 });
 
-                // Auto-scroll to the bottom
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
         }
 
+        // --- SEND A MESSAGE ---
         window.sendMessage = async () => {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
-            if (!text) return;
+            if (!text || !currentChatId) return;
 
-            input.value = ""; // Clear box instantly for good user experience
+            input.value = ""; 
 
             try {
-                // Write the new message to the database
-                await addDoc(collection(db, "messages"), {
+                // Save it into the specific conversation's folder
+                await addDoc(collection(db, "chats", currentChatId, "messages"), {
                     text: text,
-                    author: myOfficialTitle,
-                    uid: currentUserUid,
-                    timestamp: serverTimestamp() // Uses Google's exact server time
+                    senderId: currentUser.uid,
+                    timestamp: serverTimestamp()
                 });
             } catch (error) {
                 console.error("Error sending message: ", error);
-                alert("Failed to transmit. Check your connection.");
             }
         };
 
