@@ -12,6 +12,7 @@
         :root {
             --primary: #818cf8;
             --primary-glow: rgba(129, 140, 248, 0.25);
+            --accent: #f59e0b;
             --bg-main: #020617;
             --card-bg: rgba(30, 41, 59, 0.4);
             --card-border: rgba(255, 255, 255, 0.08);
@@ -50,184 +51,76 @@
         }
 
         /* --- ACCESSIBILITY --- */
-        :focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 4px;
-            border-radius: 4px;
-        }
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 4px; }
 
         /* --- NAVIGATION --- */
         nav {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(2, 6, 23, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 1.25rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 1000; background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 1.25rem 5%; display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--card-border);
         }
 
         .nav-logo {
-            font-size: 1.1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
             background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-main);
-        }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; transition: color 0.3s ease; }
+        .nav-links a:hover { color: var(--text-main); }
 
         /* --- HERO --- */
-        .hero {
-            text-align: center;
-            padding: 100px 20px 60px;
-            animation: slideUp 0.8s ease-out;
-        }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            margin-bottom: 1rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            background: linear-gradient(to right bottom, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            color: var(--text-muted);
-            font-size: clamp(1rem, 4vw, 1.25rem);
-            max-width: 600px;
-            margin: 0 auto;
-            font-weight: 400;
-        }
+        .hero { text-align: center; padding: 100px 20px 60px; animation: slideUp 0.8s ease-out; }
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); margin-bottom: 1rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(to right bottom, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-muted); font-size: clamp(1rem, 4vw, 1.25rem); max-width: 600px; margin: 0 auto; font-weight: 400; }
 
         /* --- NEWS CONTAINER --- */
-        .news-container {
-            max-width: 800px;
-            margin: 0 auto 100px;
-            padding: 0 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+        .news-container { max-width: 800px; margin: 0 auto 100px; padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
 
         .news-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 40px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            animation: slideUp 0.6s ease-out backwards;
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+            padding: 40px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); animation: slideUp 0.6s ease-out backwards;
         }
 
-        .news-card:hover {
-            transform: translateY(-6px);
-            background: rgba(30, 41, 59, 0.6);
-            border-color: var(--card-border-hover);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 10px 30px var(--primary-glow);
-        }
+        .news-card:hover { transform: translateY(-6px); background: rgba(30, 41, 59, 0.6); border-color: var(--card-border-hover); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 10px 30px var(--primary-glow); }
 
-        .news-tag {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
+        .news-tag { padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; display: inline-block; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+        .tag-legislation { background-color: var(--tag-gold-bg); color: var(--tag-gold-text); border: 1px solid var(--tag-gold-border); }
+        .tag-global { background-color: var(--tag-green-bg); color: var(--tag-green-text); border: 1px solid var(--tag-green-border); }
 
-        .tag-legislation {
-            background-color: var(--tag-gold-bg);
-            color: var(--tag-gold-text);
-            border: 1px solid var(--tag-gold-border);
-        }
+        .news-card h2 { color: var(--text-main); margin: 0 0 12px 0; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+        .news-card p { margin: 0; color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; }
 
-        .tag-global {
-            background-color: var(--tag-green-bg);
-            color: var(--tag-green-text);
-            border: 1px solid var(--tag-green-border);
-        }
+        .news-card:nth-child(2) { animation-delay: 0.1s; }
+        .news-card:nth-child(3) { animation-delay: 0.2s; }
 
-        .news-card h2 {
-            color: var(--text-main);
-            margin: 0 0 12px 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
+        /* --- BUTTONS & EDITING STYLES --- */
+        .auth-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; font-size: 1rem; }
+        .btn-primary { background: var(--primary); color: #020617; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-secondary:hover { background: var(--card-border-hover); border-color: var(--primary); }
+        .btn-save { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); display: none; margin-left: 10px;}
 
-        .news-card p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            line-height: 1.7;
-        }
-
-        /* Staggered animation for cards */
-        .news-card:nth-child(1) { animation-delay: 0.1s; }
-        .news-card:nth-child(2) { animation-delay: 0.2s; }
+        .editable-text[contenteditable="true"] { border: 1px dashed var(--accent); padding: 4px 8px; border-radius: 8px; background: rgba(0,0,0,0.5); outline: none; cursor: text; display: inline-block; width: 100%;}
+        .editable-text[contenteditable="true"]:focus { border-style: solid; background: rgba(30, 41, 59, 0.9); }
+        .news-tag.editable-text[contenteditable="true"] { width: auto; }
 
         /* --- FOOTER --- */
-        footer {
-            padding: 40px 20px 60px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            border-top: 1px solid var(--card-border);
-            opacity: 0.7;
-        }
+        footer { padding: 40px 20px 60px; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 2px; border-top: 1px solid var(--card-border); opacity: 0.7; }
 
         /* --- ANIMATIONS --- */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            nav {
-                flex-direction: column;
-                gap: 1.5rem;
-                padding: 1.5rem;
-            }
-            .nav-links {
-                gap: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .hero {
-                padding: 80px 20px 40px;
-            }
-            .news-card {
-                padding: 30px 24px;
-            }
+            nav { flex-direction: column; gap: 1.5rem; padding: 1.5rem; }
+            .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+            .hero { padding: 80px 20px 40px; }
+            .news-card { padding: 30px 24px; }
         }
     </style>
 </head>
@@ -252,16 +145,23 @@
 
     <main class="news-container">
 
+        <div id="admin-panel" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); padding: 24px; border-radius: 20px; text-align: center; margin-bottom: 24px;">
+            <h3 style="color: var(--accent); margin-bottom: 12px; font-size: 1.5rem;">📰 Web Team Control Panel</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">You have permission to modify the national news.</p>
+            <button id="edit-toggle-btn" onclick="toggleEditMode()" class="auth-btn btn-primary">Edit News</button>
+            <button id="save-content-btn" onclick="saveContent()" class="auth-btn btn-save">Publish Update</button>
+        </div>
+
         <article class="news-card">
-            <div class="news-tag tag-legislation">Legislation</div>
-            <h2>New Laws Passed</h2>
-            <p>A new royal decree states: "Any unprovoked attack on the Kingdom will result in immediate banishment. Reinstatement requires following standard legal appeals."</p>
+            <div class="news-tag tag-legislation editable-text" id="news-tag-1">Legislation</div>
+            <h2 class="editable-text" id="news-title-1">New Laws Passed</h2>
+            <p class="editable-text" id="news-content-1">A new royal decree states: "Any unprovoked attack on the Kingdom will result in immediate banishment. Reinstatement requires following standard legal appeals."</p>
         </article>
         
         <article class="news-card">
-            <div class="news-tag tag-global">Global Affairs</div>
-            <h2>International Relations</h2>
-            <p>Peace has been secured on the northern front. Following new strategic alliances, previous regional tensions have significantly cooled.</p>
+            <div class="news-tag tag-global editable-text" id="news-tag-2">Global Affairs</div>
+            <h2 class="editable-text" id="news-title-2">International Relations</h2>
+            <p class="editable-text" id="news-content-2">Peace has been secured on the northern front. Following new strategic alliances, previous regional tensions have significantly cooled.</p>
         </article>
 
     </main>
@@ -270,7 +170,102 @@
         &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
     </footer>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
+            authDomain: "chatting-kingdom.firebaseapp.com",
+            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
+            projectId: "chatting-kingdom",
+            storageBucket: "chatting-kingdom.firebasestorage.app",
+            messagingSenderId: "159434733757",
+            appId: "1:159434733757:web:e86256ba72525c0830dfd4",
+            measurementId: "G-LWVS3N6RNK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.isEditMode = false;
+
+        // --- Fetch Database Content on Page Load ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const docRef = doc(db, "site_content", "news_page");
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const fields = [
+                        'news-tag-1', 'news-title-1', 'news-content-1',
+                        'news-tag-2', 'news-title-2', 'news-content-2'
+                    ];
+                    
+                    fields.forEach(field => {
+                        if(data[field]) document.getElementById(field).innerText = data[field];
+                    });
+                }
+            } catch (error) {
+                console.log("No custom text found, using HTML defaults.");
+            }
+        });
+
+        // --- Verify Web Team Status for Admin Panel ---
+        onAuthStateChanged(auth, async (user) => {
+            const adminPanel = document.getElementById('admin-panel');
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists() && docSnap.data().role === "web team") {
+                        adminPanel.style.display = "block";
+                    }
+                } catch (error) { console.error("Error verifying role"); }
+            }
+        });
+
+        // --- Web Team Editing Functions ---
+        window.toggleEditMode = () => {
+            window.isEditMode = !window.isEditMode;
+            const toggleBtn = document.getElementById('edit-toggle-btn');
+            const saveBtn = document.getElementById('save-content-btn');
+            const editableTexts = document.querySelectorAll('.editable-text');
+
+            if (window.isEditMode) {
+                toggleBtn.innerText = "Cancel Editing";
+                toggleBtn.classList.replace('btn-primary', 'btn-secondary');
+                saveBtn.style.display = "inline-block";
+                editableTexts.forEach(el => el.setAttribute("contenteditable", "true"));
+            } else {
+                window.location.reload();
+            }
+        };
+
+        window.saveContent = async () => {
+            const saveBtn = document.getElementById('save-content-btn');
+            saveBtn.innerText = "Publishing...";
+            
+            try {
+                await setDoc(doc(db, "site_content", "news_page"), {
+                    'news-tag-1': document.getElementById('news-tag-1').innerText,
+                    'news-title-1': document.getElementById('news-title-1').innerText,
+                    'news-content-1': document.getElementById('news-content-1').innerText,
+                    'news-tag-2': document.getElementById('news-tag-2').innerText,
+                    'news-title-2': document.getElementById('news-title-2').innerText,
+                    'news-content-2': document.getElementById('news-content-2').innerText
+                });
+                
+                alert("Success! The national news has been updated.");
+                window.location.reload(); 
+            } catch(error) {
+                alert("Error saving: " + error.message);
+                saveBtn.innerText = "Publish Update";
+            }
+        };
+
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
