@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kingdom Comms | Kingdom of 8th Period</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
     <style>
         :root {
             --primary: #818cf8; --primary-hover: #6366f1; --bg-main: #020617;
@@ -33,19 +34,28 @@
 
         .chat-wrapper { display: flex; gap: 24px; padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; height: calc(100vh - 70px); }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR & AVATARS --- */
         .sidebar {
             width: 320px; background: var(--surface-bg); border: 1px solid var(--card-border);
             border-radius: 20px; padding: 24px 0; backdrop-filter: blur(12px); display: flex; flex-direction: column;
         }
 
         .sidebar-header { padding: 0 24px 16px; border-bottom: 1px solid var(--card-border); margin-bottom: 16px; }
-        .sidebar-header h3 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px;}
+        
+        /* NEW: Avatar Profile Section in Sidebar */
+        .profile-section { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .my-avatar { 
+            width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .my-avatar:hover { opacity: 0.8; transform: scale(1.05); }
+        .profile-info { display: flex; flex-direction: column; }
+        .profile-name { font-weight: 700; font-size: 1.1rem; }
         
         .id-badge { 
             display: inline-block; background: rgba(129, 140, 248, 0.15); color: var(--primary); 
-            padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; 
-            margin-bottom: 12px; border: 1px solid rgba(129, 140, 248, 0.3); cursor: pointer; transition: 0.2s;
+            padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; 
+            border: 1px solid rgba(129, 140, 248, 0.3); cursor: pointer; transition: 0.2s; margin-top: 4px;
         }
         .id-badge:hover { background: rgba(129, 140, 248, 0.25); }
 
@@ -63,16 +73,19 @@
         .section-title { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 10px 12px 5px; font-weight: 700; }
 
         .contact-item {
-            padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; gap: 4px; border: 1px solid transparent; margin-bottom: 2px;
+            padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 12px; border: 1px solid transparent; margin-bottom: 2px;
         }
         .contact-item:hover { background: rgba(255, 255, 255, 0.05); }
         .contact-item.active { background: rgba(129, 140, 248, 0.15); border-color: rgba(129, 140, 248, 0.3); }
         
+        .contact-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,0.1); }
+        .contact-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; transition: background-color 0.3s; }
         .unread-badge { background: var(--danger); color: white; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; display: none; margin-left: auto; }
         .contact-name { font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center;}
-        .contact-sub { font-size: 0.75rem; color: var(--text-muted); padding-left: 14px; }
+        .contact-sub { font-size: 0.75rem; color: var(--text-muted); }
 
         /* --- CHAT AREA --- */
         .chat-main {
@@ -93,17 +106,23 @@
 
         #chat-box { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         
-        .msg-wrapper { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }
-        .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
-        .msg-wrapper.them { align-self: flex-start; align-items: flex-start; }
+        /* NEW: Message Row to hold Avatar + Bubble */
+        .msg-row { display: flex; gap: 10px; max-width: 85%; }
+        .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-row.them { align-self: flex-start; }
+        
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 18px; }
+        
+        .msg-wrapper { display: flex; flex-direction: column; gap: 4px; }
+        .msg-wrapper.me { align-items: flex-end; }
+        .msg-wrapper.them { align-items: flex-start; }
 
         .sender-name { font-size: 0.7rem; color: var(--text-muted); padding: 0 4px; font-weight: 600; text-transform: uppercase; }
         .message { padding: 12px 16px; border-radius: 12px; line-height: 1.5; font-size: 0.95rem; word-break: break-word; }
-        .message.system { background: transparent; color: var(--text-muted); align-self: center; text-align: center; font-style: italic; font-size: 0.85rem; max-width: 100%;}
-        .message.them { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.15); border-bottom-left-radius: 4px;}
-        .message.me { background: var(--primary); color: #020617; font-weight: 500; border-bottom-right-radius: 4px; }
+        .message.system { background: transparent; color: var(--text-muted); align-self: center; text-align: center; font-style: italic; font-size: 0.85rem; max-width: 100%; margin: 0 auto;}
+        .message.them { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.15); border-top-left-radius: 4px;}
+        .message.me { background: var(--primary); color: #020617; font-weight: 500; border-top-right-radius: 4px; }
         
-        /* NEW: Image Styles for the chat bubbles */
         .chat-image { max-width: 100%; max-height: 300px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.2); }
         .chat-image:hover { opacity: 0.8; }
         .message.image-msg { padding: 4px; background: transparent; border: none; }
@@ -111,7 +130,6 @@
         .msg-meta { font-size: 0.7rem; color: var(--text-muted); padding: 0 4px; font-weight: 600; }
         .status-read { color: var(--primary); }
 
-        /* Updated Input Area with Upload Button */
         .input-container { display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border-top: 1px solid var(--card-border); }
         #upload-progress { display: none; padding: 10px 20px 0; color: var(--primary); font-size: 0.8rem; font-weight: 700; font-style: italic; }
         .input-area { padding: 15px 20px 20px; display: flex; gap: 12px; }
@@ -126,7 +144,7 @@
         .input-area button.btn-send:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
         .input-area button.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- MODAL --- */
+        /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: #0f172a; border: 1px solid var(--card-border); padding: 30px; border-radius: 20px; width: 400px; display: flex; flex-direction: column; }
         .modal h2 { margin-bottom: 20px; font-size: 1.5rem; }
@@ -138,6 +156,8 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
         .btn-cancel { background: transparent; color: white; border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
         .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -155,8 +175,16 @@
     <div class="chat-wrapper">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h3>Your Comms</h3>
-                <div class="id-badge" onclick="copyMyId()" title="Click to copy">My ID: <span id="my-comms-id">Loading...</span></div>
+                <div class="profile-section">
+                    <img src="" id="my-avatar-img" class="my-avatar" title="Click to change Avatar" onclick="document.getElementById('avatar-upload').click()">
+                    <input type="file" id="avatar-upload" accept="image/png, image/jpeg" style="display: none;" onchange="handleAvatarUpload(event)">
+                    
+                    <div class="profile-info">
+                        <span class="profile-name" id="my-name-display">Loading...</span>
+                        <div class="id-badge" onclick="copyMyId()" title="Click to copy">ID: <span id="my-comms-id">...</span></div>
+                    </div>
+                </div>
+
                 <button class="btn-add" onclick="openAddCitizenModal()">+ Add Citizen</button>
                 <button class="btn-new-group" onclick="openModal()">+ Create Group</button>
             </div>
@@ -173,14 +201,13 @@
         <div class="chat-main">
             <div class="chat-header" id="chat-header"><div>Select a chat to begin</div></div>
             <div id="chat-box">
-                <div class="message system">Select a citizen or group from the sidebar.</div>
+                <div class="message system" style="margin-top: auto; margin-bottom: auto;">Select a citizen or group from the sidebar to establish comms.</div>
             </div>
             
             <div class="input-container">
                 <div id="upload-progress">Uploading image: 0%</div>
                 <div class="input-area">
                     <input type="file" id="image-upload" accept="image/png, image/jpeg, image/gif" style="display: none;" onchange="handleImageUpload(event)">
-                    
                     <button id="upload-btn" class="btn-upload" title="Send an image" onclick="document.getElementById('image-upload').click()" disabled>📷</button>
                     
                     <input type="text" id="message-input" placeholder="Type a message..." disabled onkeypress="handleEnter(event)">
@@ -214,12 +241,37 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="incoming-call-modal" style="z-index: 2100;">
+        <div style="background: #0f172a; padding: 30px; border-radius: 20px; border: 1px solid var(--primary); width: 350px; text-align: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);">
+            <div style="font-size: 3rem; margin-bottom: 10px; animation: pulse 1.5s infinite;">📞</div>
+            <h2 style="margin-bottom: 5px;">Incoming Comms...</h2>
+            <p id="caller-name-display" style="color: var(--text-muted); margin-bottom: 25px;">Citizen is calling you</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="btn-remove" style="padding: 10px 20px; border-radius: 12px;" onclick="declineCall()">Decline</button>
+                <button class="btn-new-group" style="padding: 10px 20px; border-radius: 12px; background: var(--success);" onclick="acceptCall()">Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="video-modal" style="z-index: 2000;">
+        <div style="background: #0f172a; padding: 20px; border-radius: 20px; border: 1px solid var(--card-border); width: 80%; max-width: 900px; display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="video-title" style="margin: 0;">Secure Comms Link Active</h2>
+                <button class="btn-remove" onclick="endCall()">Hang Up</button>
+            </div>
+            <div style="display: flex; gap: 15px; height: 500px;">
+                <div id="remote-player" style="flex: 2; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Waiting for citizen to join...</div>
+                </div>
+                <div id="local-player" style="flex: 1; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary);"></div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        
-        // NEW: Import Firebase Storage modules
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -235,8 +287,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // NEW: Initialize Storage
         const storage = getStorage(app);
 
         let currentUser = null;
@@ -245,6 +295,12 @@
         let activeChatId = null;   
         let unsubscribeChat = null; 
         let contactListeners = []; 
+        let groupListeners = [];
+
+        // Helper function to generate default Avatar
+        function getDefaultAvatar(name) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=818cf8&color=fff&bold=true`;
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.href = "index.html"; } 
@@ -255,14 +311,26 @@
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
                         currentUserData = docSnap.data();
+                        
+                        // Setup Comms ID
                         if (!currentUserData.commsId) {
                             const newCommsId = Math.floor(100000 + Math.random() * 900000).toString();
                             await updateDoc(doc(db, "users", user.uid), { commsId: newCommsId, contacts: [] });
                             currentUserData.commsId = newCommsId;
                             currentUserData.contacts = [];
                         }
+                        
+                        // Setup Profile Display
+                        document.getElementById('my-name-display').innerText = currentUserData.name;
                         document.getElementById('my-comms-id').innerText = currentUserData.commsId;
-                        loadMyContacts(); loadMyGroups(); 
+                        
+                        // Setup Avatar
+                        const myAvatarUrl = currentUserData.photoURL || getDefaultAvatar(currentUserData.name);
+                        document.getElementById('my-avatar-img').src = myAvatarUrl;
+
+                        loadMyContacts(); 
+                        loadMyGroups(); 
+                        listenForCalls(); // Video Calling Listener
                     }
                 } catch (error) { console.error(error); }
             }
@@ -277,7 +345,6 @@
             signOut(auth).then(() => { window.location.href = "index.html"; });
         };
 
-        // --- COPY ID ---
         window.copyMyId = () => {
             const idText = document.getElementById('my-comms-id').innerText;
             if(idText === "Loading..." || idText === "Copied!") return;
@@ -286,6 +353,40 @@
                 badge.innerText = "Copied!";
                 setTimeout(() => badge.innerText = idText, 2000);
             });
+        };
+
+        // --- NEW: AVATAR UPLOAD LOGIC ---
+        window.handleAvatarUpload = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('avatar-upload').value = ""; // reset
+            const originalSrc = document.getElementById('my-avatar-img').src;
+            document.getElementById('my-avatar-img').src = "https://i.gifer.com/ZKZg.gif"; // Quick loading spinner
+
+            try {
+                const uniqueFileName = `avatars/${currentUser.uid}_${Date.now()}`;
+                const storageRef = ref(storage, uniqueFileName);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed', null, (error) => {
+                    console.error("Avatar upload error", error);
+                    document.getElementById('my-avatar-img').src = originalSrc;
+                    alert("Failed to upload avatar.");
+                }, async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    
+                    // Update user profile in database
+                    await updateDoc(doc(db, "users", currentUser.uid), { photoURL: downloadURL });
+                    currentUserData.photoURL = downloadURL;
+                    
+                    // Update UI locally
+                    document.getElementById('my-avatar-img').src = downloadURL;
+                });
+            } catch (e) {
+                console.error(e);
+                document.getElementById('my-avatar-img').src = originalSrc;
+            }
         };
 
         // --- ADD / REMOVE CITIZEN (Unchanged) ---
@@ -346,16 +447,28 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         const isOnlineColor = data.isOnline ? 'var(--success)' : 'var(--text-muted)';
+                        const avatarSrc = data.photoURL || getDefaultAvatar(data.name);
+
                         let dmDiv = document.getElementById(`dm-${friendUid}`);
                         if (!dmDiv) {
                             dmDiv = document.createElement('div'); dmDiv.className = 'contact-item'; dmDiv.id = `dm-${friendUid}`;
-                            dmDiv.onclick = () => openChat('dm', friendUid, data.name);
+                            dmDiv.onclick = () => openChat('dm', friendUid, data.name, avatarSrc);
                             dmList.appendChild(dmDiv);
+                            
+                            // Checkbox for groups
                             const label = document.createElement('label'); label.className = 'checklist-item';
                             label.innerHTML = `<input type="checkbox" class="citizen-checkbox" value="${friendUid}"><span>${data.name}</span>`;
                             checklist.appendChild(label);
                         }
-                        dmDiv.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div><div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div><div class="contact-sub">${data.rank}</div></div><div class="unread-badge" id="badge-${friendUid}"></div></div>`;
+                        // NEW: Sidebar layout with Avatar
+                        dmDiv.innerHTML = `
+                            <img src="${avatarSrc}" class="contact-avatar">
+                            <div class="contact-info">
+                                <div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div>
+                                <div class="contact-sub">${data.rank}</div>
+                            </div>
+                            <div class="unread-badge" id="badge-${friendUid}"></div>
+                        `;
                         if(activeChatId && activeChatId.includes(friendUid)) { dmDiv.classList.add('active'); }
                     }
                 });
@@ -380,9 +493,17 @@
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const groupId = docSnap.id;
+                    const groupAvatar = getDefaultAvatar(data.name); // Using default API to generate a letter crest for groups
+                    
                     const groupDiv = document.createElement('div'); groupDiv.className = 'contact-item'; groupDiv.id = `group-${groupId}`;
-                    groupDiv.innerHTML = `<div class="contact-name">${data.name}</div><div class="contact-sub">${data.members.length} Members</div>`;
-                    groupDiv.onclick = () => openChat('group', groupId, data.name);
+                    groupDiv.innerHTML = `
+                        <img src="${groupAvatar}" class="contact-avatar">
+                        <div class="contact-info">
+                            <div class="contact-name">${data.name}</div>
+                            <div class="contact-sub">${data.members.length} Members</div>
+                        </div>
+                    `;
+                    groupDiv.onclick = () => openChat('group', groupId, data.name, groupAvatar);
                     groupsList.appendChild(groupDiv);
                 });
             });
@@ -400,19 +521,24 @@
         };
 
         // --- OPENING A CHAT ---
-        window.openChat = (type, targetId, displayName) => {
+        window.openChat = (type, targetId, displayName, avatarSrc = "") => {
             document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`${type}-${targetId}`).classList.add('active');
+            if(document.getElementById(`${type}-${targetId}`)) {
+                document.getElementById(`${type}-${targetId}`).classList.add('active');
+            }
             
             const prefix = type === 'dm' ? "Messaging" : "Group:";
-            let headerHTML = `<div>${prefix} <strong>${displayName}</strong></div>`;
-            if (type === 'dm') { headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove Citizen</button>`; }
+            let headerHTML = `<div>${prefix} <strong>${displayName}</strong></div><div style="display:flex; gap:10px;">`;
+            if (type === 'dm') { 
+                headerHTML += `<button class="btn-new-group" style="padding: 6px 12px; margin:0;" onclick="startCall()">📹 Call</button>`;
+                headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove</button>`; 
+            }
+            headerHTML += `</div>`;
             document.getElementById('chat-header').innerHTML = headerHTML;
             
-            // Enable all inputs!
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
-            document.getElementById('upload-btn').disabled = false; // Enable camera button
+            document.getElementById('upload-btn').disabled = false; 
             document.getElementById('message-input').focus();
 
             activeChatType = type;
@@ -420,7 +546,7 @@
             listenForMessages();
         };
 
-        // --- LISTENING TO MESSAGES ---
+        // --- LISTENING TO MESSAGES (WITH AVATARS) ---
         function listenForMessages() {
             const chatBox = document.getElementById('chat-box');
             if (unsubscribeChat) unsubscribeChat();
@@ -431,7 +557,7 @@
 
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatBox.innerHTML = ""; 
-                if(snapshot.empty) { chatBox.innerHTML = `<div class="message system">Send a message to start the conversation.</div>`; return; }
+                if(snapshot.empty) { chatBox.innerHTML = `<div class="message system" style="margin-top: auto; margin-bottom: auto;">Send a message to start the conversation.</div>`; return; }
 
                 snapshot.forEach((docSnap) => {
                     const msgData = docSnap.data();
@@ -442,6 +568,17 @@
 
                     let timeString = "Sending...";
                     if (msgData.timestamp) { timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+                    // Construct Message Structure with Avatar
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = `msg-row ${isMe ? 'me' : 'them'}`;
+
+                    // Avatar (fallback dynamically)
+                    const msgAvatarSrc = msgData.senderPhotoURL || getDefaultAvatar(msgData.senderName || 'Citizen');
+                    const avatarImg = document.createElement('img');
+                    avatarImg.className = 'msg-avatar';
+                    avatarImg.src = msgAvatarSrc;
+                    rowDiv.appendChild(avatarImg);
 
                     const wrapperDiv = document.createElement('div');
                     wrapperDiv.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
@@ -457,7 +594,6 @@
                     const bubbleDiv = document.createElement('div');
                     bubbleDiv.className = `message ${isMe ? 'me' : 'them'}`;
                     
-                    // NEW: Check if the message contains an Image URL
                     if (msgData.imageUrl) {
                         bubbleDiv.classList.add('image-msg');
                         bubbleDiv.innerHTML = `<img src="${msgData.imageUrl}" class="chat-image" title="Click to view full size" onclick="window.open('${msgData.imageUrl}', '_blank')" />`;
@@ -473,7 +609,8 @@
                         wrapperDiv.appendChild(metaDiv);
                     }
 
-                    chatBox.appendChild(wrapperDiv);
+                    rowDiv.appendChild(wrapperDiv);
+                    chatBox.appendChild(rowDiv);
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
@@ -487,7 +624,13 @@
             input.value = ""; 
 
             const folder = activeChatType === 'dm' ? "chats" : "group_chats";
-            const newMessage = { text: text, senderId: currentUser.uid, senderName: currentUserData.name, timestamp: serverTimestamp() };
+            const newMessage = { 
+                text: text, 
+                senderId: currentUser.uid, 
+                senderName: currentUserData.name,
+                senderPhotoURL: currentUserData.photoURL || getDefaultAvatar(currentUserData.name), // Save avatar ref
+                timestamp: serverTimestamp() 
+            };
             if (activeChatType === 'dm') { newMessage.read = false; }
 
             try { await addDoc(collection(db, folder, activeChatId, "messages"), newMessage); } 
@@ -496,59 +639,151 @@
 
         window.handleEnter = (e) => { if (e.key === 'Enter') sendMessage(); };
 
-        // --- NEW: UPLOADING & SENDING IMAGES ---
+        // --- UPLOADING & SENDING IMAGES ---
         window.handleImageUpload = async (event) => {
             const file = event.target.files[0];
             if (!file || !activeChatId) return;
-
-            // Reset the input so they can upload the same file again later if they want
             document.getElementById('image-upload').value = "";
             
-            // Show the progress text
             const progressDiv = document.getElementById('upload-progress');
             progressDiv.style.display = 'block';
             progressDiv.innerText = `Uploading image: 0%`;
 
-            // Create a unique name for the file using the current timestamp
             const uniqueFileName = `${Date.now()}_${file.name}`;
             const storageRef = ref(storage, `chat_images/${uniqueFileName}`);
-            
-            // Start the upload
             const uploadTask = uploadBytesResumable(storageRef, file);
 
             uploadTask.on('state_changed', 
                 (snapshot) => {
-                    // Calculate and update progress percentage
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     progressDiv.innerText = `Uploading image: ${Math.round(progress)}%`;
                 }, 
-                (error) => {
-                    console.error("Upload failed", error);
-                    progressDiv.innerText = "Upload failed!";
-                    setTimeout(() => progressDiv.style.display = 'none', 3000);
-                }, 
+                (error) => { console.error("Upload failed", error); progressDiv.innerText = "Upload failed!"; setTimeout(() => progressDiv.style.display = 'none', 3000); }, 
                 async () => {
-                    // Upload completed successfully! Get the URL
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     progressDiv.style.display = 'none';
                     
-                    // Create the message object, just like a text message, but with the imageUrl attached
                     const folder = activeChatType === 'dm' ? "chats" : "group_chats";
                     const newMessage = {
-                        text: "📷 Sent an image", // Fallback text just in case
+                        text: "📷 Sent an image",
                         imageUrl: downloadURL,
                         senderId: currentUser.uid,
                         senderName: currentUserData.name, 
+                        senderPhotoURL: currentUserData.photoURL || getDefaultAvatar(currentUserData.name),
                         timestamp: serverTimestamp()
                     };
 
                     if (activeChatType === 'dm') { newMessage.read = false; }
-                    
-                    // Save to Firestore
                     await addDoc(collection(db, folder, activeChatId, "messages"), newMessage);
                 }
             );
         };
+
+        // --- VIDEO CALLING LOGIC (AGORA + FIRESTORE RINGING) ---
+        const APP_ID = "662c5c9b2e39473f9cc6dd9661410875"; 
+        let rtcClient = null;
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let incomingCallListener = null;
+
+        function listenForCalls() {
+            if (incomingCallListener) incomingCallListener();
+            
+            incomingCallListener = onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.incomingCall) {
+                        document.getElementById('incoming-call-modal').style.display = 'flex';
+                        document.getElementById('caller-name-display').innerText = `${data.incomingCall.callerName} is calling...`;
+                        
+                        window.pendingCallChatId = data.incomingCall.chatId;
+                        window.pendingCallerId = data.incomingCall.callerId;
+                        window.pendingCallerName = data.incomingCall.callerName;
+                    } else {
+                        document.getElementById('incoming-call-modal').style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        window.startCall = async () => {
+            if (!activeChatId) return alert("Select a chat first!");
+            const targetUid = activeChatId.replace(currentUser.uid, '').replace('_', '');
+
+            if (activeChatType === 'dm') {
+                await updateDoc(doc(db, "users", targetUid), {
+                    incomingCall: { callerId: currentUser.uid, callerName: currentUserData.name, chatId: activeChatId }
+                });
+            }
+
+            document.getElementById('video-modal').style.display = 'flex';
+            document.getElementById('video-title').innerText = `Calling...`;
+            await connectToAgora(activeChatId);
+        };
+
+        window.acceptCall = async () => {
+            await updateDoc(doc(db, "users", currentUser.uid), { incomingCall: null });
+            document.getElementById('incoming-call-modal').style.display = 'none';
+
+            openChat('dm', window.pendingCallerId, window.pendingCallerName);
+
+            document.getElementById('video-modal').style.display = 'flex';
+            document.getElementById('video-title').innerText = `Secure Comms Linked`;
+            await connectToAgora(window.pendingCallChatId);
+        };
+
+        window.declineCall = async () => {
+            await updateDoc(doc(db, "users", currentUser.uid), { incomingCall: null });
+            document.getElementById('incoming-call-modal').style.display = 'none';
+        };
+
+        window.endCall = async () => {
+            if (localAudioTrack) { localAudioTrack.close(); }
+            if (localVideoTrack) { localVideoTrack.close(); }
+            if (rtcClient) { await rtcClient.leave(); }
+            
+            document.getElementById('video-modal').style.display = 'none';
+            document.getElementById('local-player').innerHTML = "";
+            document.getElementById('remote-player').innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Waiting for citizen to join...</div>`;
+
+            if (activeChatType === 'dm' && activeChatId) {
+                const targetUid = activeChatId.replace(currentUser.uid, '').replace('_', '');
+                try { await updateDoc(doc(db, "users", targetUid), { incomingCall: null }); } catch(e) { }
+            }
+        };
+
+        async function connectToAgora(channelId) {
+            rtcClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+            rtcClient.on("user-published", async (user, mediaType) => {
+                await rtcClient.subscribe(user, mediaType);
+                document.getElementById('video-title').innerText = `Secure Comms Linked`;
+                
+                if (mediaType === "video") {
+                    const remotePlayer = document.getElementById("remote-player");
+                    remotePlayer.innerHTML = ""; 
+                    user.videoTrack.play(remotePlayer);
+                }
+                if (mediaType === "audio") { user.audioTrack.play(); }
+            });
+
+            rtcClient.on("user-unpublished", (user) => {
+                document.getElementById("remote-player").innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Citizen disconnected.</div>`;
+            });
+
+            try {
+                await rtcClient.join(APP_ID, channelId, null, currentUser.uid);
+                localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+                
+                localVideoTrack.play(document.getElementById("local-player"));
+                await rtcClient.publish([localAudioTrack, localVideoTrack]);
+            } catch (error) {
+                console.error("Agora Error:", error);
+                alert("Camera/Mic access denied or connection failed.");
+                endCall();
+            }
+        }
     </script>
 </body>
 </html>
