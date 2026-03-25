@@ -45,8 +45,7 @@
         .id-badge { 
             display: inline-block; background: rgba(129, 140, 248, 0.15); color: var(--primary); 
             padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; 
-            margin-bottom: 12px; border: 1px solid rgba(129, 140, 248, 0.3);
-            cursor: pointer; transition: 0.2s;
+            margin-bottom: 12px; border: 1px solid rgba(129, 140, 248, 0.3); cursor: pointer; transition: 0.2s;
         }
         .id-badge:hover { background: rgba(129, 140, 248, 0.25); }
 
@@ -61,7 +60,6 @@
         .btn-add:hover { background: #d97706; }
 
         .sidebar-scroll-area { flex: 1; overflow-y: auto; padding: 0 12px; }
-        
         .section-title { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 10px 12px 5px; font-weight: 700; }
 
         .contact-item {
@@ -71,18 +69,10 @@
         .contact-item:hover { background: rgba(255, 255, 255, 0.05); }
         .contact-item.active { background: rgba(129, 140, 248, 0.15); border-color: rgba(129, 140, 248, 0.3); }
         
-        /* NEW: Status Dot and Unread Badge */
-        .status-dot {
-            height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
-            transition: background-color 0.3s;
-        }
-        .unread-badge {
-            background: var(--danger); color: white; font-size: 0.75rem; font-weight: 700;
-            padding: 2px 8px; border-radius: 12px; display: none; margin-left: auto;
-        }
-
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; transition: background-color 0.3s; }
+        .unread-badge { background: var(--danger); color: white; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; display: none; margin-left: auto; }
         .contact-name { font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center;}
-        .contact-sub { font-size: 0.75rem; color: var(--text-muted); padding-left: 14px; } /* Indented to align with text past the dot */
+        .contact-sub { font-size: 0.75rem; color: var(--text-muted); padding-left: 14px; }
 
         /* --- CHAT AREA --- */
         .chat-main {
@@ -92,8 +82,7 @@
 
         .chat-header {
             padding: 20px 24px; border-bottom: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
-            font-weight: 700; font-size: 1.1rem;
-            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 700; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;
         }
 
         .btn-remove {
@@ -109,26 +98,36 @@
         .msg-wrapper.them { align-self: flex-start; align-items: flex-start; }
 
         .sender-name { font-size: 0.7rem; color: var(--text-muted); padding: 0 4px; font-weight: 600; text-transform: uppercase; }
-        .message { padding: 12px 16px; border-radius: 12px; line-height: 1.5; font-size: 0.95rem; }
+        .message { padding: 12px 16px; border-radius: 12px; line-height: 1.5; font-size: 0.95rem; word-break: break-word; }
         .message.system { background: transparent; color: var(--text-muted); align-self: center; text-align: center; font-style: italic; font-size: 0.85rem; max-width: 100%;}
         .message.them { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.15); border-bottom-left-radius: 4px;}
         .message.me { background: var(--primary); color: #020617; font-weight: 500; border-bottom-right-radius: 4px; }
         
+        /* NEW: Image Styles for the chat bubbles */
+        .chat-image { max-width: 100%; max-height: 300px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.2); }
+        .chat-image:hover { opacity: 0.8; }
+        .message.image-msg { padding: 4px; background: transparent; border: none; }
+
         .msg-meta { font-size: 0.7rem; color: var(--text-muted); padding: 0 4px; font-weight: 600; }
         .status-read { color: var(--primary); }
 
-        .input-area { padding: 20px; border-top: 1px solid var(--card-border); display: flex; gap: 12px; background: rgba(0,0,0,0.2); }
-        .input-area input { flex: 1; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); border-radius: 10px; color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; transition: 0.2s;}
-        .input-area input:focus { border-color: var(--primary); }
-        .input-area button { padding: 0 24px; background: var(--primary); color: #020617; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit;}
-        .input-area button:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
-        .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Updated Input Area with Upload Button */
+        .input-container { display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border-top: 1px solid var(--card-border); }
+        #upload-progress { display: none; padding: 10px 20px 0; color: var(--primary); font-size: 0.8rem; font-weight: 700; font-style: italic; }
+        .input-area { padding: 15px 20px 20px; display: flex; gap: 12px; }
+        
+        .btn-upload { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 10px; padding: 0 15px; font-size: 1.2rem; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .btn-upload:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+        .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .input-area input[type="text"] { flex: 1; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); border-radius: 10px; color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; transition: 0.2s;}
+        .input-area input[type="text"]:focus { border-color: var(--primary); }
+        .input-area button.btn-send { padding: 0 24px; background: var(--primary); color: #020617; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit;}
+        .input-area button.btn-send:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
+        .input-area button.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* --- MODAL --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: #0f172a; border: 1px solid var(--card-border); padding: 30px; border-radius: 20px; width: 400px; display: flex; flex-direction: column; }
         .modal h2 { margin-bottom: 20px; font-size: 1.5rem; }
         .modal input[type="text"] { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; color: white; outline: none; transition: 0.2s; }
@@ -164,14 +163,10 @@
             
             <div class="sidebar-scroll-area">
                 <div class="section-title">Your Groups</div>
-                <div id="groups-list">
-                    <div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">Loading groups...</div>
-                </div>
+                <div id="groups-list"><div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">Loading groups...</div></div>
 
                 <div class="section-title" style="margin-top: 15px;">Direct Messages</div>
-                <div id="dm-list">
-                    <div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No contacts yet. Add someone!</div>
-                </div>
+                <div id="dm-list"><div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No contacts yet. Add someone!</div></div>
             </div>
         </div>
 
@@ -180,9 +175,17 @@
             <div id="chat-box">
                 <div class="message system">Select a citizen or group from the sidebar.</div>
             </div>
-            <div class="input-area">
-                <input type="text" id="message-input" placeholder="Type a message..." disabled onkeypress="handleEnter(event)">
-                <button id="send-btn" onclick="sendMessage()" disabled>Send</button>
+            
+            <div class="input-container">
+                <div id="upload-progress">Uploading image: 0%</div>
+                <div class="input-area">
+                    <input type="file" id="image-upload" accept="image/png, image/jpeg, image/gif" style="display: none;" onchange="handleImageUpload(event)">
+                    
+                    <button id="upload-btn" class="btn-upload" title="Send an image" onclick="document.getElementById('image-upload').click()" disabled>📷</button>
+                    
+                    <input type="text" id="message-input" placeholder="Type a message..." disabled onkeypress="handleEnter(event)">
+                    <button id="send-btn" class="btn-send" onclick="sendMessage()" disabled>Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -215,6 +218,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // NEW: Import Firebase Storage modules
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
@@ -229,50 +235,39 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // NEW: Initialize Storage
+        const storage = getStorage(app);
 
         let currentUser = null;
         let currentUserData = null;
-        
         let activeChatType = null; 
         let activeChatId = null;   
         let unsubscribeChat = null; 
-        
-        // Array to keep track of our live listeners so we don't create duplicates
         let contactListeners = []; 
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.href = "index.html"; } 
             else {
                 currentUser = user;
-                
-                // NEW: Set the user's status to Online in the database when they log in
                 await updateDoc(doc(db, "users", user.uid), { isOnline: true });
-
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
                         currentUserData = docSnap.data();
-                        
                         if (!currentUserData.commsId) {
                             const newCommsId = Math.floor(100000 + Math.random() * 900000).toString();
-                            await updateDoc(doc(db, "users", user.uid), {
-                                commsId: newCommsId,
-                                contacts: []
-                            });
+                            await updateDoc(doc(db, "users", user.uid), { commsId: newCommsId, contacts: [] });
                             currentUserData.commsId = newCommsId;
                             currentUserData.contacts = [];
                         }
-
                         document.getElementById('my-comms-id').innerText = currentUserData.commsId;
-
-                        loadMyContacts();
-                        loadMyGroups(); 
+                        loadMyContacts(); loadMyGroups(); 
                     }
                 } catch (error) { console.error(error); }
             }
         });
 
-        // NEW: Attempt to set user Offline when they close the tab
         window.addEventListener("beforeunload", () => {
             if (currentUser) { updateDoc(doc(db, "users", currentUser.uid), { isOnline: false }); }
         });
@@ -286,7 +281,6 @@
         window.copyMyId = () => {
             const idText = document.getElementById('my-comms-id').innerText;
             if(idText === "Loading..." || idText === "Copied!") return;
-            
             navigator.clipboard.writeText(idText).then(() => {
                 const badge = document.getElementById('my-comms-id');
                 badge.innerText = "Copied!";
@@ -294,141 +288,84 @@
             });
         };
 
-        // --- ADD CITIZEN MODAL ---
-        window.openAddCitizenModal = () => {
-            document.getElementById('add-citizen-modal').style.display = 'flex';
-            document.getElementById('search-citizen-id').value = '';
-            document.getElementById('add-citizen-error').style.display = 'none';
-        };
-
-        window.closeAddCitizenModal = () => {
-            document.getElementById('add-citizen-modal').style.display = 'none';
-        };
-
+        // --- ADD / REMOVE CITIZEN (Unchanged) ---
+        window.openAddCitizenModal = () => { document.getElementById('add-citizen-modal').style.display = 'flex'; document.getElementById('search-citizen-id').value = ''; document.getElementById('add-citizen-error').style.display = 'none'; };
+        window.closeAddCitizenModal = () => { document.getElementById('add-citizen-modal').style.display = 'none'; };
         window.processAddCitizen = async () => {
             const searchId = document.getElementById('search-citizen-id').value.trim();
             const errorDiv = document.getElementById('add-citizen-error');
-            
             if (!searchId) { errorDiv.innerText = "Please enter an ID."; errorDiv.style.display = 'block'; return; }
-
             try {
                 const q = query(collection(db, "users"), where("commsId", "==", searchId));
                 const querySnapshot = await getDocs(q);
-
                 if (querySnapshot.empty) { errorDiv.innerText = "No citizen found with that Comms ID!"; errorDiv.style.display = 'block'; return; }
-
                 const foundUserDoc = querySnapshot.docs[0];
                 const newFriendUid = foundUserDoc.id;
                 const newFriendName = foundUserDoc.data().name;
-
                 if (newFriendUid === currentUser.uid) { errorDiv.innerText = "You cannot add yourself!"; errorDiv.style.display = 'block'; return; }
                 if (currentUserData.contacts.includes(newFriendUid)) { errorDiv.innerText = "This citizen is already in your comms!"; errorDiv.style.display = 'block'; return; }
-
                 await updateDoc(doc(db, "users", currentUser.uid), { contacts: arrayUnion(newFriendUid) });
                 await updateDoc(doc(db, "users", newFriendUid), { contacts: arrayUnion(currentUser.uid) });
-
                 currentUserData.contacts.push(newFriendUid);
-                loadMyContacts(); 
-                closeAddCitizenModal();
-                
+                loadMyContacts(); closeAddCitizenModal();
                 document.getElementById('chat-header').innerHTML = `<div><span style="color: var(--primary);">Success! Added ${newFriendName}.</span></div>`;
-
             } catch (error) { console.error(error); errorDiv.innerText = "Database error. Please try again."; errorDiv.style.display = 'block'; }
         };
 
-        // --- REMOVE CONTACT ---
         window.removeContact = async (targetUid, displayName) => {
             if (!confirm(`Are you sure you want to severe comms with ${displayName}?`)) return;
-
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), { contacts: arrayRemove(targetUid) });
                 await updateDoc(doc(db, "users", targetUid), { contacts: arrayRemove(currentUser.uid) });
-
                 currentUserData.contacts = currentUserData.contacts.filter(id => id !== targetUid);
                 loadMyContacts();
-
                 if (activeChatType === 'dm' && activeChatId.includes(targetUid)) {
                     document.getElementById('chat-header').innerHTML = "<div>Select a chat to begin</div>";
                     document.getElementById('chat-box').innerHTML = `<div class="message system">Citizen removed. Select a new chat from the sidebar.</div>`;
                     document.getElementById('message-input').disabled = true;
                     document.getElementById('send-btn').disabled = true;
+                    document.getElementById('upload-btn').disabled = true;
                     activeChatId = null;
                     if (unsubscribeChat) unsubscribeChat();
                 }
             } catch (error) { console.error(error); alert("Failed to remove citizen from comms."); }
         };
 
-        // --- LOAD DATA (UPDATED WITH LIVE LISTENERS) ---
+        // --- LOAD DATA ---
         function loadMyContacts() {
             const dmList = document.getElementById('dm-list');
             const checklist = document.getElementById('citizen-checklist');
-            
-            // Clean up old listeners before reloading to avoid glitches
-            contactListeners.forEach(unsub => unsub());
-            contactListeners = [];
-            
+            contactListeners.forEach(unsub => unsub()); contactListeners = [];
             dmList.innerHTML = ""; checklist.innerHTML = ""; 
-            
             if (!currentUserData.contacts || currentUserData.contacts.length === 0) {
                 dmList.innerHTML = `<div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No contacts yet. Add someone!</div>`;
                 return;
             }
-
             currentUserData.contacts.forEach(friendUid => {
-                // 1. LIVE PRESENCE LISTENER: Updates their name and green dot instantly
                 const unsubPresence = onSnapshot(doc(db, "users", friendUid), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         const isOnlineColor = data.isOnline ? 'var(--success)' : 'var(--text-muted)';
-                        
                         let dmDiv = document.getElementById(`dm-${friendUid}`);
-                        
-                        // If the div doesn't exist yet, build it
                         if (!dmDiv) {
-                            dmDiv = document.createElement('div');
-                            dmDiv.className = 'contact-item';
-                            dmDiv.id = `dm-${friendUid}`;
+                            dmDiv = document.createElement('div'); dmDiv.className = 'contact-item'; dmDiv.id = `dm-${friendUid}`;
                             dmDiv.onclick = () => openChat('dm', friendUid, data.name);
                             dmList.appendChild(dmDiv);
-
-                            // Add to modal checklist
-                            const label = document.createElement('label');
-                            label.className = 'checklist-item';
+                            const label = document.createElement('label'); label.className = 'checklist-item';
                             label.innerHTML = `<input type="checkbox" class="citizen-checkbox" value="${friendUid}"><span>${data.name}</span>`;
                             checklist.appendChild(label);
                         }
-
-                        // Re-inject the HTML to update the dot color
-                        dmDiv.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <div>
-                                    <div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div>
-                                    <div class="contact-sub">${data.rank}</div>
-                                </div>
-                                <div class="unread-badge" id="badge-${friendUid}"></div>
-                            </div>
-                        `;
-
-                        // Keep it highlighted if we are currently talking to them
+                        dmDiv.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div><div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div><div class="contact-sub">${data.rank}</div></div><div class="unread-badge" id="badge-${friendUid}"></div></div>`;
                         if(activeChatId && activeChatId.includes(friendUid)) { dmDiv.classList.add('active'); }
                     }
                 });
                 contactListeners.push(unsubPresence);
 
-                // 2. UNREAD MESSAGE LISTENER: Watches for messages sent BY them to YOU that are NOT read
                 const chatId = currentUser.uid < friendUid ? `${currentUser.uid}_${friendUid}` : `${friendUid}_${currentUser.uid}`;
                 const unreadQ = query(collection(db, "chats", chatId, "messages"), where("senderId", "==", friendUid), where("read", "==", false));
-                
                 const unsubUnread = onSnapshot(unreadQ, (snapshot) => {
                     const badge = document.getElementById(`badge-${friendUid}`);
-                    if (badge) {
-                        if (snapshot.size > 0) {
-                            badge.innerText = snapshot.size;
-                            badge.style.display = 'block';
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                    }
+                    if (badge) { if (snapshot.size > 0) { badge.innerText = snapshot.size; badge.style.display = 'block'; } else { badge.style.display = 'none'; } }
                 });
                 contactListeners.push(unsubUnread);
             });
@@ -437,19 +374,13 @@
         function loadMyGroups() {
             const groupsList = document.getElementById('groups-list');
             const q = query(collection(db, "group_chats"), where("members", "array-contains", currentUser.uid));
-            
             onSnapshot(q, (snapshot) => {
                 groupsList.innerHTML = ""; 
-                if (snapshot.empty) {
-                    groupsList.innerHTML = `<div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No groups yet.</div>`;
-                    return;
-                }
+                if (snapshot.empty) { groupsList.innerHTML = `<div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No groups yet.</div>`; return; }
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const groupId = docSnap.id;
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'contact-item';
-                    groupDiv.id = `group-${groupId}`;
+                    const groupDiv = document.createElement('div'); groupDiv.className = 'contact-item'; groupDiv.id = `group-${groupId}`;
                     groupDiv.innerHTML = `<div class="contact-name">${data.name}</div><div class="contact-sub">${data.members.length} Members</div>`;
                     groupDiv.onclick = () => openChat('group', groupId, data.name);
                     groupsList.appendChild(groupDiv);
@@ -457,27 +388,15 @@
             });
         }
 
-        // --- GROUP MODAL ---
         window.openModal = () => document.getElementById('group-modal').style.display = 'flex';
-        window.closeModal = () => {
-            document.getElementById('group-modal').style.display = 'none';
-            document.getElementById('new-group-name').value = '';
-            document.querySelectorAll('.citizen-checkbox').forEach(cb => cb.checked = false);
-        };
-
+        window.closeModal = () => { document.getElementById('group-modal').style.display = 'none'; document.getElementById('new-group-name').value = ''; document.querySelectorAll('.citizen-checkbox').forEach(cb => cb.checked = false); };
         window.createGroup = async () => {
             const nameInput = document.getElementById('new-group-name').value.trim();
             if (!nameInput) return alert("Please enter a group name!");
             const members = [currentUser.uid]; 
             document.querySelectorAll('.citizen-checkbox:checked').forEach(box => members.push(box.value));
             if (members.length < 2) return alert("Select at least one other citizen!");
-
-            try {
-                await addDoc(collection(db, "group_chats"), {
-                    name: nameInput, members: members, createdAt: serverTimestamp(), createdBy: currentUser.uid
-                });
-                closeModal();
-            } catch (error) { console.error(error); }
+            try { await addDoc(collection(db, "group_chats"), { name: nameInput, members: members, createdAt: serverTimestamp(), createdBy: currentUser.uid }); closeModal(); } catch (error) { console.error(error); }
         };
 
         // --- OPENING A CHAT ---
@@ -486,22 +405,18 @@
             document.getElementById(`${type}-${targetId}`).classList.add('active');
             
             const prefix = type === 'dm' ? "Messaging" : "Group:";
-            
             let headerHTML = `<div>${prefix} <strong>${displayName}</strong></div>`;
-            if (type === 'dm') {
-                headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove Citizen</button>`;
-            }
+            if (type === 'dm') { headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove Citizen</button>`; }
             document.getElementById('chat-header').innerHTML = headerHTML;
             
+            // Enable all inputs!
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
+            document.getElementById('upload-btn').disabled = false; // Enable camera button
             document.getElementById('message-input').focus();
 
             activeChatType = type;
-            activeChatId = type === 'dm' 
-                ? (currentUser.uid < targetId ? `${currentUser.uid}_${targetId}` : `${targetId}_${currentUser.uid}`)
-                : targetId;
-
+            activeChatId = type === 'dm' ? (currentUser.uid < targetId ? `${currentUser.uid}_${targetId}` : `${targetId}_${currentUser.uid}`) : targetId;
             listenForMessages();
         };
 
@@ -516,55 +431,45 @@
 
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatBox.innerHTML = ""; 
-                if(snapshot.empty) {
-                    chatBox.innerHTML = `<div class="message system">Send a message to start the conversation.</div>`;
-                    return;
-                }
+                if(snapshot.empty) { chatBox.innerHTML = `<div class="message system">Send a message to start the conversation.</div>`; return; }
 
                 snapshot.forEach((docSnap) => {
                     const msgData = docSnap.data();
                     const msgId = docSnap.id;
                     const isMe = msgData.senderId === currentUser.uid;
 
-                    // If it's a DM, you aren't the sender, and it's unread... MARK IT READ
-                    // (This automatically makes your new Unread Badge disappear!)
-                    if (!isMe && activeChatType === 'dm' && msgData.read === false) {
-                        updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true });
-                    }
+                    if (!isMe && activeChatType === 'dm' && msgData.read === false) { updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true }); }
 
                     let timeString = "Sending...";
-                    if (msgData.timestamp) {
-                        timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    }
+                    if (msgData.timestamp) { timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
 
                     const wrapperDiv = document.createElement('div');
                     wrapperDiv.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
                     
                     if (!isMe && activeChatType === 'group') {
-                        const nameDiv = document.createElement('div');
-                        nameDiv.className = 'sender-name';
-                        nameDiv.innerText = `${msgData.senderName || "Citizen"} • ${timeString}`;
-                        wrapperDiv.appendChild(nameDiv);
+                        const nameDiv = document.createElement('div'); nameDiv.className = 'sender-name';
+                        nameDiv.innerText = `${msgData.senderName || "Citizen"} • ${timeString}`; wrapperDiv.appendChild(nameDiv);
                     } else if (!isMe && activeChatType === 'dm') {
-                        const timeDiv = document.createElement('div');
-                        timeDiv.className = 'sender-name';
-                        timeDiv.innerText = timeString;
-                        wrapperDiv.appendChild(timeDiv);
+                        const timeDiv = document.createElement('div'); timeDiv.className = 'sender-name';
+                        timeDiv.innerText = timeString; wrapperDiv.appendChild(timeDiv);
                     }
 
                     const bubbleDiv = document.createElement('div');
                     bubbleDiv.className = `message ${isMe ? 'me' : 'them'}`;
-                    bubbleDiv.innerText = msgData.text; 
+                    
+                    // NEW: Check if the message contains an Image URL
+                    if (msgData.imageUrl) {
+                        bubbleDiv.classList.add('image-msg');
+                        bubbleDiv.innerHTML = `<img src="${msgData.imageUrl}" class="chat-image" title="Click to view full size" onclick="window.open('${msgData.imageUrl}', '_blank')" />`;
+                    } else {
+                        bubbleDiv.innerText = msgData.text; 
+                    }
                     wrapperDiv.appendChild(bubbleDiv);
 
                     if (isMe) {
-                        const metaDiv = document.createElement('div');
-                        metaDiv.className = 'msg-meta';
-                        if (activeChatType === 'dm') {
-                            metaDiv.innerHTML = `${timeString} • ` + (msgData.read ? `<span class="status-read">Read</span>` : `Delivered`);
-                        } else {
-                            metaDiv.innerHTML = timeString;
-                        }
+                        const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
+                        if (activeChatType === 'dm') { metaDiv.innerHTML = `${timeString} • ` + (msgData.read ? `<span class="status-read">Read</span>` : `Delivered`); } 
+                        else { metaDiv.innerHTML = timeString; }
                         wrapperDiv.appendChild(metaDiv);
                     }
 
@@ -574,7 +479,7 @@
             });
         }
 
-        // --- SENDING MESSAGES ---
+        // --- SENDING TEXT MESSAGES ---
         window.sendMessage = async () => {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
@@ -582,24 +487,68 @@
             input.value = ""; 
 
             const folder = activeChatType === 'dm' ? "chats" : "group_chats";
-            
-            const newMessage = {
-                text: text,
-                senderId: currentUser.uid,
-                senderName: currentUserData.name, 
-                timestamp: serverTimestamp()
-            };
+            const newMessage = { text: text, senderId: currentUser.uid, senderName: currentUserData.name, timestamp: serverTimestamp() };
+            if (activeChatType === 'dm') { newMessage.read = false; }
 
-            if (activeChatType === 'dm') {
-                newMessage.read = false;
-            }
-
-            try {
-                await addDoc(collection(db, folder, activeChatId, "messages"), newMessage);
-            } catch (error) { console.error("Error sending message: ", error); }
+            try { await addDoc(collection(db, folder, activeChatId, "messages"), newMessage); } 
+            catch (error) { console.error("Error sending message: ", error); }
         };
 
         window.handleEnter = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+        // --- NEW: UPLOADING & SENDING IMAGES ---
+        window.handleImageUpload = async (event) => {
+            const file = event.target.files[0];
+            if (!file || !activeChatId) return;
+
+            // Reset the input so they can upload the same file again later if they want
+            document.getElementById('image-upload').value = "";
+            
+            // Show the progress text
+            const progressDiv = document.getElementById('upload-progress');
+            progressDiv.style.display = 'block';
+            progressDiv.innerText = `Uploading image: 0%`;
+
+            // Create a unique name for the file using the current timestamp
+            const uniqueFileName = `${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, `chat_images/${uniqueFileName}`);
+            
+            // Start the upload
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Calculate and update progress percentage
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progressDiv.innerText = `Uploading image: ${Math.round(progress)}%`;
+                }, 
+                (error) => {
+                    console.error("Upload failed", error);
+                    progressDiv.innerText = "Upload failed!";
+                    setTimeout(() => progressDiv.style.display = 'none', 3000);
+                }, 
+                async () => {
+                    // Upload completed successfully! Get the URL
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    progressDiv.style.display = 'none';
+                    
+                    // Create the message object, just like a text message, but with the imageUrl attached
+                    const folder = activeChatType === 'dm' ? "chats" : "group_chats";
+                    const newMessage = {
+                        text: "📷 Sent an image", // Fallback text just in case
+                        imageUrl: downloadURL,
+                        senderId: currentUser.uid,
+                        senderName: currentUserData.name, 
+                        timestamp: serverTimestamp()
+                    };
+
+                    if (activeChatType === 'dm') { newMessage.read = false; }
+                    
+                    // Save to Firestore
+                    await addDoc(collection(db, folder, activeChatId, "messages"), newMessage);
+                }
+            );
+        };
     </script>
 </body>
 </html>
