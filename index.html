@@ -67,7 +67,7 @@
         .portal-card {
             background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px;
             padding: 40px 32px; text-decoration: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column; backdrop-filter: blur(12px); position: relative; overflow: hidden;
+            display: flex; flex-direction: column; backdrop-filter: blur(12px); position: relative; overflow: hidden; color: var(--text-main);
         }
 
         .portal-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow); }
@@ -84,6 +84,16 @@
             nav { flex-direction: column; gap: 1.5rem; text-align: center; }
             .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
         }
+
+        /* Auth styling */
+        .auth-inputs { padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); color: white; outline: none;}
+        .auth-inputs:focus { border-color: var(--primary); }
+        .auth-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s;}
+        .btn-primary { background: var(--primary); color: #020617; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--card-border-hover); color: white; }
+        .btn-secondary:hover { background: var(--primary-glow); }
+        .btn-danger { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
@@ -100,10 +110,24 @@
 
     <header class="hero">
         <h1 id="greeting-title">Citizen Portal</h1>
-        <p>Your gateway to the legislative heart and economic pulse of the 8th Period realm.</p>
+        <p id="role-display">Log in to access kingdom resources.</p>
+        
+        <div id="auth-container" style="margin-top: 2rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <input type="email" id="email" class="auth-inputs" placeholder="Email">
+            <input type="password" id="password" class="auth-inputs" placeholder="Password">
+            <button onclick="handleSignUp()" class="auth-btn btn-primary" id="signup-btn">Sign Up</button>
+            <button onclick="handleLogin()" class="auth-btn btn-secondary" id="login-btn">Login</button>
+            <button id="logout-btn" onclick="handleLogout()" class="auth-btn btn-danger" style="display:none;">Logout</button>
+        </div>
     </header>
 
     <main class="container">
+        <div id="admin-panel" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); padding: 20px; border-radius: 24px; margin-bottom: 30px; text-align: center; animation: fadeIn 0.5s;">
+            <h3 style="color: var(--accent); margin-bottom: 10px;">🛠️ Web Team Control Panel</h3>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">You have permission to modify the realm's digital infrastructure.</p>
+            <button onclick="alert('Editing feature coming soon!')" class="auth-btn btn-primary">Edit Site Content</button>
+        </div>
+
         <div class="portal-grid">
             <a href="constitution.html" class="portal-card">
                 <div class="icon-circle">📜</div>
@@ -141,7 +165,128 @@
         &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
     </footer>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your exact config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
+            authDomain: "chatting-kingdom.firebaseapp.com",
+            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
+            projectId: "chatting-kingdom",
+            storageBucket: "chatting-kingdom.firebasestorage.app",
+            messagingSenderId: "159434733757",
+            appId: "1:159434733757:web:e86256ba72525c0830dfd4",
+            measurementId: "G-LWVS3N6RNK"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- Attach Auth Functions to Window so HTML buttons can use them ---
+        window.handleSignUp = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(!email || !pass) return alert("Please enter email and password.");
+            
+            try {
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                // Create the user profile in Firestore with default "citizen" role
+                await setDoc(doc(db, "users", res.user.uid), {
+                    email: email,
+                    role: "citizen"
+                });
+                alert("Welcome to the Kingdom! You are now a registered citizen.");
+            } catch (error) { 
+                alert(error.message); 
+            }
+        };
+
+        window.handleLogin = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(!email || !pass) return alert("Please enter email and password.");
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (error) { 
+                alert("Login failed: " + error.message); 
+            }
+        };
+
+        window.handleLogout = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error signing out: ", error);
+            }
+        };
+
+        // --- Listen for Login Status Changes ---
+        onAuthStateChanged(auth, async (user) => {
+            const adminPanel = document.getElementById('admin-panel');
+            const roleDisplay = document.getElementById('role-display');
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('password');
+            const loginBtn = document.getElementById('login-btn');
+            const signupBtn = document.getElementById('signup-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (user) {
+                // User is logged in
+                emailInput.style.display = "none";
+                passInput.style.display = "none";
+                loginBtn.style.display = "none";
+                signupBtn.style.display = "none";
+                logoutBtn.style.display = "inline-block";
+                
+                roleDisplay.textContent = "Loading your citizen profile...";
+
+                try {
+                    // Fetch role from Firestore
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        const role = userData.role || 'citizen';
+                        
+                        // Capitalize first letter of role
+                        const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
+                        roleDisplay.textContent = `Welcome! Recognized Status: ${displayRole}`;
+
+                        // Show admin panel if Web Team
+                        if (role === "web team") {
+                            adminPanel.style.display = "block";
+                        } else {
+                            adminPanel.style.display = "none";
+                        }
+                    } else {
+                        roleDisplay.textContent = "Citizen profile not found in records.";
+                    }
+                } catch (error) {
+                    console.error("Error fetching role: ", error);
+                    roleDisplay.textContent = "Error verifying kingdom status.";
+                }
+
+            } else {
+                // User is logged out
+                emailInput.style.display = "inline-block";
+                passInput.style.display = "inline-block";
+                loginBtn.style.display = "inline-block";
+                signupBtn.style.display = "inline-block";
+                logoutBtn.style.display = "none";
+                adminPanel.style.display = "none";
+                
+                emailInput.value = "";
+                passInput.value = "";
+                roleDisplay.textContent = "Log in to access kingdom resources.";
+            }
+        });
+
+        // Set current year in footer
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
