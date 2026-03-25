@@ -183,7 +183,7 @@
             
             <a href="news.html" class="portal-card">
                 <div class="icon-circle">📰</div>
-                <h2>News <span class="badge-new">NEW</span></h2>
+                <h2>News</h2>
                 <p class="editable-text" id="desc-news">Latest announcements, events, and decrees within the Kingdom.</p>
             </a>
 
@@ -201,7 +201,7 @@
 
             <a href="chat.html" class="portal-card protected-link">
                 <div class="icon-circle">💬</div>
-                <h2>Secure Chat 🔒</h2>
+                <h2>Secure Chat 🔒 <span class="badge-new">NEW</span></h2>
                 <p class="editable-text" id="desc-chat">Encrypted real-time communication. Connect with fellow citizens and officials.</p>
             </a>
 
@@ -255,7 +255,6 @@
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    // Inject saved text into the HTML if it exists in the database
                     if(data.news) document.getElementById('desc-news').innerText = data.news;
                     if(data.constitution) document.getElementById('desc-constitution').innerText = data.constitution;
                     if(data.ranks) document.getElementById('desc-ranks').innerText = data.ranks;
@@ -277,33 +276,25 @@
             const cards = document.querySelectorAll('.portal-card');
 
             if (window.isEditMode) {
-                // Turn ON Edit Mode
                 toggleBtn.innerText = "Cancel Editing";
                 toggleBtn.classList.replace('btn-primary', 'btn-secondary');
                 saveBtn.style.display = "inline-block";
                 
-                // Make paragraphs editable
                 editableTexts.forEach(el => el.setAttribute("contenteditable", "true"));
-                
-                // Stop cards from redirecting to other pages while editing
                 cards.forEach(card => card.addEventListener('click', preventLink));
                 alert("Edit Mode Active: Click on any card's text to type new descriptions!");
             } else {
-                // Cancel Editing - reload page to reset everything cleanly
                 window.location.reload();
             }
         };
 
-        function preventLink(e) {
-            e.preventDefault(); 
-        }
+        function preventLink(e) { e.preventDefault(); }
 
         window.saveContent = async () => {
             const saveBtn = document.getElementById('save-content-btn');
             saveBtn.innerText = "Saving...";
             
             try {
-                // Save all text directly to Firestore
                 await setDoc(doc(db, "site_content", "homepage_cards"), {
                     news: document.getElementById('desc-news').innerText,
                     constitution: document.getElementById('desc-constitution').innerText,
@@ -314,7 +305,7 @@
                 });
                 
                 alert("Success! The kingdom's portals have been updated.");
-                window.location.reload(); // Reload to turn off edit mode and show live results
+                window.location.reload(); 
             } catch(error) {
                 alert("Error saving: " + error.message);
                 saveBtn.innerText = "Save Changes to Database";
