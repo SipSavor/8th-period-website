@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Kingdom of 8th Period</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --bg-main: #020617;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main);
+            color: var(--text-main); margin: 0; min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+        }
+
+        nav {
+            background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(20px); padding: 1.25rem 5%;
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);
+        }
+        .nav-logo { font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
+        .nav-links a { color: var(--text-muted); text-decoration: none; margin-left: 2rem; font-weight: 600; }
+        .nav-links a:hover { color: var(--text-main); }
+
+        .container { max-width: 1000px; margin: 60px auto; padding: 0 24px; }
+        
+        h1 { color: var(--accent); margin-bottom: 10px; font-size: 2.5rem; }
+        p { color: var(--text-muted); margin-bottom: 40px; }
+
+        .admin-table-wrapper {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+            overflow: hidden; backdrop-filter: blur(12px);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(0,0,0,0.3); padding: 16px 24px; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 16px 24px; border-top: 1px solid var(--card-border); vertical-align: middle; }
+        
+        .user-name { font-weight: 700; color: var(--text-main); }
+        .user-email { font-size: 0.85rem; color: var(--text-muted); }
+
+        select {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: var(--text-main);
+            padding: 8px 12px; border-radius: 8px; font-family: inherit; outline: none; transition: 0.2s;
+        }
+        select:focus { border-color: var(--accent); }
+
+        .save-btn {
+            background: var(--card-border); color: var(--text-main); border: none; padding: 8px 16px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit;
+        }
+        .save-btn:hover { background: var(--accent); color: #000; }
+        .save-btn.success { background: #34d399; color: #000; }
+
+        .restricted-msg { text-align: center; margin-top: 100px; color: var(--danger); font-size: 1.5rem; display: none; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">Kingdom Admin</div>
+        <div class="nav-links">
+            <a href="index.html">Back to Portal</a>
+        </div>
+    </nav>
+
+    <div id="restricted-view" class="restricted-msg">
+        ⚠️ ACCESS DENIED. You do not have Web Team permissions.
+    </div>
+
+    <div id="admin-view" class="container" style="display: none;">
+        <h1>Citizen Management</h1>
+        <p>Update government ranks and system permissions for the realm.</p>
+
+        <div class="admin-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Citizen</th>
+                        <th>Government Rank</th>
+                        <th>System Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <tr><td colspan="4" style="text-align: center;">Loading citizens...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
+            authDomain: "chatting-kingdom.firebaseapp.com",
+            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
+            projectId: "chatting-kingdom",
+            storageBucket: "chatting-kingdom.firebasestorage.app",
+            messagingSenderId: "159434733757",
+            appId: "1:159434733757:web:e86256ba72525c0830dfd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check if user is Web Team
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists() && docSnap.data().role === "web team") {
+                    document.getElementById('admin-view').style.display = 'block';
+                    loadUsers();
+                } else {
+                    document.getElementById('restricted-view').style.display = 'block';
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        async function loadUsers() {
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = '';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const uid = docSnap.id;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <div class="user-name">${data.name || "Unknown"}</div>
+                            <div class="user-email">${data.email}</div>
+                        </td>
+                        <td>
+                            <select id="rank-${uid}">
+                                <option value="Peasant" ${data.rank === 'Peasant' ? 'selected' : ''}>Peasant</option>
+                                <option value="Merchant" ${data.rank === 'Merchant' ? 'selected' : ''}>Merchant</option>
+                                <option value="Knight" ${data.rank === 'Knight' ? 'selected' : ''}>Knight</option>
+                                <option value="Noble" ${data.rank === 'Noble' ? 'selected' : ''}>Noble</option>
+                                <option value="Monarch" ${data.rank === 'Monarch' ? 'selected' : ''}>Monarch</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="role-${uid}">
+                                <option value="citizen" ${data.role === 'citizen' ? 'selected' : ''}>Citizen</option>
+                                <option value="chancellor" ${data.role === 'chancellor' ? 'selected' : ''}>Chancellor</option>
+                                <option value="web team" ${data.role === 'web team' ? 'selected' : ''}>Web Team</option>
+                                <option value="banned" ${data.role === 'banned' ? 'selected' : ''}>🚫 Banned</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button id="btn-${uid}" class="save-btn" onclick="saveUser('${uid}')">Save</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error loading users: ", error);
+                tableBody.innerHTML = `<tr><td colspan="4" style="color:red;">Error loading directory. Check permissions.</td></tr>`;
+            }
+        }
+
+        // Global function to save updates
+        window.saveUser = async (uid) => {
+            const btn = document.getElementById(`btn-${uid}`);
+            const newRank = document.getElementById(`rank-${uid}`).value;
+            const newRole = document.getElementById(`role-${uid}`).value;
+
+            btn.innerText = "Saving...";
+            
+            try {
+                await updateDoc(doc(db, "users", uid), {
+                    rank: newRank,
+                    role: newRole
+                });
+                
+                btn.innerText = "Saved!";
+                btn.classList.add('success');
+                setTimeout(() => { 
+                    btn.innerText = "Save"; 
+                    btn.classList.remove('success');
+                }, 2000);
+
+            } catch (error) {
+                alert("Error saving: " + error.message);
+                btn.innerText = "Save";
+            }
+        };
+    </script>
+</body>
+</html>
