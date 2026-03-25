@@ -75,6 +75,8 @@
         .icon-circle { width: 64px; height: 64px; background: rgba(255, 255, 255, 0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; border: 1px solid var(--card-border); transition: 0.5s; }
         .portal-card:hover .icon-circle { background: var(--primary); color: #020617; transform: scale(1.1) rotate(-5deg); }
 
+        .badge-new { font-size: 0.45em; background: var(--danger); color: white; padding: 4px 8px; border-radius: 12px; vertical-align: middle; margin-left: 8px; font-weight: 800; letter-spacing: 1px;}
+
         footer { padding: 40px 20px 60px; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 2px; border-top: 1px solid var(--card-border); opacity: 0.7; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -85,7 +87,7 @@
             .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
         }
 
-        /* --- Buttons --- */
+        /* --- Buttons & Modal --- */
         .auth-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: #020617; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
@@ -93,8 +95,8 @@
         .btn-secondary:hover { background: var(--card-border-hover); border-color: var(--primary); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-save { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); display: none; margin-left: 10px;}
 
-        /* --- Modal Styling --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(10px);
@@ -111,20 +113,26 @@
         }
         .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        .close-modal {
-            position: absolute; top: 20px; right: 24px; font-size: 1.5rem;
-            color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s;
-        }
+        .close-modal { position: absolute; top: 20px; right: 24px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; }
         .close-modal:hover { color: var(--text-main); transform: rotate(90deg); }
 
         .auth-form { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
-        .auth-inputs { 
-            padding: 14px; border-radius: 12px; border: 1px solid var(--card-border); 
-            background: var(--card-bg); color: white; outline: none; font-family: inherit; font-size: 1rem;
-            transition: 0.2s;
-        }
+        .auth-inputs { padding: 14px; border-radius: 12px; border: 1px solid var(--card-border); background: var(--card-bg); color: white; outline: none; font-family: inherit; font-size: 1rem; transition: 0.2s; }
         .auth-inputs:focus { border-color: var(--primary); background: rgba(30, 41, 59, 0.8); }
 
+        /* Editing mode highlights */
+        .editable-text[contenteditable="true"] {
+            border: 1px dashed var(--accent);
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.5);
+            outline: none;
+            cursor: text;
+        }
+        .editable-text[contenteditable="true"]:focus {
+            border-style: solid;
+            background: rgba(30, 41, 59, 0.9);
+        }
     </style>
 </head>
 <body>
@@ -133,6 +141,7 @@
         <div class="nav-logo">Kingdom of 8th</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
+            <a href="news.html">News</a>
             <a href="constitution.html">Constitution</a>
             <a href="ranks.html">Ranks</a>
             <a href="chat.html" class="protected-link">Secure Chat 🔒</a>
@@ -166,38 +175,46 @@
         <div id="admin-panel" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); padding: 24px; border-radius: 24px; margin-bottom: 40px; text-align: center; animation: fadeIn 0.5s;">
             <h3 style="color: var(--accent); margin-bottom: 12px; font-size: 1.5rem;">🛠️ Web Team Control Panel</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px;">You have permission to modify the realm's digital infrastructure.</p>
-            <button onclick="alert('Editing feature coming soon!')" class="auth-btn btn-primary">Edit Site Content</button>
+            <button id="edit-toggle-btn" onclick="toggleEditMode()" class="auth-btn btn-primary">Edit Site Content</button>
+            <button id="save-content-btn" onclick="saveContent()" class="auth-btn btn-save">Save Changes to Database</button>
         </div>
 
-        <div class="portal-grid">
+        <div class="portal-grid" id="main-grid">
+            
+            <a href="news.html" class="portal-card">
+                <div class="icon-circle">📰</div>
+                <h2>News <span class="badge-new">NEW</span></h2>
+                <p class="editable-text" id="desc-news">Latest announcements, events, and decrees within the Kingdom.</p>
+            </a>
+
             <a href="constitution.html" class="portal-card">
                 <div class="icon-circle">📜</div>
                 <h2>Constitution</h2>
-                <p>The supreme law of the land. Understand your rights and the foundations of our society.</p>
+                <p class="editable-text" id="desc-constitution">The supreme law of the land. Understand your rights and the foundations of our society.</p>
             </a>
 
             <a href="ranks.html" class="portal-card">
                 <div class="icon-circle">🏛️</div>
                 <h2>Government</h2>
-                <p>Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
+                <p class="editable-text" id="desc-ranks">Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
             </a>
 
             <a href="chat.html" class="portal-card protected-link">
                 <div class="icon-circle">💬</div>
                 <h2>Secure Chat 🔒</h2>
-                <p>Encrypted real-time communication. Connect with fellow citizens and officials.</p>
+                <p class="editable-text" id="desc-chat">Encrypted real-time communication. Connect with fellow citizens and officials.</p>
             </a>
 
             <a href="economy.html" class="portal-card">
                 <div class="icon-circle">💰</div>
                 <h2>Economy</h2>
-                <p>Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
+                <p class="editable-text" id="desc-economy">Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
             </a>
 
             <a href="links.html" class="portal-card protected-link">
                 <div class="icon-circle">🔗</div>
                 <h2>Resources 🔒</h2>
-                <p>Essential voting forms, classroom portals, and external kingdom documents.</p>
+                <p class="editable-text" id="desc-links">Essential voting forms, classroom portals, and external kingdom documents.</p>
             </a>
         </div>
     </main>
@@ -226,18 +243,92 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Global Auth State ---
-        // We use this variable to check if the user is allowed to click protected links
+        // --- Global State ---
         window.isLoggedIn = false;
+        window.isEditMode = false;
+
+        // --- Fetch Database Content on Page Load ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const docRef = doc(db, "site_content", "homepage_cards");
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Inject saved text into the HTML if it exists in the database
+                    if(data.news) document.getElementById('desc-news').innerText = data.news;
+                    if(data.constitution) document.getElementById('desc-constitution').innerText = data.constitution;
+                    if(data.ranks) document.getElementById('desc-ranks').innerText = data.ranks;
+                    if(data.chat) document.getElementById('desc-chat').innerText = data.chat;
+                    if(data.economy) document.getElementById('desc-economy').innerText = data.economy;
+                    if(data.links) document.getElementById('desc-links').innerText = data.links;
+                }
+            } catch (error) {
+                console.log("No custom text found or error loading, using HTML defaults.", error);
+            }
+        });
+
+        // --- Web Team Editing Functions ---
+        window.toggleEditMode = () => {
+            window.isEditMode = !window.isEditMode;
+            const toggleBtn = document.getElementById('edit-toggle-btn');
+            const saveBtn = document.getElementById('save-content-btn');
+            const editableTexts = document.querySelectorAll('.editable-text');
+            const cards = document.querySelectorAll('.portal-card');
+
+            if (window.isEditMode) {
+                // Turn ON Edit Mode
+                toggleBtn.innerText = "Cancel Editing";
+                toggleBtn.classList.replace('btn-primary', 'btn-secondary');
+                saveBtn.style.display = "inline-block";
+                
+                // Make paragraphs editable
+                editableTexts.forEach(el => el.setAttribute("contenteditable", "true"));
+                
+                // Stop cards from redirecting to other pages while editing
+                cards.forEach(card => card.addEventListener('click', preventLink));
+                alert("Edit Mode Active: Click on any card's text to type new descriptions!");
+            } else {
+                // Cancel Editing - reload page to reset everything cleanly
+                window.location.reload();
+            }
+        };
+
+        function preventLink(e) {
+            e.preventDefault(); 
+        }
+
+        window.saveContent = async () => {
+            const saveBtn = document.getElementById('save-content-btn');
+            saveBtn.innerText = "Saving...";
+            
+            try {
+                // Save all text directly to Firestore
+                await setDoc(doc(db, "site_content", "homepage_cards"), {
+                    news: document.getElementById('desc-news').innerText,
+                    constitution: document.getElementById('desc-constitution').innerText,
+                    ranks: document.getElementById('desc-ranks').innerText,
+                    chat: document.getElementById('desc-chat').innerText,
+                    economy: document.getElementById('desc-economy').innerText,
+                    links: document.getElementById('desc-links').innerText
+                });
+                
+                alert("Success! The kingdom's portals have been updated.");
+                window.location.reload(); // Reload to turn off edit mode and show live results
+            } catch(error) {
+                alert("Error saving: " + error.message);
+                saveBtn.innerText = "Save Changes to Database";
+            }
+        };
 
         // --- Link Protection Logic ---
         const protectedLinks = document.querySelectorAll('.protected-link');
         protectedLinks.forEach(link => {
             link.addEventListener('click', function(event) {
                 if (!window.isLoggedIn) {
-                    event.preventDefault(); // Stop them from going to the page
+                    event.preventDefault(); 
                     alert("⚠️ Access Denied: You must log in to access this sector.");
-                    window.openModal(); // Automatically open the login box
+                    window.openModal(); 
                 }
             });
         });
@@ -245,12 +336,8 @@
         // --- Modal UI Controls ---
         window.openModal = () => document.getElementById('auth-modal').classList.add('active');
         window.closeModal = () => document.getElementById('auth-modal').classList.remove('active');
-        
         window.onclick = function(event) {
-            const modal = document.getElementById('auth-modal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            if (event.target === document.getElementById('auth-modal')) closeModal();
         }
 
         // --- Auth Functions ---
@@ -258,36 +345,26 @@
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             if(!email || !pass) return alert("Please enter email and password.");
-            
             try {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), {
-                    email: email,
-                    role: "citizen"
-                });
+                await setDoc(doc(db, "users", res.user.uid), { email: email, role: "citizen" });
                 alert("Welcome to the Kingdom! You are now a registered citizen.");
                 closeModal();
-            } catch (error) { 
-                alert(error.message); 
-            }
+            } catch (error) { alert(error.message); }
         };
 
         window.handleLogin = async () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             if(!email || !pass) return alert("Please enter email and password.");
-
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeModal();
-            } catch (error) { 
-                alert("Login failed: " + error.message); 
-            }
+            } catch (error) { alert("Login failed: " + error.message); }
         };
 
         window.handleLogout = async () => {
-            try { await signOut(auth); } 
-            catch (error) { console.error("Error signing out: ", error); }
+            try { await signOut(auth); } catch (error) { console.error("Error signing out: ", error); }
         };
 
         // --- Listen for Login Status Changes ---
@@ -298,7 +375,6 @@
             const logoutBtn = document.getElementById('logout-btn');
 
             if (user) {
-                // User is logged in
                 window.isLoggedIn = true; 
                 openAuthBtn.style.display = "none";
                 logoutBtn.style.display = "inline-block";
@@ -307,33 +383,22 @@
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
-                        const userData = docSnap.data();
-                        const role = userData.role || 'citizen';
-                        const displayRole = role.charAt(0).toUpperCase() + role.slice(1);
-                        
-                        roleDisplay.innerHTML = `Welcome back. Recognized Status: <strong style="color: var(--primary);">${displayRole}</strong>`;
-
-                        if (role === "web team") {
-                            adminPanel.style.display = "block";
-                        } else {
-                            adminPanel.style.display = "none";
-                        }
+                        const role = docSnap.data().role || 'citizen';
+                        roleDisplay.innerHTML = `Welcome back. Recognized Status: <strong style="color: var(--primary);">${role.toUpperCase()}</strong>`;
+                        if (role === "web team") adminPanel.style.display = "block";
+                        else adminPanel.style.display = "none";
                     } else {
                         roleDisplay.textContent = "Citizen profile not found in records.";
                     }
                 } catch (error) {
-                    console.error("Error fetching role: ", error);
                     roleDisplay.textContent = "Error verifying kingdom status.";
                 }
-
             } else {
-                // User is logged out
                 window.isLoggedIn = false;
                 openAuthBtn.style.display = "inline-block";
                 logoutBtn.style.display = "none";
                 adminPanel.style.display = "none";
                 roleDisplay.textContent = "Log in to access kingdom resources and secure communications.";
-                
                 document.getElementById('email').value = "";
                 document.getElementById('password').value = "";
             }
