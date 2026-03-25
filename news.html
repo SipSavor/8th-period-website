@@ -30,11 +30,7 @@
             --tag-green-border: rgba(52, 211, 153, 0.3);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -50,10 +46,8 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- ACCESSIBILITY --- */
         :focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 4px; }
 
-        /* --- NAVIGATION --- */
         nav {
             position: sticky; top: 0; z-index: 1000; background: rgba(2, 6, 23, 0.6);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -67,16 +61,14 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .nav-links { display: flex; gap: 2rem; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
         .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; transition: color 0.3s ease; }
         .nav-links a:hover { color: var(--text-main); }
 
-        /* --- HERO --- */
         .hero { text-align: center; padding: 100px 20px 60px; animation: slideUp 0.8s ease-out; }
         .hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); margin-bottom: 1rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(to right bottom, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero p { color: var(--text-muted); font-size: clamp(1rem, 4vw, 1.25rem); max-width: 600px; margin: 0 auto; font-weight: 400; }
 
-        /* --- NEWS CONTAINER --- */
         .news-container { max-width: 800px; margin: 0 auto 100px; padding: 0 24px; display: flex; flex-direction: column; gap: 24px; }
 
         .news-card {
@@ -97,7 +89,6 @@
         .news-card:nth-child(2) { animation-delay: 0.1s; }
         .news-card:nth-child(3) { animation-delay: 0.2s; }
 
-        /* --- BUTTONS & EDITING STYLES --- */
         .auth-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: #020617; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
@@ -109,13 +100,10 @@
         .editable-text[contenteditable="true"]:focus { border-style: solid; background: rgba(30, 41, 59, 0.9); }
         .news-tag.editable-text[contenteditable="true"] { width: auto; }
 
-        /* --- FOOTER --- */
         footer { padding: 40px 20px 60px; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 2px; border-top: 1px solid var(--card-border); opacity: 0.7; }
 
-        /* --- ANIMATIONS --- */
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
             nav { flex-direction: column; gap: 1.5rem; padding: 1.5rem; }
             .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
@@ -130,11 +118,13 @@
         <div class="nav-logo">Kingdom of 8th</div>
         <div class="nav-links">
             <a href="index.html">Home</a>
+            <a href="news.html">News</a>
             <a href="constitution.html">Constitution</a>
             <a href="ranks.html">Ranks</a>
+            <a href="chat.html">Secure Chat 🔒</a>
             <a href="economy.html">Economy</a>
-            <a href="news.html">News</a>
             <a href="links.html">Links</a>
+            <a href="admin.html" id="nav-admin-link" style="color: var(--accent); display: none;">Admin Panel</a>
         </div>
     </nav>
 
@@ -214,16 +204,21 @@
             }
         });
 
-        // --- Verify Web Team Status for Admin Panel ---
+        // --- Verify Web Team Status for Admin Panel & Nav Link ---
         onAuthStateChanged(auth, async (user) => {
             const adminPanel = document.getElementById('admin-panel');
+            const adminLink = document.getElementById('nav-admin-link');
+            
             if (user) {
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists() && docSnap.data().role === "web team") {
-                        adminPanel.style.display = "block";
+                        if (adminPanel) adminPanel.style.display = "block";
+                        if (adminLink) adminLink.style.display = "inline";
                     }
                 } catch (error) { console.error("Error verifying role"); }
+            } else {
+                if (adminLink) adminLink.style.display = "none";
             }
         });
 
