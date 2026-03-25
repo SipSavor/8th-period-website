@@ -41,7 +41,13 @@
         .sidebar-header { padding: 0 24px 16px; border-bottom: 1px solid var(--card-border); margin-bottom: 16px; }
         .sidebar-header h3 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px;}
         
-        .id-badge { display: inline-block; background: rgba(129, 140, 248, 0.15); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; border: 1px solid rgba(129, 140, 248, 0.3);}
+        .id-badge { 
+            display: inline-block; background: rgba(129, 140, 248, 0.15); color: var(--primary); 
+            padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; 
+            margin-bottom: 12px; border: 1px solid rgba(129, 140, 248, 0.3);
+            cursor: pointer; transition: 0.2s;
+        }
+        .id-badge:hover { background: rgba(129, 140, 248, 0.25); }
 
         .btn-new-group, .btn-add {
             width: 100%; color: #020617; border: none; padding: 10px;
@@ -75,7 +81,14 @@
         .chat-header {
             padding: 20px 24px; border-bottom: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
             font-weight: 700; font-size: 1.1rem;
+            display: flex; justify-content: space-between; align-items: center;
         }
+
+        .btn-remove {
+            background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-remove:hover { background: var(--danger); color: white; }
 
         #chat-box { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         
@@ -106,12 +119,14 @@
         }
         .modal { background: #0f172a; border: 1px solid var(--card-border); padding: 30px; border-radius: 20px; width: 400px; display: flex; flex-direction: column; }
         .modal h2 { margin-bottom: 20px; font-size: 1.5rem; }
-        .modal input[type="text"] { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; color: white; }
+        .modal input[type="text"] { width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; color: white; outline: none; transition: 0.2s; }
+        .modal input[type="text"]:focus { border-color: var(--primary); }
         .citizen-checklist { flex: 1; overflow-y: auto; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.2); max-height: 200px; }
         .checklist-item { display: flex; align-items: center; gap: 10px; padding: 8px; cursor: pointer; }
         .checklist-item:hover { background: rgba(255,255,255,0.05); border-radius: 5px;}
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-        .btn-cancel { background: transparent; color: white; border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 8px; cursor: pointer;}
+        .btn-cancel { background: transparent; color: white; border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -130,8 +145,8 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h3>Your Comms</h3>
-                <div class="id-badge">My ID: <span id="my-comms-id">Loading...</span></div>
-                <button class="btn-add" onclick="addContactByNumber()">+ Add Citizen</button>
+                <div class="id-badge" onclick="copyMyId()" title="Click to copy">My ID: <span id="my-comms-id">Loading...</span></div>
+                <button class="btn-add" onclick="openAddCitizenModal()">+ Add Citizen</button>
                 <button class="btn-new-group" onclick="openModal()">+ Create Group</button>
             </div>
             
@@ -149,7 +164,7 @@
         </div>
 
         <div class="chat-main">
-            <div class="chat-header" id="chat-header">Select a chat to begin</div>
+            <div class="chat-header" id="chat-header"><div>Select a chat to begin</div></div>
             <div id="chat-box">
                 <div class="message system">Select a citizen or group from the sidebar.</div>
             </div>
@@ -172,11 +187,23 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="add-citizen-modal">
+        <div class="modal">
+            <h2>Add Citizen</h2>
+            <input type="text" id="search-citizen-id" placeholder="Enter 6-digit Comms ID" maxlength="6">
+            <div id="add-citizen-error" style="color: var(--danger); margin-bottom: 15px; font-size: 0.85rem; display: none;"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeAddCitizenModal()">Cancel</button>
+                <button class="btn-add" style="width: auto; padding: 10px 20px; margin: 0;" onclick="processAddCitizen()">Add</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // Added arrayUnion here!
-        import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // arrayRemove added to imports
+        import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
@@ -208,7 +235,6 @@
                     if (docSnap.exists()) {
                         currentUserData = docSnap.data();
                         
-                        // Safety Check: If this is an older account without an ID or contacts list, give them one right now!
                         if (!currentUserData.commsId) {
                             const newCommsId = Math.floor(100000 + Math.random() * 900000).toString();
                             await updateDoc(doc(db, "users", user.uid), {
@@ -219,7 +245,6 @@
                             currentUserData.contacts = [];
                         }
 
-                        // Display their ID
                         document.getElementById('my-comms-id').innerText = currentUserData.commsId;
 
                         loadMyContacts();
@@ -231,52 +256,104 @@
 
         window.logout = () => signOut(auth).then(() => { window.location.href = "index.html"; });
 
-        // --- ADD A CITIZEN BY ID ---
-        window.addContactByNumber = async () => {
-            const searchId = prompt("Enter the 6-digit Comms ID of the citizen:");
-            if (!searchId) return;
+        // --- COPY ID ---
+        window.copyMyId = () => {
+            const idText = document.getElementById('my-comms-id').innerText;
+            if(idText === "Loading..." || idText === "Copied!") return;
+            
+            navigator.clipboard.writeText(idText).then(() => {
+                const badge = document.getElementById('my-comms-id');
+                badge.innerText = "Copied!";
+                setTimeout(() => badge.innerText = idText, 2000);
+            });
+        };
+
+        // --- ADD CITIZEN MODAL ---
+        window.openAddCitizenModal = () => {
+            document.getElementById('add-citizen-modal').style.display = 'flex';
+            document.getElementById('search-citizen-id').value = '';
+            document.getElementById('add-citizen-error').style.display = 'none';
+        };
+
+        window.closeAddCitizenModal = () => {
+            document.getElementById('add-citizen-modal').style.display = 'none';
+        };
+
+        window.processAddCitizen = async () => {
+            const searchId = document.getElementById('search-citizen-id').value.trim();
+            const errorDiv = document.getElementById('add-citizen-error');
+            
+            if (!searchId) {
+                errorDiv.innerText = "Please enter an ID.";
+                errorDiv.style.display = 'block';
+                return;
+            }
 
             try {
-                // 1. Search the database for someone with this number
                 const q = query(collection(db, "users"), where("commsId", "==", searchId));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    alert("No citizen found with that Comms ID!");
+                    errorDiv.innerText = "No citizen found with that Comms ID!";
+                    errorDiv.style.display = 'block';
                     return;
                 }
 
-                // 2. We found them! Get their data.
                 const foundUserDoc = querySnapshot.docs[0];
                 const newFriendUid = foundUserDoc.id;
                 const newFriendName = foundUserDoc.data().name;
 
                 if (newFriendUid === currentUser.uid) {
-                    return alert("You can't add yourself!");
+                    errorDiv.innerText = "You cannot add yourself!";
+                    errorDiv.style.display = 'block';
+                    return;
                 }
 
                 if (currentUserData.contacts.includes(newFriendUid)) {
-                    return alert("This citizen is already in your comms!");
+                    errorDiv.innerText = "This citizen is already in your comms!";
+                    errorDiv.style.display = 'block';
+                    return;
                 }
 
-                // 3. Add them to YOUR contacts array
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    contacts: arrayUnion(newFriendUid)
-                });
+                await updateDoc(doc(db, "users", currentUser.uid), { contacts: arrayUnion(newFriendUid) });
+                await updateDoc(doc(db, "users", newFriendUid), { contacts: arrayUnion(currentUser.uid) });
 
-                // 4. Add YOU to THEIR contacts array (so they see you too)
-                await updateDoc(doc(db, "users", newFriendUid), {
-                    contacts: arrayUnion(currentUser.uid)
-                });
-
-                // Update local memory and refresh the list
                 currentUserData.contacts.push(newFriendUid);
-                alert(`Success! ${newFriendName} has been added to your Comms.`);
                 loadMyContacts(); 
+                closeAddCitizenModal();
+                
+                document.getElementById('chat-header').innerHTML = `<div><span style="color: var(--primary);">Success! Added ${newFriendName}.</span></div>`;
 
             } catch (error) {
                 console.error("Error adding contact:", error);
-                alert("Failed to add citizen.");
+                errorDiv.innerText = "Database error. Please try again.";
+                errorDiv.style.display = 'block';
+            }
+        };
+
+        // --- REMOVE CONTACT ---
+        window.removeContact = async (targetUid, displayName) => {
+            if (!confirm(`Are you sure you want to severe comms with ${displayName}?`)) return;
+
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { contacts: arrayRemove(targetUid) });
+                await updateDoc(doc(db, "users", targetUid), { contacts: arrayRemove(currentUser.uid) });
+
+                currentUserData.contacts = currentUserData.contacts.filter(id => id !== targetUid);
+                loadMyContacts();
+
+                if (activeChatType === 'dm' && activeChatId.includes(targetUid)) {
+                    document.getElementById('chat-header').innerHTML = "<div>Select a chat to begin</div>";
+                    document.getElementById('chat-box').innerHTML = `<div class="message system">Citizen removed. Select a new chat from the sidebar.</div>`;
+                    document.getElementById('message-input').disabled = true;
+                    document.getElementById('send-btn').disabled = true;
+                    activeChatId = null;
+                    if (unsubscribeChat) unsubscribeChat();
+                }
+
+            } catch (error) {
+                console.error("Error removing contact:", error);
+                alert("Failed to remove citizen from comms.");
             }
         };
 
@@ -292,13 +369,11 @@
             }
 
             try {
-                // Fetch the profile for every UID in our contacts list
                 for (const friendUid of currentUserData.contacts) {
                     const friendSnap = await getDoc(doc(db, "users", friendUid));
                     if (friendSnap.exists()) {
                         const data = friendSnap.data();
                         
-                        // Add to Sidebar
                         const dmDiv = document.createElement('div');
                         dmDiv.className = 'contact-item';
                         dmDiv.id = `dm-${friendUid}`;
@@ -306,7 +381,6 @@
                         dmDiv.onclick = () => openChat('dm', friendUid, data.name);
                         dmList.appendChild(dmDiv);
 
-                        // Add to Group Chat Checkboxes
                         const label = document.createElement('label');
                         label.className = 'checklist-item';
                         label.innerHTML = `<input type="checkbox" class="citizen-checkbox" value="${friendUid}"><span>${data.name}</span>`;
@@ -339,7 +413,7 @@
             });
         }
 
-        // --- MODAL ---
+        // --- GROUP MODAL ---
         window.openModal = () => document.getElementById('group-modal').style.display = 'flex';
         window.closeModal = () => {
             document.getElementById('group-modal').style.display = 'none';
@@ -368,7 +442,12 @@
             document.getElementById(`${type}-${targetId}`).classList.add('active');
             
             const prefix = type === 'dm' ? "Messaging" : "Group:";
-            document.getElementById('chat-header').innerHTML = `${prefix} <strong>${displayName}</strong>`;
+            
+            let headerHTML = `<div>${prefix} <strong>${displayName}</strong></div>`;
+            if (type === 'dm') {
+                headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove Citizen</button>`;
+            }
+            document.getElementById('chat-header').innerHTML = headerHTML;
             
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
@@ -382,7 +461,7 @@
             listenForMessages();
         };
 
-        // --- LISTENING TO MESSAGES (WITH READ RECEIPTS) ---
+        // --- LISTENING TO MESSAGES (WITH READ RECEIPTS & TIMESTAMPS) ---
         function listenForMessages() {
             const chatBox = document.getElementById('chat-box');
             if (unsubscribeChat) unsubscribeChat();
@@ -407,14 +486,25 @@
                         updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true });
                     }
 
+                    // Format Timestamp
+                    let timeString = "Sending...";
+                    if (msgData.timestamp) {
+                        timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+
                     const wrapperDiv = document.createElement('div');
                     wrapperDiv.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
                     
                     if (!isMe && activeChatType === 'group') {
                         const nameDiv = document.createElement('div');
                         nameDiv.className = 'sender-name';
-                        nameDiv.innerText = msgData.senderName || "Citizen";
+                        nameDiv.innerText = `${msgData.senderName || "Citizen"} • ${timeString}`;
                         wrapperDiv.appendChild(nameDiv);
+                    } else if (!isMe && activeChatType === 'dm') {
+                        const timeDiv = document.createElement('div');
+                        timeDiv.className = 'sender-name';
+                        timeDiv.innerText = timeString;
+                        wrapperDiv.appendChild(timeDiv);
                     }
 
                     const bubbleDiv = document.createElement('div');
@@ -422,10 +512,14 @@
                     bubbleDiv.innerText = msgData.text; 
                     wrapperDiv.appendChild(bubbleDiv);
 
-                    if (isMe && activeChatType === 'dm') {
+                    if (isMe) {
                         const metaDiv = document.createElement('div');
                         metaDiv.className = 'msg-meta';
-                        metaDiv.innerHTML = msgData.read ? `<span class="status-read">Read</span>` : `Delivered`;
+                        if (activeChatType === 'dm') {
+                            metaDiv.innerHTML = `${timeString} • ` + (msgData.read ? `<span class="status-read">Read</span>` : `Delivered`);
+                        } else {
+                            metaDiv.innerHTML = timeString;
+                        }
                         wrapperDiv.appendChild(metaDiv);
                     }
 
