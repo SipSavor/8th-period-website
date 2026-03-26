@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Love Sophia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Reset margins and set up the background */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* A soft, romantic pink gradient */
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Create a modern "glassmorphism" card effect */
+        .card {
+            background: rgba(255, 255, 255, 0.65);
+            padding: 50px 80px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(255, 100, 150, 0.2);
+            backdrop-filter: blur(8px);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Style the main text */
+        h1 {
+            font-size: 3.5rem;
+            color: #4a4a4a;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        /* Make the name stand out */
+        .name {
+            color: #ff477e;
+            font-weight: 800;
+        }
+
+        /* Style and animate the heart */
+        .heart {
+            display: inline-block;
+            color: #ff477e;
+            animation: pulse 1.2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: #ff477e;
+            color: #ffffff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #e03a6b;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 71, 126, 0.4);
+        }
+
+        /* Poem Container - Hidden by default with smooth transition */
+        .poem-container {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+        }
+
+        /* When the 'show' class is added via JavaScript */
+        .poem-container.show {
+            max-height: 400px; /* Enough space for the poem */
+            opacity: 1;
+            margin-top: 30px;
+        }
+
+        /* Style the poem text itself */
+        .poem {
+            color: #555;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* Make it responsive for mobile devices */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .card {
+                padding: 40px 30px;
+            }
+            .poem {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>I Love <span class="name">Sophia</span> <span class="heart">❤️</span></h1>
+        
+        <button class="btn" id="revealBtn">Your poem</button>
+
+        <div class="poem-container" id="poemBox">
+            <p class="poem">
+                In every quiet moment,<br>
+                In every crowded room,<br>
+                You’re the light that finds its way<br>
+                To clear away the gloom.<br><br>
+                It isn’t just the way you laugh,<br>
+                Or how you say my name;<br>
+                It’s that since the day I met you,<br>
+                I’ve never been the same.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('revealBtn');
+        const poemBox = document.getElementById('poemBox');
+
+        btn.addEventListener('click', function() {
+            // Toggle the 'show' class to open/close the poem
+            poemBox.classList.toggle('show');
+            
+            // Change the button text depending on if it's open or closed
+            if (poemBox.classList.contains('show')) {
+                btn.textContent = "Close poem";
+            } else {
+                btn.textContent = "Read a poem";
+            }
+        });
+    </script>
+
+</body>
+</html>
