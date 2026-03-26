@@ -68,7 +68,7 @@
             color: #ff477e;
             animation: pulse 1.2s infinite ease-in-out;
             filter: drop-shadow(0 0 10px rgba(255, 71, 126, 0.4));
-            cursor: pointer; /* Lets her know it's clickable */
+            cursor: pointer;
             user-select: none;
         }
 
@@ -179,7 +179,7 @@
 <body>
 
     <audio id="bgMusic" loop>
-        <source src="lsonican-lo-fi-music-loop-sentimental-jazzy-love-473154.mp3" type="audio/mpeg">
+        <source src="sonican-lo-fi-music-loop-sentimental-jazzy-love-473154.mp3" type="audio/mpeg">
     </audio>
 
     <div class="card">
@@ -245,39 +245,32 @@
             const particle = document.createElement('div');
             particle.classList.add('particle');
             
-            // Randomly choose between a heart or a sparkle
             const types = ['🤍', '✨', '💖'];
             particle.innerText = types[Math.floor(Math.random() * types.length)];
             
-            // Randomize position and animation duration
             particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.animationDuration = Math.random() * 5 + 5 + 's'; // Between 5 and 10 seconds
-            particle.style.fontSize = Math.random() * 20 + 10 + 'px'; // Varying sizes
+            particle.style.animationDuration = Math.random() * 5 + 5 + 's'; 
+            particle.style.fontSize = Math.random() * 20 + 10 + 'px'; 
             
             document.body.appendChild(particle);
 
-            // Remove the element after it floats off screen to keep the page running smoothly
             setTimeout(() => {
                 particle.remove();
             }, 10000);
         }
 
-        // Create a new particle every 400 milliseconds
         setInterval(createParticles, 400);
 
         // --- INTERACTIVE HEART EXPLOSION LOGIC ---
         mainHeart.addEventListener('click', function(e) {
-            // Create 10 mini hearts when clicked
             for(let j = 0; j < 10; j++) {
                 const miniHeart = document.createElement('div');
                 miniHeart.classList.add('mini-heart');
                 miniHeart.innerText = '💖';
                 
-                // Position them exactly where she clicked
                 miniHeart.style.left = e.clientX + 'px';
                 miniHeart.style.top = e.clientY + 'px';
 
-                // Give them random directions to fly out to
                 const tx = (Math.random() - 0.5) * 200 + 'px';
                 const ty = (Math.random() - 0.5) * 200 + 'px';
                 const rot = Math.random() * 360 + 'deg';
@@ -288,7 +281,6 @@
 
                 document.body.appendChild(miniHeart);
 
-                // Clean them up after the animation finishes
                 setTimeout(() => {
                     miniHeart.remove();
                 }, 1000);
