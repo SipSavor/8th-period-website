@@ -21,6 +21,8 @@
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
             position: relative;
+            /* Added perspective to the body so the 3D effect works */
+            perspective: 1000px; 
         }
 
         @keyframes gradientMove {
@@ -29,7 +31,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Enhanced Glass Card */
+        /* Enhanced Glass Card with 3D settings */
         .card {
             background: rgba(255, 255, 255, 0.4);
             padding: 50px 60px;
@@ -39,14 +41,14 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             text-align: center;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 500px;
             width: 85%;
             z-index: 10;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
+            /* Prepares the card for 3D rotation */
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Starts flat */
+            transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
         }
 
         h1 {
@@ -55,6 +57,8 @@
             margin: 0 0 15px 0;
             font-weight: 600;
             text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+            /* Makes the text slightly pop out of the card in 3D */
+            transform: translateZ(30px);
         }
 
         .name {
@@ -95,10 +99,11 @@
             transition: all 0.3s ease;
             position: relative;
             z-index: 20;
+            transform: translateZ(20px);
         }
 
         .btn:hover {
-            transform: scale(1.05) translateY(-2px);
+            transform: translateZ(25px) scale(1.05);
             box-shadow: 0 12px 25px rgba(255, 71, 126, 0.5);
         }
 
@@ -107,6 +112,7 @@
             opacity: 0;
             overflow: hidden;
             transition: all 0.8s ease-in-out;
+            transform: translateZ(15px);
         }
 
         .poem-container.show {
@@ -182,7 +188,7 @@
         <source src="sonican-lo-fi-music-loop-sentimental-jazzy-love-473154.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="card">
+    <div class="card" id="glassCard">
         <h1>I Love <span class="name">Sophia</span> <span class="heart" id="mainHeart">❤️</span></h1>
         
         <button class="btn" id="revealBtn">Read my poem</button>
@@ -193,6 +199,32 @@
     </div>
 
     <script>
+        // --- 3D TILT EFFECT LOGIC ---
+        const card = document.getElementById('glassCard');
+
+        card.addEventListener('mousemove', (e) => {
+            // Get the card's dimensions and position
+            const rect = card.getBoundingClientRect();
+            // Calculate mouse position relative to the center of the card
+            const x = e.clientX - rect.left - (rect.width / 2);
+            const y = e.clientY - rect.top - (rect.height / 2);
+            
+            // Convert positions to rotation angles (the dividing numbers control how strong the tilt is)
+            const rotateX = (y / (rect.height / 2)) * -10; // Max 10 degrees up/down
+            const rotateY = (x / (rect.width / 2)) * 10;   // Max 10 degrees left/right
+            
+            // Apply the rotation and remove the transition for smooth tracking
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            card.style.transition = 'none';
+        });
+
+        // When the mouse leaves the card, smoothly snap it back to flat
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+            card.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        });
+
+
         // --- POEM AND MUSIC LOGIC ---
         const btn = document.getElementById('revealBtn');
         const poemBox = document.getElementById('poemBox');
