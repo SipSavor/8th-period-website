@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Lora:ital@1&display=swap" rel="stylesheet">
     
     <style>
-        /* UPGRADE 1: Animated Gradient Background */
+        /* Animated Gradient Background */
         body {
             margin: 0;
             padding: 0;
@@ -28,7 +28,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* UPGRADE 2: Enhanced Glass Card */
+        /* Enhanced Glass Card */
         .card {
             background: rgba(255, 255, 255, 0.4);
             padding: 50px 60px;
@@ -109,19 +109,17 @@
             margin-top: 35px;
         }
 
-        /* UPGRADE 3: Better Typography for the Poem */
         .poem {
             color: #444;
             font-size: 1.3rem;
             line-height: 1.8;
-            font-family: 'Lora', serif; /* A more elegant, romantic font for the poem */
+            font-family: 'Lora', serif;
             font-style: italic;
             margin: 0;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-            white-space: pre-wrap; /* Preserves line breaks in JS */
+            white-space: pre-wrap;
         }
 
-        /* Blinking cursor for typewriter effect */
         .cursor {
             display: inline-block;
             width: 2px;
@@ -143,6 +141,10 @@
 </head>
 <body>
 
+    <audio id="bgMusic" loop>
+        <source src="lofi-beat.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="card">
         <h1>I Love <span class="name">Sophia</span> <span class="heart">❤️</span></h1>
         
@@ -158,41 +160,42 @@
         const poemBox = document.getElementById('poemBox');
         const poemTextElement = document.getElementById('poemText');
         const cursor = document.getElementById('cursor');
+        const bgMusic = document.getElementById('bgMusic');
 
-        // The poem stored in a variable. \n creates a line break.
         const fullPoem = "In every quiet moment,\nIn every crowded room,\nYou’re the light that finds its way\nTo clear away the gloom.\n\nIt isn’t just the way you laugh,\nOr how you say my name;\nIt’s that since the day I met you,\nI’ve never been the same.";
         
         let i = 0;
         let isTyping = false;
         let poemRevealed = false;
 
-        // Typewriter function
         function typeWriter() {
             if (i < fullPoem.length) {
                 poemTextElement.textContent += fullPoem.charAt(i);
                 i++;
-                setTimeout(typeWriter, 40); // 40ms delay between letters - adjust for speed
+                setTimeout(typeWriter, 40); 
             } else {
                 isTyping = false;
-                cursor.style.display = 'none'; // Hide cursor when done
+                cursor.style.display = 'none'; 
             }
         }
 
         btn.addEventListener('click', function() {
+            // Play the music if it's not already playing
+            if (bgMusic.paused) {
+                bgMusic.volume = 0.4; // Sets volume to 40% so it's not too loud
+                bgMusic.play();
+            }
+
             if (!poemRevealed) {
-                // Open the box and start typing
                 poemBox.classList.add('show');
                 btn.textContent = "Close poem";
                 poemRevealed = true;
                 
-                // Only start typing if it hasn't been typed yet
                 if (i === 0) {
                     isTyping = true;
-                    // Add a slight delay before typing starts so the box can open first
                     setTimeout(typeWriter, 500);
                 }
             } else {
-                // Close the box
                 poemBox.classList.remove('show');
                 btn.textContent = "Read my poem";
                 poemRevealed = false;
