@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Love Sophia</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>For Sophia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Lora:ital@1&display=swap" rel="stylesheet">
     
     <style>
-        /* Reset margins and set up the background */
+        /* UPGRADE 1: Animated Gradient Background */
         body {
             margin: 0;
             padding: 0;
@@ -15,115 +15,129 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* A soft, romantic pink gradient */
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fbc2eb, #a18cd1);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
             font-family: 'Poppins', sans-serif;
+            overflow: hidden;
         }
 
-        /* Create a modern "glassmorphism" card effect */
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* UPGRADE 2: Enhanced Glass Card */
         .card {
-            background: rgba(255, 255, 255, 0.65);
-            padding: 50px 80px;
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(255, 100, 150, 0.2);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.4);
+            padding: 50px 60px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 
+                        inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: transform 0.3s ease;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 500px;
-            width: 90%;
+            width: 85%;
+            z-index: 10;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
         }
 
-        /* Style the main text */
         h1 {
             font-size: 3.5rem;
-            color: #4a4a4a;
-            margin: 0 0 10px 0;
+            color: #333;
+            margin: 0 0 15px 0;
             font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
         }
 
-        /* Make the name stand out */
         .name {
             color: #ff477e;
             font-weight: 800;
         }
 
-        /* Style and animate the heart */
         .heart {
             display: inline-block;
             color: #ff477e;
             animation: pulse 1.2s infinite ease-in-out;
+            filter: drop-shadow(0 0 10px rgba(255, 71, 126, 0.4));
         }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            15% { transform: scale(1.25); }
+            15% { transform: scale(1.3); }
             30% { transform: scale(1); }
-            45% { transform: scale(1.25); }
+            45% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
 
-        /* Button Styling */
         .btn {
-            background-color: #ff477e;
+            background: linear-gradient(45deg, #ff477e, #ff758c);
             color: #ffffff;
             border: none;
-            padding: 12px 30px;
+            padding: 14px 35px;
             font-size: 1.1rem;
-            border-radius: 30px;
+            border-radius: 50px;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3);
+            margin-top: 15px;
+            box-shadow: 0 8px 20px rgba(255, 71, 126, 0.4);
             transition: all 0.3s ease;
         }
 
         .btn:hover {
-            background-color: #e03a6b;
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 71, 126, 0.4);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 71, 126, 0.5);
         }
 
-        /* Poem Container - Hidden by default with smooth transition */
         .poem-container {
             max-height: 0;
             opacity: 0;
             overflow: hidden;
-            transition: all 0.6s ease-in-out;
+            transition: all 0.8s ease-in-out;
         }
 
-        /* When the 'show' class is added via JavaScript */
         .poem-container.show {
-            max-height: 400px; /* Enough space for the poem */
+            max-height: 500px;
             opacity: 1;
-            margin-top: 30px;
+            margin-top: 35px;
         }
 
-        /* Style the poem text itself */
+        /* UPGRADE 3: Better Typography for the Poem */
         .poem {
-            color: #555;
-            font-size: 1.15rem;
+            color: #444;
+            font-size: 1.3rem;
             line-height: 1.8;
+            font-family: 'Lora', serif; /* A more elegant, romantic font for the poem */
             font-style: italic;
             margin: 0;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            white-space: pre-wrap; /* Preserves line breaks in JS */
         }
 
-        /* Make it responsive for mobile devices */
+        /* Blinking cursor for typewriter effect */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #ff477e;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
         @media (max-width: 600px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-            .card {
-                padding: 40px 30px;
-            }
-            .poem {
-                font-size: 1rem;
-            }
+            h1 { font-size: 2.5rem; }
+            .card { padding: 40px 25px; }
+            .poem { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -132,35 +146,56 @@
     <div class="card">
         <h1>I Love <span class="name">Sophia</span> <span class="heart">❤️</span></h1>
         
-        <button class="btn" id="revealBtn">Your poem</button>
+        <button class="btn" id="revealBtn">Read my poem</button>
 
         <div class="poem-container" id="poemBox">
-            <p class="poem">
-                In every quiet moment,<br>
-                In every crowded room,<br>
-                You’re the light that finds its way<br>
-                To clear away the gloom.<br><br>
-                It isn’t just the way you laugh,<br>
-                Or how you say my name;<br>
-                It’s that since the day I met you,<br>
-                I’ve never been the same.
-            </p>
+            <p class="poem"><span id="poemText"></span><span class="cursor" id="cursor"></span></p>
         </div>
     </div>
 
     <script>
         const btn = document.getElementById('revealBtn');
         const poemBox = document.getElementById('poemBox');
+        const poemTextElement = document.getElementById('poemText');
+        const cursor = document.getElementById('cursor');
+
+        // The poem stored in a variable. \n creates a line break.
+        const fullPoem = "In every quiet moment,\nIn every crowded room,\nYou’re the light that finds its way\nTo clear away the gloom.\n\nIt isn’t just the way you laugh,\nOr how you say my name;\nIt’s that since the day I met you,\nI’ve never been the same.";
+        
+        let i = 0;
+        let isTyping = false;
+        let poemRevealed = false;
+
+        // Typewriter function
+        function typeWriter() {
+            if (i < fullPoem.length) {
+                poemTextElement.textContent += fullPoem.charAt(i);
+                i++;
+                setTimeout(typeWriter, 40); // 40ms delay between letters - adjust for speed
+            } else {
+                isTyping = false;
+                cursor.style.display = 'none'; // Hide cursor when done
+            }
+        }
 
         btn.addEventListener('click', function() {
-            // Toggle the 'show' class to open/close the poem
-            poemBox.classList.toggle('show');
-            
-            // Change the button text depending on if it's open or closed
-            if (poemBox.classList.contains('show')) {
+            if (!poemRevealed) {
+                // Open the box and start typing
+                poemBox.classList.add('show');
                 btn.textContent = "Close poem";
+                poemRevealed = true;
+                
+                // Only start typing if it hasn't been typed yet
+                if (i === 0) {
+                    isTyping = true;
+                    // Add a slight delay before typing starts so the box can open first
+                    setTimeout(typeWriter, 500);
+                }
             } else {
-                btn.textContent = "Read a poem";
+                // Close the box
+                poemBox.classList.remove('show');
+                btn.textContent = "Read my poem";
+                poemRevealed = false;
             }
         });
     </script>
