@@ -243,15 +243,23 @@
     <div class="modal-overlay" id="add-citizen-modal">
         <div class="modal">
             <h2>Add Citizen</h2>
-            <input type="text" id="search-citizen-id" placeholder="Enter 6-digit Comms ID" maxlength="6">
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">Select from the realm or enter an ID.</p>
+            
+            <div id="available-citizens-list" class="citizen-checklist" style="max-height: 150px; margin-bottom: 15px;">
+                </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="search-citizen-id" placeholder="Or enter 6-digit ID..." maxlength="6" style="margin-bottom: 0;">
+                <button class="btn-add" style="width: auto; padding: 10px 20px; margin: 0;" onclick="processAddCitizen()">Add ID</button>
+            </div>
+            
             <div id="add-citizen-error" style="color: var(--danger); margin-bottom: 15px; font-size: 0.85rem; display: none;"></div>
+            
             <div class="modal-btns">
-                <button class="btn-cancel" onclick="closeAddCitizenModal()">Cancel</button>
-                <button class="btn-add" style="width: auto; padding: 10px 20px; margin: 0;" onclick="processAddCitizen()">Add</button>
+                <button class="btn-cancel" onclick="closeAddCitizenModal()">Close</button>
             </div>
         </div>
     </div>
-
     <div class="modal-overlay" id="incoming-call-modal" style="z-index: 2100;">
         <div style="background: #0f172a; padding: 30px; border-radius: 20px; border: 1px solid var(--primary); width: 350px; text-align: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);">
             <div style="font-size: 3rem; margin-bottom: 10px; animation: pulse 1.5s infinite;">📞</div>
