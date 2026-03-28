@@ -172,14 +172,18 @@
 <div id="add-citizen-modal" class="modal">
     <div class="modal-content">
         <h3>Add Citizen</h3>
-        <input type="text" id="filter-citizens" placeholder="Search by name..." style="width:90%; padding:10px; margin-bottom:10px; background:#0f172a; border:1px solid #334155; color:white;" onkeyup="filterCitizenList()">
         
-        <div id="available-citizens-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #334155; border-radius: 8px; padding: 5px;">
+        <input type="text" id="filter-citizens" placeholder="Search Citizens..." style="width:90%; padding:10px; margin-bottom:10px; background:#0f172a; border:1px solid #334155; color:white;" onkeyup="filterCitizenList()">
+        
+        <div id="available-citizens-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px; background:#0f172a; border:1px solid #334155; border-radius: 4px;">
             </div>
-        
+
         <div id="add-citizen-error" style="color:var(--danger); font-size:0.8rem; margin-bottom:10px; display:none;"></div>
         
-        <button onclick="closeAddCitizenModal()" style="width:100%; background:none; color:white; border:1px solid #334155; cursor:pointer; padding: 10px; border-radius: 8px;">Close</button>
+        <div style="display:flex; gap:10px;">
+            <button class="send-btn" onclick="processAddCitizen()" style="flex:1">Link Comms</button>
+            <button onclick="closeAddCitizenModal()" style="flex:1; background:none; color:white; border:1px solid #334155; cursor:pointer; padding: 10px; border-radius: 8px;">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -222,10 +226,9 @@
 </div>
 
 <script type="module">
-    // --- FIREBASE IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -242,7 +245,6 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // Sound FX
     const pingSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     const ringSound = new Audio('https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3');
     ringSound.loop = true;
@@ -253,12 +255,12 @@
     let activeChatId = null; 
     let unsubscribeChat = null; 
     let contactListeners = []; 
+    let selectedCitizenId = null; // Used for the Add Citizen list
 
     function getDefaultAvatar(name) {
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=818cf8&color=fff&bold=true`;
     }
 
-    // --- AUTH STATE ---
     onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = "index.html"; } 
         else {
@@ -284,7 +286,6 @@
         }
     });
 
-    // --- SIDEBAR LOGIC ---
     function loadMyContacts() {
         const dmList = document.getElementById('dm-list');
         const checklist = document.getElementById('citizen-checklist');
@@ -342,7 +343,6 @@
         });
     }
 
-    // --- CHAT LOGIC ---
     window.openChat = (type, targetId, displayName, avatarSrc = "") => {
         document.getElementById('message-input').disabled = false;
         document.getElementById('send-btn').disabled = false;
@@ -499,15 +499,14 @@
         });
     };
 
-    // --- NEW ADD CITIZEN LOGIC ---
-    
-    // Opens modal and fetches all users from Firestore
+    // --- ADD CITIZEN LOGIC (With Original Layout) ---
     window.openAddCitizenModal = async () => {
         document.getElementById('add-citizen-modal').style.display = 'flex';
         const listContainer = document.getElementById('available-citizens-list');
-        listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--text-muted);">Fetching citizens...</div>';
+        listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--text-muted); font-size: 0.8rem;">Fetching citizens...</div>';
         document.getElementById('add-citizen-error').style.display = 'none';
         document.getElementById('filter-citizens').value = '';
+        selectedCitizenId = null;
 
         try {
             const usersSnap = await getDocs(collection(db, "users"));
@@ -515,71 +514,75 @@
             let userCount = 0;
 
             usersSnap.forEach((docSnap) => {
-                // Don't show the current user
                 if (docSnap.id !== currentUser.uid) { 
                     const data = docSnap.data();
-                    
-                    // Don't show citizens who are already in the contacts list
                     if (currentUserData.contacts && currentUserData.contacts.includes(docSnap.id)) return;
 
                     userCount++;
                     const avatarSrc = data.photoURL || getDefaultAvatar(data.name);
                     
-                    // Create the list item
                     const div = document.createElement('div');
                     div.className = 'contact-item citizen-list-item';
-                    div.style.padding = '10px';
-                    div.style.marginBottom = '5px';
-                    div.style.borderRadius = '8px';
+                    div.style.padding = '8px 10px';
+                    div.style.borderBottom = '1px solid #334155';
+                    div.style.margin = '0'; 
+                    
                     div.innerHTML = `
-                        <img src="${avatarSrc}" class="contact-avatar" style="width:30px;height:30px;">
+                        <img src="${avatarSrc}" class="contact-avatar" style="width:25px;height:25px; margin-right:10px;">
                         <div class="contact-info">
-                            <div class="contact-name">${data.name}</div>
+                            <div class="contact-name" style="font-size: 0.85rem;">${data.name}</div>
                         </div>
-                        <button class="send-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="addCitizen('${docSnap.id}')">Add</button>
                     `;
+                    
+                    // Highlight the item when clicked and store the ID
+                    div.onclick = () => {
+                        document.querySelectorAll('.citizen-list-item').forEach(el => el.style.background = 'transparent');
+                        div.style.background = '#334155';
+                        selectedCitizenId = docSnap.id;
+                    };
+                    
                     listContainer.appendChild(div);
                 }
             });
 
             if (userCount === 0) {
-                 listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--text-muted);">No new citizens found.</div>';
+                 listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--text-muted); font-size: 0.8rem;">No new citizens found.</div>';
             }
 
         } catch (error) {
             console.error("Error fetching users: ", error);
-            listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--danger);">Error loading citizens.</div>';
+            listContainer.innerHTML = '<div style="padding:10px; text-align:center; color:var(--danger); font-size: 0.8rem;">Error loading citizens.</div>';
         }
     };
 
-    // Handles the actual database update when "Add" is clicked
-    window.addCitizen = async (targetUid) => {
+    window.processAddCitizen = async () => {
+        const errDiv = document.getElementById('add-citizen-error');
+        if (!selectedCitizenId) {
+            errDiv.innerText = "Please click a citizen from the list to select them.";
+            errDiv.style.display = "block";
+            return;
+        }
+
         try {
-            // Add target to my contacts
             await updateDoc(doc(db, "users", currentUser.uid), {
-                contacts: arrayUnion(targetUid)
+                contacts: arrayUnion(selectedCitizenId)
             });
-            // Add me to target's contacts (two-way connection)
-            await updateDoc(doc(db, "users", targetUid), {
+            await updateDoc(doc(db, "users", selectedCitizenId), {
                 contacts: arrayUnion(currentUser.uid)
             });
             
-            // Update local state so UI refreshes correctly
             if (!currentUserData.contacts) currentUserData.contacts = [];
-            currentUserData.contacts.push(targetUid);
+            currentUserData.contacts.push(selectedCitizenId);
 
-            // Reload sidebar contacts and close the modal
             loadMyContacts();
             closeAddCitizenModal();
         } catch(error) {
             console.error("Error adding citizen:", error);
-            const errDiv = document.getElementById('add-citizen-error');
             errDiv.innerText = "Secure line failed. Try again.";
             errDiv.style.display = "block";
         }
     };
 
-    // Allows users to search through the pop-up list
     window.filterCitizenList = () => {
         const input = document.getElementById('filter-citizens').value.toLowerCase();
         const items = document.querySelectorAll('.citizen-list-item');
