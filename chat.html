@@ -157,6 +157,87 @@
         .btn-cancel:hover { background: rgba(255,255,255,0.1); }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        /* --- RESPONSIVE DESIGN --- */
+        
+        /* Tablet / iPad adjustments */
+        @media (max-width: 1024px) {
+            .chat-wrapper { padding: 12px; gap: 12px; }
+            .sidebar { width: 260px; }
+            .chat-main { flex: 1; }
+        }
+
+        /* Cellular / Mobile adjustments */
+        @media (max-width: 768px) {
+            nav { flex-direction: column; gap: 10px; padding: 15px; }
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .nav-links a { margin: 0; }
+
+            .chat-wrapper {
+                padding: 10px;
+                height: calc(100vh - 120px); /* Adjust for taller mobile nav */
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* Make both panels take full width, but hide chat by default */
+            .sidebar {
+                width: 100%;
+                height: 100%;
+                border-radius: 16px;
+                transition: transform 0.3s ease;
+            }
+
+            .chat-main {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                width: calc(100% - 20px);
+                height: calc(100% - 20px);
+                transform: translateX(120%); /* Hide off-screen to the right */
+                transition: transform 0.3s ease;
+                z-index: 10;
+            }
+
+            /* When a chat is active, slide the chat window in */
+            .chat-wrapper.mobile-chat-active .sidebar {
+                transform: translateX(-120%);
+            }
+            
+            .chat-wrapper.mobile-chat-active .chat-main {
+                transform: translateX(0);
+            }
+
+            /* Show the mobile back button */
+            .mobile-back-btn { display: block !important; }
+
+            /* Fix input area for small screens */
+            .input-area { padding: 10px; gap: 8px; flex-wrap: wrap; }
+            .input-area input[type="text"] { width: 100%; flex: none; order: -1; margin-bottom: 5px; }
+            .btn-send { flex: 1; }
+
+            /* Modals */
+            .modal { width: 95%; padding: 20px; }
+            
+            /* Video Modal */
+            #video-modal > div:nth-child(2) { flex-direction: column; height: auto; min-height: 60vh; }
+            #remote-player, #local-player { width: 100%; height: 250px; }
+        }
+
+        /* Hide back button on desktop */
+        .mobile-back-btn {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        
     </style>
 </head>
 <body>
@@ -208,7 +289,13 @@
         </div>
 
         <div class="chat-main">
-            <div class="chat-header" id="chat-header"><div>Select a chat to begin</div></div>
+            <div class="chat-header">
+    <div style="display: flex; align-items: center;">
+        <button class="mobile-back-btn" onclick="closeMobileChat()">← Back</button>
+        <div id="chat-header-title">Select a chat to begin</div>
+    </div>
+    <div id="chat-header-actions"></div>
+</div>
             <div id="chat-box">
                 <div class="message system" style="margin-top: auto; margin-bottom: auto;">Select a citizen or group from the sidebar to establish comms.</div>
             </div>
@@ -292,7 +379,7 @@
         </div>
     </div>
 
-    <script type="module">
+   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -313,7 +400,7 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // NEW: Sound Effects!
+        // Sound Effects!
         const pingSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         const ringSound = new Audio('https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3');
         ringSound.loop = true;
@@ -324,6 +411,17 @@
         let activeChatId = null;   
         let unsubscribeChat = null; 
         let contactListeners = []; 
+
+        // --- MOBILE RESPONSIVE FUNCTIONS ---
+        window.openMobileChat = () => {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.chat-wrapper').classList.add('mobile-chat-active');
+            }
+        };
+
+        window.closeMobileChat = () => {
+            document.querySelector('.chat-wrapper').classList.remove('mobile-chat-active');
+        };
 
         function getDefaultAvatar(name) {
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=818cf8&color=fff&bold=true`;
@@ -412,7 +510,6 @@
             listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">Loading citizens...</div>';
 
             try {
-                // Fetch all users from the database
                 const querySnapshot = await getDocs(collection(db, "users"));
                 listContainer.innerHTML = '';
                 let foundAny = false;
@@ -421,11 +518,8 @@
                     const userData = docSnap.data();
                     const uid = docSnap.id;
 
-                    // Filter out the current user AND people already in their contacts
                     if (uid !== currentUser.uid && (!currentUserData.contacts || !currentUserData.contacts.includes(uid))) {
                         foundAny = true;
-                        
-                        // Create the row for the citizen
                         const item = document.createElement('div');
                         item.className = 'checklist-item';
                         item.style.justifyContent = 'space-between';
@@ -441,7 +535,6 @@
                         addBtn.style.fontSize = '0.8rem';
                         addBtn.style.margin = '0';
                         
-                        // When clicked, add them directly
                         addBtn.onclick = () => addCitizenByUid(uid, userData.name);
 
                         item.appendChild(nameSpan);
@@ -449,64 +542,6 @@
                         listContainer.appendChild(item);
                     }
                 });
-
-                window.closeAddCitizenModal = () => { 
-    document.getElementById('add-citizen-modal').style.display = 'none'; 
-};
-
-                window.processAddCitizen = async () => {
-    const searchId = document.getElementById('search-citizen-id').value.trim();
-    const errorDiv = document.getElementById('add-citizen-error');
-
-    // Basic validation
-    if (!searchId) {
-        errorDiv.innerText = "Please enter an ID.";
-        errorDiv.style.display = 'block';
-        return;
-    }
-
-    if (currentUserData && searchId === currentUserData.commsId) {
-        errorDiv.innerText = "You cannot add yourself to your own comms!";
-        errorDiv.style.display = 'block';
-        return;
-    }
-
-    try {
-        // Hide error div while searching
-        errorDiv.style.display = 'none';
-
-        // Query the database for a user with this specific commsId
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("commsId", "==", searchId));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            errorDiv.innerText = "No citizen found with that ID in the realm.";
-            errorDiv.style.display = 'block';
-            return;
-        }
-
-        // Grab the first match (since IDs should be unique)
-        const matchedDoc = querySnapshot.docs[0];
-        const newFriendUid = matchedDoc.id;
-        const newFriendData = matchedDoc.data();
-
-        // Check if they are already in the contacts list
-        if (currentUserData.contacts && currentUserData.contacts.includes(newFriendUid)) {
-            errorDiv.innerText = "This citizen is already in your contacts!";
-            errorDiv.style.display = 'block';
-            return;
-        }
-
-        // Reuse your existing function to add them to the contacts array!
-        await window.addCitizenByUid(newFriendUid, newFriendData.name);
-
-    } catch (error) {
-        console.error("Error finding citizen:", error);
-        errorDiv.innerText = "The royal database is acting up. Please try again.";
-        errorDiv.style.display = 'block';
-    }
-};
 
                 if (!foundAny) {
                     listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">No new citizens to add!</div>';
@@ -517,19 +552,65 @@
             }
         };
 
-        // NEW function to handle clicking the "Add" button from the list
+        window.closeAddCitizenModal = () => { 
+            document.getElementById('add-citizen-modal').style.display = 'none'; 
+        };
+
+        window.processAddCitizen = async () => {
+            const searchId = document.getElementById('search-citizen-id').value.trim();
+            const errorDiv = document.getElementById('add-citizen-error');
+
+            if (!searchId) {
+                errorDiv.innerText = "Please enter an ID.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (currentUserData && searchId === currentUserData.commsId) {
+                errorDiv.innerText = "You cannot add yourself to your own comms!";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                errorDiv.style.display = 'none';
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("commsId", "==", searchId));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    errorDiv.innerText = "No citizen found with that ID in the realm.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                const matchedDoc = querySnapshot.docs[0];
+                const newFriendUid = matchedDoc.id;
+                const newFriendData = matchedDoc.data();
+
+                if (currentUserData.contacts && currentUserData.contacts.includes(newFriendUid)) {
+                    errorDiv.innerText = "This citizen is already in your contacts!";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                await window.addCitizenByUid(newFriendUid, newFriendData.name);
+            } catch (error) {
+                console.error("Error finding citizen:", error);
+                errorDiv.innerText = "The royal database is acting up. Please try again.";
+                errorDiv.style.display = 'block';
+            }
+        };
+
         window.addCitizenByUid = async (newFriendUid, newFriendName) => {
             const errorDiv = document.getElementById('add-citizen-error');
             try {
-                // Update both users' contact arrays in Firebase
                 await updateDoc(doc(db, "users", currentUser.uid), { contacts: arrayUnion(newFriendUid) });
                 await updateDoc(doc(db, "users", newFriendUid), { contacts: arrayUnion(currentUser.uid) });
                 
-                // Update local state
                 if(!currentUserData.contacts) currentUserData.contacts = [];
                 currentUserData.contacts.push(newFriendUid);
                 
-                // Refresh UI
                 loadMyContacts(); 
                 closeAddCitizenModal();
                 document.getElementById('chat-header').innerHTML = `<div><span style="color: var(--primary);">Success! Added ${newFriendName}.</span></div>`;
@@ -645,7 +726,7 @@
             try { await addDoc(collection(db, "group_chats"), { name: nameInput, members: members, createdAt: serverTimestamp(), createdBy: currentUser.uid }); closeModal(); } catch (error) { console.error(error); }
         };
 
-        // --- OPENING A CHAT (UPDATED FOR TOWN SQUARE) ---
+        // --- OPENING A CHAT (UPDATED FOR MOBILE & WEBRTC) ---
         window.openChat = (type, targetId, displayName, avatarSrc = "") => {
             document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
             if(document.getElementById(`${type}-${targetId}`)) {
@@ -653,14 +734,24 @@
             }
             
             const prefix = type === 'dm' ? "Messaging" : (type === 'global' ? "Global:" : "Group:");
-            let headerHTML = `<div>${prefix} <strong>${displayName}</strong></div><div style="display:flex; gap:10px;">`;
             
+            // Rebuild Header with Mobile Back Button dynamically
+            let titleHTML = `${prefix} <strong>${displayName}</strong>`;
+            let actionsHTML = ``;
             if (type === 'dm') { 
-                headerHTML += `<button class="btn-new-group" style="padding: 6px 12px; margin:0;" onclick="startCall()">📹 Call</button>`;
-                headerHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove</button>`; 
+                actionsHTML += `<button class="btn-new-group" style="padding: 6px 12px; margin:0;" onclick="startCall()">📹 Call</button>`;
+                actionsHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove</button>`; 
             }
-            headerHTML += `</div>`;
-            document.getElementById('chat-header').innerHTML = headerHTML;
+            
+            document.getElementById('chat-header').innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <button class="mobile-back-btn" onclick="closeMobileChat()">← Back</button>
+                    <div>${titleHTML}</div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    ${actionsHTML}
+                </div>
+            `;
             
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
@@ -670,10 +761,12 @@
 
             activeChatType = type;
             activeChatId = type === 'dm' ? (currentUser.uid < targetId ? `${currentUser.uid}_${targetId}` : `${targetId}_${currentUser.uid}`) : targetId;
+            
             listenForMessages();
+            openMobileChat(); // Slide the mobile window over automatically!
         };
 
-        // --- LISTENING TO MESSAGES (UPDATED SOUND & GLOBAL) ---
+        // --- LISTENING TO MESSAGES ---
         function listenForMessages() {
             const chatBox = document.getElementById('chat-box');
             if (unsubscribeChat) unsubscribeChat();
@@ -692,14 +785,12 @@
                 chatBox.innerHTML = ""; 
                 if(snapshot.empty) { chatBox.innerHTML = `<div class="message system" style="margin-top: auto; margin-bottom: auto;">Send a message to start the conversation.</div>`; return; }
 
-                // Ping sound check!
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const mData = change.doc.data();
-                        // Play sound if we didn't send it, and if it's a DM, make sure it's unread
                         if (mData.senderId !== currentUser.uid) {
                             if (activeChatType !== 'dm' || (activeChatType === 'dm' && !mData.read)) {
-                                pingSound.play().catch(e => {}); // Catch error if browser blocks autoplay
+                                pingSound.play().catch(e => {}); 
                             }
                         }
                     }
@@ -763,7 +854,7 @@
             });
         }
 
-        // --- SENDING TEXT MESSAGES (UPDATED FOR GLOBAL) ---
+        // --- SENDING TEXT MESSAGES ---
         window.sendMessage = async () => {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
@@ -832,7 +923,7 @@
             );
         };
 
-        // --- NEW: AUDIO VOICE NOTES ---
+        // --- AUDIO VOICE NOTES ---
         let mediaRecorder;
         let audioChunks = [];
 
@@ -891,7 +982,7 @@
             }
         };
 
-        // --- VIDEO CALLING LOGIC (WITH NEW CONTROLS) ---
+        // --- VIDEO CALLING LOGIC (AGORA WEBRTC) ---
         const APP_ID = "662c5c9b2e39473f9cc6dd9661410875"; 
         let rtcClient = null;
         let localAudioTrack = null;
@@ -907,14 +998,14 @@
                     if (data.incomingCall) {
                         document.getElementById('incoming-call-modal').style.display = 'flex';
                         document.getElementById('caller-name-display').innerText = `${data.incomingCall.callerName} is calling...`;
-                        ringSound.play().catch(e => {}); // Play ringtone
+                        ringSound.play().catch(e => {}); 
                         
                         window.pendingCallChatId = data.incomingCall.chatId;
                         window.pendingCallerId = data.incomingCall.callerId;
                         window.pendingCallerName = data.incomingCall.callerName;
                     } else {
                         document.getElementById('incoming-call-modal').style.display = 'none';
-                        ringSound.pause(); // Stop ringtone
+                        ringSound.pause(); 
                         ringSound.currentTime = 0;
                     }
                 }
@@ -956,7 +1047,6 @@
             document.getElementById('local-player').innerHTML = "";
             document.getElementById('remote-player').innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Waiting for citizen to join...</div>`;
 
-            // Reset control buttons
             document.getElementById('ctrl-mic').innerText = "🎤 Mute";
             document.getElementById('ctrl-cam').innerText = "📷 Camera Off";
             document.getElementById('ctrl-mic').style.background = "var(--primary)";
@@ -968,11 +1058,10 @@
             }
         };
 
-        // NEW: Video Controls
         window.toggleMic = async () => {
             if (!localAudioTrack) return;
             const isMuted = localAudioTrack.muted;
-            await localAudioTrack.setMuted(!isMuted); // Flips the state
+            await localAudioTrack.setMuted(!isMuted); 
             const btn = document.getElementById('ctrl-mic');
             btn.innerText = !isMuted ? "🎤 Unmute" : "🎤 Mute";
             btn.style.background = !isMuted ? "var(--danger)" : "var(--primary)";
@@ -992,10 +1081,9 @@
                 const screenTrack = await AgoraRTC.createScreenVideoTrack();
                 await rtcClient.unpublish(localVideoTrack);
                 await rtcClient.publish(screenTrack);
-                document.getElementById("local-player").innerHTML = ""; // clear camera
+                document.getElementById("local-player").innerHTML = ""; 
                 screenTrack.play(document.getElementById("local-player"));
                 
-                // When you click "Stop Sharing" on browser
                 screenTrack.on("track-ended", async () => {
                     await rtcClient.unpublish(screenTrack);
                     await rtcClient.publish(localVideoTrack);
@@ -1037,5 +1125,3 @@
             }
         }
     </script>
-</body>
-</html>
