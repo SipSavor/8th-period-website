@@ -447,12 +447,12 @@
                         item.appendChild(nameSpan);
                         item.appendChild(addBtn);
                         listContainer.appendChild(item);
-
-                        window.closeAddCitizenModal = () => { 
-    document.getElementById('add-citizen-modal').style.display = 'none'; 
-};
                     }
                 });
+
+                window.closeAddCitizenModal = () => { 
+    document.getElementById('add-citizen-modal').style.display = 'none'; 
+};
 
                 if (!foundAny) {
                     listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">No new citizens to add!</div>';
