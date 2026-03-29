@@ -447,6 +447,10 @@
                         item.appendChild(nameSpan);
                         item.appendChild(addBtn);
                         listContainer.appendChild(item);
+
+                        window.closeAddCitizenModal = () => { 
+    document.getElementById('add-citizen-modal').style.display = 'none'; 
+};
                     }
                 });
 
