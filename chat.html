@@ -454,6 +454,60 @@
     document.getElementById('add-citizen-modal').style.display = 'none'; 
 };
 
+                window.processAddCitizen = async () => {
+    const searchId = document.getElementById('search-citizen-id').value.trim();
+    const errorDiv = document.getElementById('add-citizen-error');
+
+    // Basic validation
+    if (!searchId) {
+        errorDiv.innerText = "Please enter an ID.";
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (currentUserData && searchId === currentUserData.commsId) {
+        errorDiv.innerText = "You cannot add yourself to your own comms!";
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    try {
+        // Hide error div while searching
+        errorDiv.style.display = 'none';
+
+        // Query the database for a user with this specific commsId
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("commsId", "==", searchId));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            errorDiv.innerText = "No citizen found with that ID in the realm.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // Grab the first match (since IDs should be unique)
+        const matchedDoc = querySnapshot.docs[0];
+        const newFriendUid = matchedDoc.id;
+        const newFriendData = matchedDoc.data();
+
+        // Check if they are already in the contacts list
+        if (currentUserData.contacts && currentUserData.contacts.includes(newFriendUid)) {
+            errorDiv.innerText = "This citizen is already in your contacts!";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // Reuse your existing function to add them to the contacts array!
+        await window.addCitizenByUid(newFriendUid, newFriendData.name);
+
+    } catch (error) {
+        console.error("Error finding citizen:", error);
+        errorDiv.innerText = "The royal database is acting up. Please try again.";
+        errorDiv.style.display = 'block';
+    }
+};
+
                 if (!foundAny) {
                     listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">No new citizens to add!</div>';
                 }
