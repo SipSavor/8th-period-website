@@ -379,7 +379,7 @@
         </div>
     </div>
 
-   <script type="module">
+  <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -414,13 +414,17 @@
 
         // --- MOBILE RESPONSIVE FUNCTIONS ---
         window.openMobileChat = () => {
-            if (window.innerWidth <= 768) {
-                document.querySelector('.chat-wrapper').classList.add('mobile-chat-active');
+            const wrapper = document.querySelector('.chat-wrapper');
+            if (wrapper && window.innerWidth <= 768) {
+                wrapper.classList.add('mobile-chat-active');
             }
         };
 
         window.closeMobileChat = () => {
-            document.querySelector('.chat-wrapper').classList.remove('mobile-chat-active');
+            const wrapper = document.querySelector('.chat-wrapper');
+            if (wrapper) {
+                wrapper.classList.remove('mobile-chat-active');
+            }
         };
 
         function getDefaultAvatar(name) {
@@ -535,7 +539,7 @@
                         addBtn.style.fontSize = '0.8rem';
                         addBtn.style.margin = '0';
                         
-                        addBtn.onclick = () => addCitizenByUid(uid, userData.name);
+                        addBtn.onclick = () => window.addCitizenByUid(uid, userData.name);
 
                         item.appendChild(nameSpan);
                         item.appendChild(addBtn);
@@ -612,8 +616,9 @@
                 currentUserData.contacts.push(newFriendUid);
                 
                 loadMyContacts(); 
-                closeAddCitizenModal();
-                document.getElementById('chat-header').innerHTML = `<div><span style="color: var(--primary);">Success! Added ${newFriendName}.</span></div>`;
+                window.closeAddCitizenModal();
+                const chatHeader = document.getElementById('chat-header');
+                if(chatHeader) chatHeader.innerHTML = `<div><span style="color: var(--primary);">Success! Added ${newFriendName}.</span></div>`;
             } catch (error) {
                 console.error(error);
                 errorDiv.innerText = "Database error. Please try again.";
@@ -629,12 +634,17 @@
                 currentUserData.contacts = currentUserData.contacts.filter(id => id !== targetUid);
                 loadMyContacts();
                 if (activeChatType === 'dm' && activeChatId.includes(targetUid)) {
-                    document.getElementById('chat-header').innerHTML = "<div>Select a chat to begin</div>";
-                    document.getElementById('chat-box').innerHTML = `<div class="message system">Citizen removed. Select a new chat from the sidebar.</div>`;
-                    document.getElementById('message-input').disabled = true;
-                    document.getElementById('send-btn').disabled = true;
-                    document.getElementById('upload-btn').disabled = true;
-                    document.getElementById('btn-voice').disabled = true;
+                    const chatHeader = document.getElementById('chat-header');
+                    if(chatHeader) chatHeader.innerHTML = "<div>Select a chat to begin</div>";
+                    
+                    const chatBox = document.getElementById('chat-box');
+                    if(chatBox) chatBox.innerHTML = `<div class="message system">Citizen removed. Select a new chat from the sidebar.</div>`;
+                    
+                    if (document.getElementById('message-input')) document.getElementById('message-input').disabled = true;
+                    if (document.getElementById('send-btn')) document.getElementById('send-btn').disabled = true;
+                    if (document.getElementById('upload-btn')) document.getElementById('upload-btn').disabled = true;
+                    if (document.getElementById('btn-voice')) document.getElementById('btn-voice').disabled = true;
+                    
                     activeChatId = null;
                     if (unsubscribeChat) unsubscribeChat();
                 }
@@ -645,9 +655,12 @@
             const dmList = document.getElementById('dm-list');
             const checklist = document.getElementById('citizen-checklist');
             contactListeners.forEach(unsub => unsub()); contactListeners = [];
-            dmList.innerHTML = ""; checklist.innerHTML = ""; 
+            
+            if(dmList) dmList.innerHTML = ""; 
+            if(checklist) checklist.innerHTML = ""; 
+            
             if (!currentUserData.contacts || currentUserData.contacts.length === 0) {
-                dmList.innerHTML = `<div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No contacts yet. Add someone!</div>`;
+                if(dmList) dmList.innerHTML = `<div style="padding: 10px 12px; color: var(--text-muted); font-size: 0.8rem;">No contacts yet. Add someone!</div>`;
                 return;
             }
             currentUserData.contacts.forEach(friendUid => {
@@ -658,24 +671,29 @@
                         const avatarSrc = data.photoURL || getDefaultAvatar(data.name);
 
                         let dmDiv = document.getElementById(`dm-${friendUid}`);
-                        if (!dmDiv) {
+                        if (!dmDiv && dmList) {
                             dmDiv = document.createElement('div'); dmDiv.className = 'contact-item'; dmDiv.id = `dm-${friendUid}`;
-                            dmDiv.onclick = () => openChat('dm', friendUid, data.name, avatarSrc);
+                            // FIXED CLICK HANDLER HERE
+                            dmDiv.onclick = () => window.openChat('dm', friendUid, data.name, avatarSrc);
                             dmList.appendChild(dmDiv);
                             
-                            const label = document.createElement('label'); label.className = 'checklist-item';
-                            label.innerHTML = `<input type="checkbox" class="citizen-checkbox" value="${friendUid}"><span>${data.name}</span>`;
-                            checklist.appendChild(label);
+                            if(checklist) {
+                                const label = document.createElement('label'); label.className = 'checklist-item';
+                                label.innerHTML = `<input type="checkbox" class="citizen-checkbox" value="${friendUid}"><span>${data.name}</span>`;
+                                checklist.appendChild(label);
+                            }
                         }
-                        dmDiv.innerHTML = `
-                            <img src="${avatarSrc}" class="contact-avatar">
-                            <div class="contact-info">
-                                <div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div>
-                                <div class="contact-sub">${data.rank}</div>
-                            </div>
-                            <div class="unread-badge" id="badge-${friendUid}"></div>
-                        `;
-                        if(activeChatId && activeChatId.includes(friendUid)) { dmDiv.classList.add('active'); }
+                        if(dmDiv) {
+                            dmDiv.innerHTML = `
+                                <img src="${avatarSrc}" class="contact-avatar">
+                                <div class="contact-info">
+                                    <div class="contact-name"><span class="status-dot" style="background-color: ${isOnlineColor}"></span>${data.name}</div>
+                                    <div class="contact-sub">${data.rank || 'Citizen'}</div>
+                                </div>
+                                <div class="unread-badge" id="badge-${friendUid}"></div>
+                            `;
+                            if(activeChatId && activeChatId.includes(friendUid)) { dmDiv.classList.add('active'); }
+                        }
                     }
                 });
                 contactListeners.push(unsubPresence);
@@ -692,6 +710,7 @@
 
         function loadMyGroups() {
             const groupsList = document.getElementById('groups-list');
+            if(!groupsList) return;
             const q = query(collection(db, "group_chats"), where("members", "array-contains", currentUser.uid));
             onSnapshot(q, (snapshot) => {
                 groupsList.innerHTML = ""; 
@@ -709,66 +728,86 @@
                             <div class="contact-sub">${data.members.length} Members</div>
                         </div>
                     `;
-                    groupDiv.onclick = () => openChat('group', groupId, data.name, groupAvatar);
+                    // FIXED CLICK HANDLER HERE
+                    groupDiv.onclick = () => window.openChat('group', groupId, data.name, groupAvatar);
                     groupsList.appendChild(groupDiv);
                 });
             });
         }
 
-        window.openModal = () => document.getElementById('group-modal').style.display = 'flex';
-        window.closeModal = () => { document.getElementById('group-modal').style.display = 'none'; document.getElementById('new-group-name').value = ''; document.querySelectorAll('.citizen-checkbox').forEach(cb => cb.checked = false); };
+        window.openModal = () => {
+            const modal = document.getElementById('group-modal');
+            if(modal) modal.style.display = 'flex';
+        };
+        
+        window.closeModal = () => { 
+            const modal = document.getElementById('group-modal');
+            if(modal) modal.style.display = 'none'; 
+            if(document.getElementById('new-group-name')) document.getElementById('new-group-name').value = ''; 
+            document.querySelectorAll('.citizen-checkbox').forEach(cb => cb.checked = false); 
+        };
+        
         window.createGroup = async () => {
             const nameInput = document.getElementById('new-group-name').value.trim();
             if (!nameInput) return alert("Please enter a group name!");
             const members = [currentUser.uid]; 
             document.querySelectorAll('.citizen-checkbox:checked').forEach(box => members.push(box.value));
             if (members.length < 2) return alert("Select at least one other citizen!");
-            try { await addDoc(collection(db, "group_chats"), { name: nameInput, members: members, createdAt: serverTimestamp(), createdBy: currentUser.uid }); closeModal(); } catch (error) { console.error(error); }
+            try { 
+                await addDoc(collection(db, "group_chats"), { name: nameInput, members: members, createdAt: serverTimestamp(), createdBy: currentUser.uid }); 
+                window.closeModal(); 
+            } catch (error) { console.error(error); }
         };
 
-        // --- OPENING A CHAT (UPDATED FOR MOBILE & WEBRTC) ---
+        // --- OPENING A CHAT (CRASH-PROOF VERSION) ---
         window.openChat = (type, targetId, displayName, avatarSrc = "") => {
             document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
-            if(document.getElementById(`${type}-${targetId}`)) {
-                document.getElementById(`${type}-${targetId}`).classList.add('active');
-            }
+            const activeItem = document.getElementById(`${type}-${targetId}`);
+            if(activeItem) activeItem.classList.add('active');
             
             const prefix = type === 'dm' ? "Messaging" : (type === 'global' ? "Global:" : "Group:");
             
-            // Rebuild Header with Mobile Back Button dynamically
             let titleHTML = `${prefix} <strong>${displayName}</strong>`;
             let actionsHTML = ``;
             if (type === 'dm') { 
-                actionsHTML += `<button class="btn-new-group" style="padding: 6px 12px; margin:0;" onclick="startCall()">📹 Call</button>`;
-                actionsHTML += `<button class="btn-remove" onclick="removeContact('${targetId}', '${displayName}')">Remove</button>`; 
+                actionsHTML += `<button class="btn-new-group" style="padding: 6px 12px; margin:0;" onclick="window.startCall()">📹 Call</button>`;
+                actionsHTML += `<button class="btn-remove" onclick="window.removeContact('${targetId}', '${displayName}')">Remove</button>`; 
             }
             
-            document.getElementById('chat-header').innerHTML = `
-                <div style="display: flex; align-items: center;">
-                    <button class="mobile-back-btn" onclick="closeMobileChat()">← Back</button>
-                    <div>${titleHTML}</div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    ${actionsHTML}
-                </div>
-            `;
+            const chatHeader = document.getElementById('chat-header');
+            if (chatHeader) {
+                chatHeader.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <button class="mobile-back-btn" onclick="window.closeMobileChat()">← Back</button>
+                        <div>${titleHTML}</div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        ${actionsHTML}
+                    </div>
+                `;
+            }
             
-            document.getElementById('message-input').disabled = false;
-            document.getElementById('send-btn').disabled = false;
-            document.getElementById('upload-btn').disabled = false; 
-            document.getElementById('btn-voice').disabled = false;
-            document.getElementById('message-input').focus();
+            const msgInput = document.getElementById('message-input');
+            if (msgInput) {
+                msgInput.disabled = false;
+                msgInput.focus();
+            }
+            
+            if (document.getElementById('send-btn')) document.getElementById('send-btn').disabled = false;
+            if (document.getElementById('upload-btn')) document.getElementById('upload-btn').disabled = false; 
+            if (document.getElementById('btn-voice')) document.getElementById('btn-voice').disabled = false;
 
             activeChatType = type;
             activeChatId = type === 'dm' ? (currentUser.uid < targetId ? `${currentUser.uid}_${targetId}` : `${targetId}_${currentUser.uid}`) : targetId;
             
             listenForMessages();
-            openMobileChat(); // Slide the mobile window over automatically!
+            window.openMobileChat(); 
         };
 
         // --- LISTENING TO MESSAGES ---
         function listenForMessages() {
             const chatBox = document.getElementById('chat-box');
+            if(!chatBox) return;
             if (unsubscribeChat) unsubscribeChat();
 
             let messagesRef;
@@ -857,6 +896,7 @@
         // --- SENDING TEXT MESSAGES ---
         window.sendMessage = async () => {
             const input = document.getElementById('message-input');
+            if(!input) return;
             const text = input.value.trim();
             if (!text || !activeChatId) return;
             input.value = ""; 
@@ -880,17 +920,20 @@
             } catch (error) { console.error("Error sending message: ", error); }
         };
 
-        window.handleEnter = (e) => { if (e.key === 'Enter') sendMessage(); };
+        window.handleEnter = (e) => { if (e.key === 'Enter') window.sendMessage(); };
 
         // --- UPLOADING & SENDING IMAGES ---
         window.handleImageUpload = async (event) => {
             const file = event.target.files[0];
             if (!file || !activeChatId) return;
-            document.getElementById('image-upload').value = "";
+            const imageUpload = document.getElementById('image-upload');
+            if(imageUpload) imageUpload.value = "";
             
             const progressDiv = document.getElementById('upload-progress');
-            progressDiv.style.display = 'block';
-            progressDiv.innerText = `Uploading image: 0%`;
+            if(progressDiv) {
+                progressDiv.style.display = 'block';
+                progressDiv.innerText = `Uploading image: 0%`;
+            }
 
             const uniqueFileName = `${Date.now()}_${file.name}`;
             const storageRef = ref(storage, `chat_images/${uniqueFileName}`);
@@ -898,13 +941,20 @@
 
             uploadTask.on('state_changed', 
                 (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    progressDiv.innerText = `Uploading image: ${Math.round(progress)}%`;
+                    if(progressDiv) {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressDiv.innerText = `Uploading image: ${Math.round(progress)}%`;
+                    }
                 }, 
-                (error) => { progressDiv.innerText = "Upload failed!"; setTimeout(() => progressDiv.style.display = 'none', 3000); }, 
+                (error) => { 
+                    if(progressDiv) {
+                        progressDiv.innerText = "Upload failed!"; 
+                        setTimeout(() => progressDiv.style.display = 'none', 3000); 
+                    }
+                }, 
                 async () => {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    progressDiv.style.display = 'none';
+                    if(progressDiv) progressDiv.style.display = 'none';
                     
                     const newMessage = {
                         text: "📷 Sent an image", imageUrl: downloadURL, senderId: currentUser.uid,
@@ -935,8 +985,10 @@
                 mediaRecorder.start();
                 
                 const voiceBtn = document.getElementById('btn-voice');
-                voiceBtn.innerText = "🔴 Recording";
-                voiceBtn.style.color = "var(--danger)";
+                if(voiceBtn) {
+                    voiceBtn.innerText = "🔴 Recording";
+                    voiceBtn.style.color = "var(--danger)";
+                }
                 
                 mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
                 
@@ -945,15 +997,17 @@
                     audioChunks = []; 
                     
                     const progressDiv = document.getElementById('upload-progress');
-                    progressDiv.style.display = 'block';
-                    progressDiv.innerText = `Sending transmission...`;
+                    if(progressDiv) {
+                        progressDiv.style.display = 'block';
+                        progressDiv.innerText = `Sending transmission...`;
+                    }
                     
                     const storageRef = ref(storage, `chat_audio/${Date.now()}_voice.mp3`);
                     const uploadTask = uploadBytesResumable(storageRef, audioBlob);
                     
                     uploadTask.on('state_changed', null, null, async () => {
                         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        progressDiv.style.display = 'none';
+                        if(progressDiv) progressDiv.style.display = 'none';
                         
                         const newMessage = {
                             text: "🎤 Sent a voice note", audioUrl: downloadURL, senderId: currentUser.uid,
@@ -977,8 +1031,10 @@
             if(mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
                 const voiceBtn = document.getElementById('btn-voice');
-                voiceBtn.innerText = "🎙️";
-                voiceBtn.style.color = "var(--text-main)";
+                if(voiceBtn) {
+                    voiceBtn.innerText = "🎙️";
+                    voiceBtn.style.color = "var(--text-main)";
+                }
             }
         };
 
@@ -996,15 +1052,19 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.incomingCall) {
-                        document.getElementById('incoming-call-modal').style.display = 'flex';
-                        document.getElementById('caller-name-display').innerText = `${data.incomingCall.callerName} is calling...`;
+                        const incomingModal = document.getElementById('incoming-call-modal');
+                        const callerNameDisplay = document.getElementById('caller-name-display');
+                        
+                        if(incomingModal) incomingModal.style.display = 'flex';
+                        if(callerNameDisplay) callerNameDisplay.innerText = `${data.incomingCall.callerName} is calling...`;
                         ringSound.play().catch(e => {}); 
                         
                         window.pendingCallChatId = data.incomingCall.chatId;
                         window.pendingCallerId = data.incomingCall.callerId;
                         window.pendingCallerName = data.incomingCall.callerName;
                     } else {
-                        document.getElementById('incoming-call-modal').style.display = 'none';
+                        const incomingModal = document.getElementById('incoming-call-modal');
+                        if(incomingModal) incomingModal.style.display = 'none';
                         ringSound.pause(); 
                         ringSound.currentTime = 0;
                     }
@@ -1021,16 +1081,20 @@
                     incomingCall: { callerId: currentUser.uid, callerName: currentUserData.name, chatId: activeChatId }
                 });
             }
-            document.getElementById('video-modal').style.display = 'flex';
-            document.getElementById('video-title').innerText = `Calling...`;
+            const videoModal = document.getElementById('video-modal');
+            const videoTitle = document.getElementById('video-title');
+            if(videoModal) videoModal.style.display = 'flex';
+            if(videoTitle) videoTitle.innerText = `Calling...`;
             await connectToAgora(activeChatId);
         };
 
         window.acceptCall = async () => {
             await updateDoc(doc(db, "users", currentUser.uid), { incomingCall: null });
-            openChat('dm', window.pendingCallerId, window.pendingCallerName);
-            document.getElementById('video-modal').style.display = 'flex';
-            document.getElementById('video-title').innerText = `Secure Comms Linked`;
+            window.openChat('dm', window.pendingCallerId, window.pendingCallerName);
+            const videoModal = document.getElementById('video-modal');
+            const videoTitle = document.getElementById('video-title');
+            if(videoModal) videoModal.style.display = 'flex';
+            if(videoTitle) videoTitle.innerText = `Secure Comms Linked`;
             await connectToAgora(window.pendingCallChatId);
         };
 
@@ -1043,14 +1107,24 @@
             if (localVideoTrack) { localVideoTrack.close(); }
             if (rtcClient) { await rtcClient.leave(); }
             
-            document.getElementById('video-modal').style.display = 'none';
-            document.getElementById('local-player').innerHTML = "";
-            document.getElementById('remote-player').innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Waiting for citizen to join...</div>`;
+            const videoModal = document.getElementById('video-modal');
+            const localPlayer = document.getElementById('local-player');
+            const remotePlayer = document.getElementById('remote-player');
+            const ctrlMic = document.getElementById('ctrl-mic');
+            const ctrlCam = document.getElementById('ctrl-cam');
+            
+            if(videoModal) videoModal.style.display = 'none';
+            if(localPlayer) localPlayer.innerHTML = "";
+            if(remotePlayer) remotePlayer.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Waiting for citizen to join...</div>`;
 
-            document.getElementById('ctrl-mic').innerText = "🎤 Mute";
-            document.getElementById('ctrl-cam').innerText = "📷 Camera Off";
-            document.getElementById('ctrl-mic').style.background = "var(--primary)";
-            document.getElementById('ctrl-cam').style.background = "var(--primary)";
+            if(ctrlMic) {
+                ctrlMic.innerText = "🎤 Mute";
+                ctrlMic.style.background = "var(--primary)";
+            }
+            if(ctrlCam) {
+                ctrlCam.innerText = "📷 Camera Off";
+                ctrlCam.style.background = "var(--primary)";
+            }
 
             if (activeChatType === 'dm' && activeChatId) {
                 const targetUid = activeChatId.replace(currentUser.uid, '').replace('_', '');
@@ -1063,8 +1137,10 @@
             const isMuted = localAudioTrack.muted;
             await localAudioTrack.setMuted(!isMuted); 
             const btn = document.getElementById('ctrl-mic');
-            btn.innerText = !isMuted ? "🎤 Unmute" : "🎤 Mute";
-            btn.style.background = !isMuted ? "var(--danger)" : "var(--primary)";
+            if(btn) {
+                btn.innerText = !isMuted ? "🎤 Unmute" : "🎤 Mute";
+                btn.style.background = !isMuted ? "var(--danger)" : "var(--primary)";
+            }
         };
 
         window.toggleCam = async () => {
@@ -1072,8 +1148,10 @@
             const isMuted = localVideoTrack.muted;
             await localVideoTrack.setMuted(!isMuted);
             const btn = document.getElementById('ctrl-cam');
-            btn.innerText = !isMuted ? "📷 Cam On" : "📷 Camera Off";
-            btn.style.background = !isMuted ? "var(--danger)" : "var(--primary)";
+            if(btn) {
+                btn.innerText = !isMuted ? "📷 Cam On" : "📷 Camera Off";
+                btn.style.background = !isMuted ? "var(--danger)" : "var(--primary)";
+            }
         };
 
         window.shareScreen = async () => {
@@ -1081,14 +1159,19 @@
                 const screenTrack = await AgoraRTC.createScreenVideoTrack();
                 await rtcClient.unpublish(localVideoTrack);
                 await rtcClient.publish(screenTrack);
-                document.getElementById("local-player").innerHTML = ""; 
-                screenTrack.play(document.getElementById("local-player"));
+                const localPlayer = document.getElementById("local-player");
+                if(localPlayer) {
+                    localPlayer.innerHTML = ""; 
+                    screenTrack.play(localPlayer);
+                }
                 
                 screenTrack.on("track-ended", async () => {
                     await rtcClient.unpublish(screenTrack);
                     await rtcClient.publish(localVideoTrack);
-                    document.getElementById("local-player").innerHTML = ""; 
-                    localVideoTrack.play(document.getElementById("local-player"));
+                    if(localPlayer) {
+                        localPlayer.innerHTML = ""; 
+                        localVideoTrack.play(localPlayer);
+                    }
                 });
             } catch(e) { console.error("Screen Share Error", e); }
         };
@@ -1098,18 +1181,24 @@
 
             rtcClient.on("user-published", async (user, mediaType) => {
                 await rtcClient.subscribe(user, mediaType);
-                document.getElementById('video-title').innerText = `Secure Comms Linked`;
+                const videoTitle = document.getElementById('video-title');
+                if(videoTitle) videoTitle.innerText = `Secure Comms Linked`;
                 
                 if (mediaType === "video") {
                     const remotePlayer = document.getElementById("remote-player");
-                    remotePlayer.innerHTML = ""; 
-                    user.videoTrack.play(remotePlayer);
+                    if(remotePlayer) {
+                        remotePlayer.innerHTML = ""; 
+                        user.videoTrack.play(remotePlayer);
+                    }
                 }
                 if (mediaType === "audio") { user.audioTrack.play(); }
             });
 
             rtcClient.on("user-unpublished", (user) => {
-                document.getElementById("remote-player").innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Citizen disconnected.</div>`;
+                const remotePlayer = document.getElementById("remote-player");
+                if(remotePlayer) {
+                    remotePlayer.innerHTML = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted);">Citizen disconnected.</div>`;
+                }
             });
 
             try {
@@ -1117,11 +1206,14 @@
                 localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 localVideoTrack = await AgoraRTC.createCameraVideoTrack();
                 
-                localVideoTrack.play(document.getElementById("local-player"));
+                const localPlayer = document.getElementById("local-player");
+                if(localPlayer) {
+                    localVideoTrack.play(localPlayer);
+                }
                 await rtcClient.publish([localAudioTrack, localVideoTrack]);
             } catch (error) {
                 alert("Camera/Mic access denied or connection failed.");
-                endCall();
+                window.endCall();
             }
         }
     </script>
