@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Echo Messaging: Secure Comms for the Kingdom of 8th Period">
-    <title>Echo Messaging</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>Portal | Echo Messaging</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
             --primary-light: #818cf8;
             --primary-glow: rgba(99, 102, 241, 0.2);
-            --accent: #fbbf24;
             --bg-main: #020617; 
             --card-bg: #0f172a;
             --border-color: #1e293b;
@@ -25,37 +19,18 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { scroll-behavior: smooth; }
-
+        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow-x: hidden;
         }
 
-        /* Background Decor */
-        .blob {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-            filter: blur(60px);
-            border-radius: 50%;
-            z-index: -1;
-            top: -200px;
-            right: -100px;
-            animation: float 20s infinite alternate;
-        }
-
-        @keyframes float {
-            from { transform: translate(0, 0); }
-            to { transform: translate(-100px, 100px); }
-        }
-
-        /* Navigation */
+        /* Navigation Styling */
         nav {
             padding: 1rem 8%;
             display: flex;
@@ -64,7 +39,8 @@
             border-bottom: 1px solid var(--border-color);
             background: var(--nav-bg);
             backdrop-filter: blur(16px);
-            position: sticky;
+            width: 100%;
+            position: fixed;
             top: 0;
             z-index: 1000;
         }
@@ -77,7 +53,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            letter-spacing: -0.5px;
         }
 
         .logo-icon {
@@ -88,267 +63,221 @@
             display: grid;
             place-items: center;
             color: white;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        /* Hero Section */
-        .hero {
-            padding: 80px 8% 120px 8%;
+        /* Main Content Wrapper */
+        .portal-container {
+            flex: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 40px;
-            min-height: 85vh;
+            justify-content: center;
+            padding-top: 80px; /* Offset for fixed nav */
         }
 
-        .hero-content {
-            max-width: 650px;
+        .blob {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            filter: blur(80px);
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 10s infinite alternate;
         }
 
-        .hero-content h1 {
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        .portal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .card-logo-center {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
             font-weight: 800;
-            line-height: 1.05;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to bottom right, #ffffff 40%, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin: 0 auto 12px auto;
         }
 
-        .hero-content p {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-            max-width: 500px;
+        h1 { font-size: 1.5rem; text-align: center; margin-bottom: 8px; }
+        p.subtitle { color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-bottom: 24px; }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
         }
 
-        /* Buttons */
+        .form-control:focus { outline: none; border-color: var(--primary); }
+
         .btn {
-            padding: 14px 28px;
+            padding: 10px 20px;
             border-radius: 10px;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-block;
             cursor: pointer;
+            transition: 0.2s;
+            border: none;
             font-family: inherit;
-            font-size: 0.95rem;
         }
 
         .btn-primary {
             background: var(--primary);
             color: white;
-            box-shadow: 0 8px 20px -4px var(--primary-glow);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            background: var(--primary-light);
-            box-shadow: 0 12px 24px -4px var(--primary-glow);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            margin-left: 12px;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--text-muted);
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
         }
 
-        /* UI Mockup */
-        .hero-visual {
-            position: relative;
-            perspective: 1000px;
-        }
+        .btn:hover { transform: translateY(-1px); opacity: 0.9; }
 
-        .mockup {
-            width: 380px;
-            height: 480px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.8);
-            padding: 24px;
-            position: relative;
-            transform: rotateY(-5deg) rotateX(5deg);
-            transition: transform 0.5s ease;
-        }
-
-        .mockup:hover {
-            transform: rotateY(0deg) rotateX(0deg);
-        }
-
-        .mockup-header {
-            height: 30px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            color: var(--primary-light);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .mockup-bubble {
-            padding: 12px 16px;
-            border-radius: 16px;
-            margin-bottom: 12px;
+        .toggle-text {
+            text-align: center;
+            margin-top: 20px;
             font-size: 0.85rem;
-            max-width: 80%;
-            animation: slideIn 0.4s ease-out forwards;
-            opacity: 0;
-        }
-
-        .msg-received {
-            background: var(--border-color);
-            color: var(--text-main);
-            border-bottom-left-radius: 4px;
-        }
-
-        .msg-sent {
-            background: var(--primary);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-            animation-delay: 0.2s;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Features Grid */
-        .features {
-            padding: 100px 8%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0) 100%);
-            border: 1px solid var(--border-color);
-            padding: 40px;
-            border-radius: 24px;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary-light);
-            transform: translateY(-5px);
-            background: rgba(30, 41, 59, 0.6);
-        }
-
-        .feature-icon {
-            font-size: 1.5rem;
-            width: 48px;
-            height: 48px;
-            background: var(--primary-glow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            color: var(--primary-light);
-        }
-
-        .feature-card h3 {
-            margin-bottom: 12px;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .feature-card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.7;
         }
 
-        @media (max-width: 1024px) {
-            .hero { flex-direction: column; text-align: center; padding-top: 60px; }
-            .hero-content { display: flex; flex-direction: column; align-items: center; }
-            .hero-visual { margin-top: 40px; }
-        }
-
-        @media (max-width: 640px) {
-            .hero-content h1 { font-size: 2.8rem; }
-            .btn-secondary { margin-left: 0; margin-top: 12px; width: 100%; }
-            .btn-primary { width: 100%; }
-            .mockup { width: 300px; }
-        }
+        .toggle-text span { color: var(--primary-light); cursor: pointer; font-weight: 600; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="blob"></div>
-
     <nav>
-        <a href="index.html" class="logo" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
-    <img src="Gemini_Generated_Image_9qbhrk9qbhrk9qbh.png" alt="Echo Logo" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
-    <span style="color: var(--text-main); font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px;">
-        Echo Messaging
-    </span>
-</a>
-        <div class="nav-links">
-            <a href="portal.html" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">Portal</a>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">E</div>
+            Echo Messaging
+        </a>
+        <div id="nav-user-area">
+            <a href="portal.html" class="btn btn-primary" id="portal-btn" style="padding: 8px 18px; font-size: 0.85rem;">Portal</a>
         </div>
     </nav>
 
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Secure Comms for Everyone.</h1>
-                <p>The high-performance messaging standard for people of NJHS. End-to-end encrypted and built for the modern person.</p>
-                <div class="hero-actions">
-                    <a href="portal.html" class="btn btn-primary">Enter Dashboard</a>
-                    <a href="#features" class="btn btn-secondary">Platform Features</a>
-                </div>
-            </div>
+    <div class="portal-container">
+        <div class="blob"></div>
 
-            <div class="hero-visual">
-                <div class="mockup">
-                    <div class="mockup-header">
-                        # Texing-Normal
+        <div class="portal-card">
+            <div class="card-logo-center">E</div>
+            
+            <div id="login-section">
+                <h1>welcome back</h1>
+                <p class="subtitle">log in to see what's happening</p>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>username</label>
+                        <input type="text" id="login-user" class="form-control" placeholder="your name" required>
                     </div>
-                    <div class="mockup-bubble msg-received">yoooo is the project due today?</div>
-<div class="mockup-bubble msg-received">i literally haven't even started lol</div>
-<div class="mockup-bubble msg-sent">nah we have until friday</div>
-<div class="mockup-bubble msg-sent">just don't wait until 11:59 again 💀</div>
-<div class="mockup-bubble msg-received">bet. you're a lifesaver</div>
-                    
-                    <div style="position: absolute; bottom: 24px; left: 24px; right: 24px; height: 44px; background: var(--bg-main); border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; padding-left: 15px; color: #475569; font-size: 0.8rem;">
-                        Type a message...
+                    <div class="form-group">
+                        <label>passkey</label>
+                        <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary btn-submit">sign in</button>
+                </form>
+                <p class="toggle-text">new here? <span onclick="toggleForm()">create an account</span></p>
             </div>
-        </section>
 
-        <section class="features" id="features">
-            <div class="feature-card">
-                <div class="feature-icon">🛡️</div>
-                <h3>Secure by Design</h3>
-                <p>Every message is wrapped in multi-layer encryption. Your data remains your property, always.</p>
+            <div id="register-section" class="hidden">
+                <h1>join the echo</h1>
+                <p class="subtitle">create your kingdom identity</p>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label>choose username</label>
+                        <input type="text" id="reg-user" class="form-control" placeholder="coolname123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>set passkey</label>
+                        <input type="password" id="reg-pass" class="form-control" placeholder="make it strong" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-submit">create account</button>
+                </form>
+                <p class="toggle-text">already a citizen? <span onclick="toggleForm()">log in</span></p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Instant Sync</h3>
-                <p>Seamlessly transition between terminal, web, and mobile. Zero latency, zero packet loss.</p>
-            </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
-    <footer style="text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color);">
-        &copy; 2026 Echo Messaging | Kingdom of 8th Period
-    </footer>
+    <script>
+        // Check if someone is logged in for the Nav Bar
+        const user = sessionStorage.getItem('currentUser');
+        if(user) {
+            document.getElementById('nav-user-area').innerHTML = `
+                <span style="margin-right:15px; font-weight:600; font-size:0.9rem;">👋 hi, ${user}</span>
+                <button onclick="logout()" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.75rem; margin:0;">Logout</button>
+            `;
+        }
 
+        function logout() {
+            sessionStorage.clear();
+            window.location.reload();
+        }
+
+        function toggleForm() {
+            document.getElementById('login-section').classList.toggle('hidden');
+            document.getElementById('register-section').classList.toggle('hidden');
+        }
+
+        // REGISTER LOGIC
+        document.getElementById('register-form').onsubmit = function(e) {
+            e.preventDefault();
+            const userVal = document.getElementById('reg-user').value;
+            const passVal = document.getElementById('reg-pass').value;
+
+            if(localStorage.getItem(userVal)) {
+                alert("That name is taken, choose another!");
+            } else {
+                localStorage.setItem(userVal, passVal);
+                alert("Account created! Now you can sign in.");
+                toggleForm();
+            }
+        };
+
+        // LOGIN LOGIC
+        document.getElementById('login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const userVal = document.getElementById('login-user').value;
+            const passVal = document.getElementById('login-pass').value;
+            const storedPass = localStorage.getItem(userVal);
+
+            if (storedPass && storedPass === passVal) {
+                sessionStorage.setItem('currentUser', userVal);
+                window.location.href = 'index.html';
+            } else {
+                alert("Access Denied. Check your name or passkey.");
+            }
+        };
+    </script>
 </body>
 </html>
