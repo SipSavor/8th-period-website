@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Citizen Portal for the Kingdom of 8th Period">
-    <title>Kingdom of 8th Period | Portal</title>
+    <meta name="description" content="Echo Messaging: Secure Comms for the Kingdom of 8th Period">
+    <title>Echo Messaging | Kingdom Standards</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,411 +12,341 @@
     
     <style>
         :root {
-            --primary: #818cf8;
-            --primary-glow: rgba(129, 140, 248, 0.25);
-            --accent: #f59e0b;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-glow: rgba(99, 102, 241, 0.2);
+            --accent: #fbbf24;
             --bg-main: #020617; 
-            --card-bg: rgba(30, 41, 59, 0.4);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --card-border-hover: rgba(129, 140, 248, 0.4);
+            --card-bg: #0f172a;
+            --border-color: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --danger: #ef4444;
+            --nav-bg: rgba(2, 6, 23, 0.85);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { scroll-behavior: smooth; }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-main);
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.1) 0%, transparent 40%);
-            background-attachment: fixed;
             color: var(--text-main);
-            min-height: 100vh;
             line-height: 1.6;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
         }
 
+        /* Background Decor */
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            filter: blur(60px);
+            border-radius: 50%;
+            z-index: -1;
+            top: -200px;
+            right: -100px;
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-100px, 100px); }
+        }
+
+        /* Navigation */
         nav {
-            position: sticky; top: 0; z-index: 1000; background: rgba(2, 6, 23, 0.6);
-            backdrop-filter: blur(20px); padding: 1.25rem 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--nav-bg);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .nav-logo {
-            font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
-            background: linear-gradient(135deg, #e2e8f0 0%, var(--primary) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
         }
 
-        .nav-links { display: flex; gap: 2rem; align-items: center; }
-        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
-        .nav-links a:hover { color: var(--text-main); }
-
-        .hero { text-align: center; padding: 120px 20px 60px; animation: slideUp 0.8s ease-out; }
-        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 1rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(to right bottom, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { color: var(--text-muted); font-size: clamp(1rem, 4vw, 1.25rem); max-width: 600px; margin: 0 auto; margin-bottom: 2rem; }
-
-        .container { max-width: 1200px; margin: 0 auto 100px; padding: 0 24px; }
-        .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
-        
-        .portal-card {
-            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px;
-            padding: 40px 32px; text-decoration: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column; backdrop-filter: blur(12px); position: relative; overflow: hidden; color: var(--text-main);
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        .portal-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow); }
-
-        .icon-circle { width: 64px; height: 64px; background: rgba(255, 255, 255, 0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; border: 1px solid var(--card-border); transition: 0.5s; }
-        .portal-card:hover .icon-circle { background: var(--primary); color: #020617; transform: scale(1.1) rotate(-5deg); }
-
-        .badge-new { font-size: 0.45em; background: var(--danger); color: white; padding: 4px 8px; border-radius: 12px; vertical-align: middle; margin-left: 8px; font-weight: 800; letter-spacing: 1px;}
-
-        footer { padding: 40px 20px 60px; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 2px; border-top: 1px solid var(--card-border); opacity: 0.7; }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            nav { flex-direction: column; gap: 1.5rem; text-align: center; }
-            .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        /* Hero Section */
+        .hero {
+            padding: 80px 8% 120px 8%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            min-height: 85vh;
         }
 
-        /* --- Buttons & Modal --- */
-        .auth-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; font-size: 1rem; }
-        .btn-primary { background: var(--primary); color: #020617; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
-        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--card-border); }
-        .btn-secondary:hover { background: var(--card-border-hover); border-color: var(--primary); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-        .btn-save { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); display: none; margin-left: 10px;}
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(10px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s ease;
+        .hero-content {
+            max-width: 650px;
         }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .modal-content {
-            background: var(--bg-main); border: 1px solid var(--card-border);
-            border-radius: 24px; padding: 40px; width: 90%; max-width: 400px;
-            position: relative; transform: translateY(20px); transition: 0.3s ease;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to bottom right, #ffffff 40%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        .close-modal { position: absolute; top: 20px; right: 24px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; transition: 0.2s; }
-        .close-modal:hover { color: var(--text-main); transform: rotate(90deg); }
-
-        .auth-form { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
-        .auth-inputs { padding: 14px; border-radius: 12px; border: 1px solid var(--card-border); background: var(--card-bg); color: white; outline: none; font-family: inherit; font-size: 1rem; transition: 0.2s; }
-        .auth-inputs:focus { border-color: var(--primary); background: rgba(30, 41, 59, 0.8); }
-
-        /* Editing mode highlights */
-        .editable-text[contenteditable="true"] {
-            border: 1px dashed var(--accent);
-            padding: 8px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.5);
-            outline: none;
-            cursor: text;
+        .hero-content p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
         }
-        .editable-text[contenteditable="true"]:focus {
-            border-style: solid;
-            background: rgba(30, 41, 59, 0.9);
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 8px 20px -4px var(--primary-glow);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            background: var(--primary-light);
+            box-shadow: 0 12px 24px -4px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            margin-left: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+        }
+
+        /* UI Mockup */
+        .hero-visual {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .mockup {
+            width: 380px;
+            height: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.8);
+            padding: 24px;
+            position: relative;
+            transform: rotateY(-5deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+
+        .mockup:hover {
+            transform: rotateY(0deg) rotateX(0deg);
+        }
+
+        .mockup-header {
+            height: 30px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            color: var(--primary-light);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mockup-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            max-width: 80%;
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        .msg-received {
+            background: var(--border-color);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-sent {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            animation-delay: 0.2s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Features Grid */
+        .features {
+            padding: 100px 8%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0) 100%);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            color: var(--primary-light);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1024px) {
+            .hero { flex-direction: column; text-align: center; padding-top: 60px; }
+            .hero-content { display: flex; flex-direction: column; align-items: center; }
+            .hero-visual { margin-top: 40px; }
+        }
+
+        @media (max-width: 640px) {
+            .hero-content h1 { font-size: 2.8rem; }
+            .btn-secondary { margin-left: 0; margin-top: 12px; width: 100%; }
+            .btn-primary { width: 100%; }
+            .mockup { width: 300px; }
         }
     </style>
 </head>
 <body>
 
+    <div class="blob"></div>
+
     <nav>
-        <div class="nav-logo">Kingdom of 8th</div>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">E</div>
+            Echo Messaging
+        </a>
         <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="news.html">News</a>
-            <a href="constitution.html">Constitution</a>
-            <a href="ranks.html">Ranks</a>
-            <a href="chat.html" class="protected-link">Secure Chat 🔒</a>
-            <a href="admin.html" style="color: #f59e0b;">Admin</a>
+            <a href="portal.html" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">Portal</a>
         </div>
     </nav>
 
-    <header class="hero">
-        <h1 id="greeting-title">Citizen Portal</h1>
-        <p id="role-display">Log in to access kingdom resources and secure communications.</p>
-        
-        <button id="open-auth-btn" onclick="openModal()" class="auth-btn btn-primary">Citizen Login</button>
-        <button id="logout-btn" onclick="handleLogout()" class="auth-btn btn-danger" style="display:none;">Sign Out</button>
-    </header>
-
-    <div id="auth-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal()">&times;</button>
-            <h2 style="margin-bottom: 8px;">Access Portal</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Enter your credentials to continue.</p>
-            
-            <div class="auth-form">
-                <input type="text" id="citizen-name" class="auth-inputs" placeholder="Citizen Name (Required for New Reg)">
-                
-                <input type="email" id="email" class="auth-inputs" placeholder="Citizen Email">
-                <input type="password" id="password" class="auth-inputs" placeholder="Password">
-                <button onclick="handleLogin()" class="auth-btn btn-primary">Log In</button>
-                <button onclick="handleSignUp()" class="auth-btn btn-secondary">Register New Citizen</button>
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Secure Comms for the Everyone.</h1>
+                <p>The high-performance messaging standard for people of NJHS. End-to-end encrypted and built for the modern person.</p>
+                <div class="hero-actions">
+                    <a href="portal.html" class="btn btn-primary">Enter Dashboard</a>
+                    <a href="#features" class="btn btn-secondary">Platform Features</a>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <main class="container">
-        <div id="admin-panel" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); padding: 24px; border-radius: 24px; margin-bottom: 40px; text-align: center; animation: fadeIn 0.5s;">
-            <h3 style="color: var(--accent); margin-bottom: 12px; font-size: 1.5rem;">🛠️ Web Team Control Panel</h3>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">You have permission to modify the realm's digital infrastructure.</p>
-            <button id="edit-toggle-btn" onclick="toggleEditMode()" class="auth-btn btn-primary">Edit Site Content</button>
-            <button id="save-content-btn" onclick="saveContent()" class="auth-btn btn-save">Save Changes to Database</button>
-        </div>
+            <div class="hero-visual">
+                <div class="mockup">
+                    <div class="mockup-header">
+                        # Texing-Normal
+                    </div>
+                    <div class="mockup-bubble msg-received">yoooo is the project due today?</div>
+<div class="mockup-bubble msg-received">i literally haven't even started lol</div>
+<div class="mockup-bubble msg-sent">nah we have until friday</div>
+<div class="mockup-bubble msg-sent">just don't wait until 11:59 again 💀</div>
+<div class="mockup-bubble msg-received">bet. you're a lifesaver</div>
+                    
+                    <div style="position: absolute; bottom: 24px; left: 24px; right: 24px; height: 44px; background: var(--bg-main); border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; padding-left: 15px; color: #475569; font-size: 0.8rem;">
+                        Type a message...
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <div class="portal-grid" id="main-grid">
-            
-            <a href="news.html" class="portal-card">
-                <div class="icon-circle">📰</div>
-                <h2>News</h2>
-                <p class="editable-text" id="desc-news">Latest announcements, events, and decrees within the Kingdom.</p>
-            </a>
-
-            <a href="constitution.html" class="portal-card">
-                <div class="icon-circle">📜</div>
-                <h2>Constitution</h2>
-                <p class="editable-text" id="desc-constitution">The supreme law of the land. Understand your rights and the foundations of our society.</p>
-            </a>
-
-            <a href="ranks.html" class="portal-card">
-                <div class="icon-circle">🏛️</div>
-                <h2>Government</h2>
-                <p class="editable-text" id="desc-ranks">Explore the hierarchy of the realm and the roles that keep our kingdom flourishing.</p>
-            </a>
-
-            <a href="chat.html" class="portal-card protected-link">
-                <div class="icon-circle">💬</div>
-                <h2>Secure Chat 🔒 <span class="badge-new">NEW</span></h2>
-                <p class="editable-text" id="desc-chat">Encrypted real-time communication. Connect with fellow citizens and officials.</p>
-            </a>
-
-            <a href="economy.html" class="portal-card">
-                <div class="icon-circle">💰</div>
-                <h2>Economy</h2>
-                <p class="editable-text" id="desc-economy">Real-time data on the national treasury, citizen wealth, and trade regulations.</p>
-            </a>
-
-            <a href="links.html" class="portal-card protected-link">
-                <div class="icon-circle">🔗</div>
-                <h2>Resources 🔒</h2>
-                <p class="editable-text" id="desc-links">Essential voting forms, classroom portals, and external kingdom documents.</p>
-            </a>
-        </div>
+        <section class="features" id="features">
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Secure by Design</h3>
+                <p>Every message is wrapped in multi-layer encryption. Your data remains your property, always.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Instant Sync</h3>
+                <p>Seamlessly transition between terminal, web, and mobile. Zero latency, zero packet loss.</p>
+            </div>
+        </section>
     </main>
 
-    <footer>
-        &copy; <span id="current-year"></span> KINGDOM OF 8TH PERIOD • ASCENDANCY THROUGH ORDER
+    <footer style="text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color);">
+        &copy; 2026 Echo Messaging | Kingdom of 8th Period
     </footer>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
-            authDomain: "chatting-kingdom.firebaseapp.com",
-            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
-            projectId: "chatting-kingdom",
-            storageBucket: "chatting-kingdom.firebasestorage.app",
-            messagingSenderId: "159434733757",
-            appId: "1:159434733757:web:e86256ba72525c0830dfd4",
-            measurementId: "G-LWVS3N6RNK"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- Global State ---
-        window.isLoggedIn = false;
-        window.isEditMode = false;
-
-        // --- Fetch Database Content on Page Load ---
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const docRef = doc(db, "site_content", "homepage_cards");
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(data.news) document.getElementById('desc-news').innerText = data.news;
-                    if(data.constitution) document.getElementById('desc-constitution').innerText = data.constitution;
-                    if(data.ranks) document.getElementById('desc-ranks').innerText = data.ranks;
-                    if(data.chat) document.getElementById('desc-chat').innerText = data.chat;
-                    if(data.economy) document.getElementById('desc-economy').innerText = data.economy;
-                    if(data.links) document.getElementById('desc-links').innerText = data.links;
-                }
-            } catch (error) {
-                console.log("No custom text found or error loading, using HTML defaults.", error);
-            }
-        });
-
-        // --- Web Team Editing Functions ---
-        window.toggleEditMode = () => {
-            window.isEditMode = !window.isEditMode;
-            const toggleBtn = document.getElementById('edit-toggle-btn');
-            const saveBtn = document.getElementById('save-content-btn');
-            const editableTexts = document.querySelectorAll('.editable-text');
-            const cards = document.querySelectorAll('.portal-card');
-
-            if (window.isEditMode) {
-                toggleBtn.innerText = "Cancel Editing";
-                toggleBtn.classList.replace('btn-primary', 'btn-secondary');
-                saveBtn.style.display = "inline-block";
-                
-                editableTexts.forEach(el => el.setAttribute("contenteditable", "true"));
-                cards.forEach(card => card.addEventListener('click', preventLink));
-                alert("Edit Mode Active: Click on any card's text to type new descriptions!");
-            } else {
-                window.location.reload();
-            }
-        };
-
-        function preventLink(e) { e.preventDefault(); }
-
-        window.saveContent = async () => {
-            const saveBtn = document.getElementById('save-content-btn');
-            saveBtn.innerText = "Saving...";
-            
-            try {
-                await setDoc(doc(db, "site_content", "homepage_cards"), {
-                    news: document.getElementById('desc-news').innerText,
-                    constitution: document.getElementById('desc-constitution').innerText,
-                    ranks: document.getElementById('desc-ranks').innerText,
-                    chat: document.getElementById('desc-chat').innerText,
-                    economy: document.getElementById('desc-economy').innerText,
-                    links: document.getElementById('desc-links').innerText
-                });
-                
-                alert("Success! The kingdom's portals have been updated.");
-                window.location.reload(); 
-            } catch(error) {
-                alert("Error saving: " + error.message);
-                saveBtn.innerText = "Save Changes to Database";
-            }
-        };
-
-        // --- Link Protection Logic ---
-        const protectedLinks = document.querySelectorAll('.protected-link');
-        protectedLinks.forEach(link => {
-            link.addEventListener('click', function(event) {
-                if (!window.isLoggedIn) {
-                    event.preventDefault(); 
-                    alert("⚠️ Access Denied: You must log in to access this sector.");
-                    window.openModal(); 
-                }
-            });
-        });
-
-        // --- Modal UI Controls ---
-        window.openModal = () => document.getElementById('auth-modal').classList.add('active');
-        window.closeModal = () => document.getElementById('auth-modal').classList.remove('active');
-        window.onclick = function(event) {
-            if (event.target === document.getElementById('auth-modal')) closeModal();
-        }
-
-        // --- Auth Functions ---
-        window.handleSignUp = async () => {
-            const name = document.getElementById('citizen-name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
-            
-            if(!name) return alert("Please enter your Citizen Name to register.");
-            if(!email || !pass) return alert("Please enter an email and password.");
-            
-            try {
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                
-                // Generate a random 6-digit Comms ID
-                const newCommsId = Math.floor(100000 + Math.random() * 900000).toString();
-
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    email: email, 
-                    role: "citizen",
-                    name: name,
-                    rank: "Citizen",
-                    commsId: newCommsId, // <-- Gives them their phone number
-                    contacts: []         // <-- Gives them an empty contact book
-                });
-                
-                alert(`Welcome to the Kingdom, ${name}! You are now a registered citizen.`);
-                closeModal();
-            } catch (error) { 
-                alert(error.message); 
-            }
-        };
-
-        window.handleLogin = async () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            if(!email || !pass) return alert("Please enter email and password.");
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                closeModal();
-            } catch (error) { alert("Login failed: " + error.message); }
-        };
-
-        window.handleLogout = async () => {
-            try { await signOut(auth); } catch (error) { console.error("Error signing out: ", error); }
-        };
-
-        // --- Listen for Login Status Changes ---
-        onAuthStateChanged(auth, async (user) => {
-            const adminPanel = document.getElementById('admin-panel');
-            const roleDisplay = document.getElementById('role-display');
-            const openAuthBtn = document.getElementById('open-auth-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-
-            if (user) {
-                window.isLoggedIn = true; 
-                openAuthBtn.style.display = "none";
-                logoutBtn.style.display = "inline-block";
-                roleDisplay.textContent = "Loading your citizen profile...";
-
-                try {
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
-                        const role = docSnap.data().role || 'citizen';
-                        roleDisplay.innerHTML = `Welcome back. Recognized Status: <strong style="color: var(--primary);">${role.toUpperCase()}</strong>`;
-                        if (role === "web team") adminPanel.style.display = "block";
-                        else adminPanel.style.display = "none";
-                    } else {
-                        roleDisplay.textContent = "Citizen profile not found in records.";
-                    }
-                } catch (error) {
-                    roleDisplay.textContent = "Error verifying kingdom status.";
-                }
-            } else {
-                window.isLoggedIn = false;
-                openAuthBtn.style.display = "inline-block";
-                logoutBtn.style.display = "none";
-                adminPanel.style.display = "none";
-                roleDisplay.textContent = "Log in to access kingdom resources and secure communications.";
-                document.getElementById('email').value = "";
-                document.getElementById('password').value = "";
-            }
-        });
-
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-    </script>
 </body>
 </html>
