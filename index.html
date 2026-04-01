@@ -15,63 +15,18 @@
             --border-color: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --nav-bg: rgba(2, 6, 23, 0.85);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        /* Navigation Styling */
-        nav {
-            padding: 1rem 8%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--nav-bg);
-            backdrop-filter: blur(16px);
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            color: white;
-        }
-
-        /* Main Content Wrapper */
-        .portal-container {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-top: 80px; /* Offset for fixed nav */
+            min-height: 100vh;
+            overflow: hidden;
         }
 
         .blob {
@@ -81,15 +36,12 @@
             background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
             filter: blur(80px);
             z-index: -1;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             animation: pulse 10s infinite alternate;
         }
 
         @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .portal-card {
@@ -104,7 +56,7 @@
             position: relative;
         }
 
-        .card-logo-center {
+        .logo-icon {
             width: 42px;
             height: 42px;
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
@@ -134,35 +86,20 @@
 
         .form-control:focus { outline: none; border-color: var(--primary); }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: 0.2s;
-            border: none;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-        }
-
         .btn-submit {
             width: 100%;
             padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
             margin-top: 10px;
+            transition: 0.2s;
         }
 
-        .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+        .btn-submit:hover { background: var(--primary-light); transform: translateY(-1px); }
 
         .toggle-text {
             text-align: center;
@@ -172,78 +109,56 @@
         }
 
         .toggle-text span { color: var(--primary-light); cursor: pointer; font-weight: 600; }
+
         .hidden { display: none; }
+        
+        .back-link { position: absolute; top: 20px; left: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html" class="logo">
-            <div class="logo-icon">E</div>
-            Echo Messaging
-        </a>
-        <div id="nav-user-area">
-            <a href="portal.html" class="btn btn-primary" id="portal-btn" style="padding: 8px 18px; font-size: 0.85rem;">Portal</a>
+    <div class="blob"></div>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="portal-card">
+        <div class="logo-icon">E</div>
+        
+        <div id="login-section">
+            <h1>welcome back</h1>
+            <p class="subtitle">log in to see what's happening</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>username</label>
+                    <input type="text" id="login-user" class="form-control" placeholder="your name" required>
+                </div>
+                <div class="form-group">
+                    <label>passkey</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit">sign in</button>
+            </form>
+            <p class="toggle-text">new here? <span onclick="toggleForm()">create an account</span></p>
         </div>
-    </nav>
 
-    <div class="portal-container">
-        <div class="blob"></div>
-
-        <div class="portal-card">
-            <div class="card-logo-center">E</div>
-            
-            <div id="login-section">
-                <h1>welcome back</h1>
-                <p class="subtitle">log in to see what's happening</p>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label>username</label>
-                        <input type="text" id="login-user" class="form-control" placeholder="your name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>passkey</label>
-                        <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-submit">sign in</button>
-                </form>
-                <p class="toggle-text">new here? <span onclick="toggleForm()">create an account</span></p>
-            </div>
-
-            <div id="register-section" class="hidden">
-                <h1>join the echo</h1>
-                <p class="subtitle">create your kingdom identity</p>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label>choose username</label>
-                        <input type="text" id="reg-user" class="form-control" placeholder="coolname123" required>
-                    </div>
-                    <div class="form-group">
-                        <label>set passkey</label>
-                        <input type="password" id="reg-pass" class="form-control" placeholder="make it strong" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-submit">create account</button>
-                </form>
-                <p class="toggle-text">already a citizen? <span onclick="toggleForm()">log in</span></p>
-            </div>
+        <div id="register-section" class="hidden">
+            <h1>join the echo</h1>
+            <p class="subtitle">create your kingdom identity</p>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>choose username</label>
+                    <input type="text" id="reg-user" class="form-control" placeholder="coolname123" required>
+                </div>
+                <div class="form-group">
+                    <label>set passkey</label>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="make it strong" required>
+                </div>
+                <button type="submit" class="btn-submit">create account</button>
+            </form>
+            <p class="toggle-text">already a citizen? <span onclick="toggleForm()">log in</span></p>
         </div>
     </div>
 
     <script>
-        // Check if someone is logged in for the Nav Bar
-        const user = sessionStorage.getItem('currentUser');
-        if(user) {
-            document.getElementById('nav-user-area').innerHTML = `
-                <span style="margin-right:15px; font-weight:600; font-size:0.9rem;">👋 hi, ${user}</span>
-                <button onclick="logout()" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.75rem; margin:0;">Logout</button>
-            `;
-        }
-
-        function logout() {
-            sessionStorage.clear();
-            window.location.reload();
-        }
-
         function toggleForm() {
             document.getElementById('login-section').classList.toggle('hidden');
             document.getElementById('register-section').classList.toggle('hidden');
@@ -252,13 +167,14 @@
         // REGISTER LOGIC
         document.getElementById('register-form').onsubmit = function(e) {
             e.preventDefault();
-            const userVal = document.getElementById('reg-user').value;
-            const passVal = document.getElementById('reg-pass').value;
+            const user = document.getElementById('reg-user').value;
+            const pass = document.getElementById('reg-pass').value;
 
-            if(localStorage.getItem(userVal)) {
+            // Check if user already exists
+            if(localStorage.getItem(user)) {
                 alert("That name is taken, choose another!");
             } else {
-                localStorage.setItem(userVal, passVal);
+                localStorage.setItem(user, pass); // SAVE TO BROWSER
                 alert("Account created! Now you can sign in.");
                 toggleForm();
             }
@@ -267,12 +183,13 @@
         // LOGIN LOGIC
         document.getElementById('login-form').onsubmit = function(e) {
             e.preventDefault();
-            const userVal = document.getElementById('login-user').value;
-            const passVal = document.getElementById('login-pass').value;
-            const storedPass = localStorage.getItem(userVal);
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const storedPass = localStorage.getItem(user);
 
-            if (storedPass && storedPass === passVal) {
-                sessionStorage.setItem('currentUser', userVal);
+            if (storedPass && storedPass === pass) {
+                // Success! Store session name and redirect
+                sessionStorage.setItem('currentUser', user);
                 window.location.href = 'index.html';
             } else {
                 alert("Access Denied. Check your name or passkey.");
