@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal | Echo Messaging</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-glow: rgba(99, 102, 241, 0.2);
+            --bg-main: #020617; 
+            --card-bg: #0f172a;
+            --border-color: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            filter: blur(80px);
+            z-index: -1;
+            animation: pulse 10s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .portal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 800;
+            margin: 0 auto 12px auto;
+        }
+
+        h1 { font-size: 1.5rem; text-align: center; margin-bottom: 8px; }
+        p.subtitle { color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-bottom: 24px; }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .form-control:focus { outline: none; border-color: var(--primary); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover { background: var(--primary-light); transform: translateY(-1px); }
+
+        .toggle-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-text span { color: var(--primary-light); cursor: pointer; font-weight: 600; }
+
+        .hidden { display: none; }
+        
+        .back-link { position: absolute; top: 20px; left: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div class="blob"></div>
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="portal-card">
+        <div class="logo-icon">E</div>
+        
+        <div id="login-section">
+            <h1>welcome back</h1>
+            <p class="subtitle">log in to see what's happening</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>username</label>
+                    <input type="text" id="login-user" class="form-control" placeholder="your name" required>
+                </div>
+                <div class="form-group">
+                    <label>passkey</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit">sign in</button>
+            </form>
+            <p class="toggle-text">new here? <span onclick="toggleForm()">create an account</span></p>
+        </div>
+
+        <div id="register-section" class="hidden">
+            <h1>join the echo</h1>
+            <p class="subtitle">create your kingdom identity</p>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>choose username</label>
+                    <input type="text" id="reg-user" class="form-control" placeholder="coolname123" required>
+                </div>
+                <div class="form-group">
+                    <label>set passkey</label>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="make it strong" required>
+                </div>
+                <button type="submit" class="btn-submit">create account</button>
+            </form>
+            <p class="toggle-text">already a citizen? <span onclick="toggleForm()">log in</span></p>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            document.getElementById('login-section').classList.toggle('hidden');
+            document.getElementById('register-section').classList.toggle('hidden');
+        }
+
+        // REGISTER LOGIC
+        document.getElementById('register-form').onsubmit = function(e) {
+            e.preventDefault();
+            const user = document.getElementById('reg-user').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            // Check if user already exists
+            if(localStorage.getItem(user)) {
+                alert("That name is taken, choose another!");
+            } else {
+                localStorage.setItem(user, pass); // SAVE TO BROWSER
+                alert("Account created! Now you can sign in.");
+                toggleForm();
+            }
+        };
+
+        // LOGIN LOGIC
+        document.getElementById('login-form').onsubmit = function(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const storedPass = localStorage.getItem(user);
+
+            if (storedPass && storedPass === pass) {
+                // Success! Store session name and redirect
+                sessionStorage.setItem('currentUser', user);
+                window.location.href = 'index.html';
+            } else {
+                alert("Access Denied. Check your name or passkey.");
+            }
+        };
+    </script>
+</body>
+</html>
