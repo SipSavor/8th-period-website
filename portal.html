@@ -109,9 +109,7 @@
         }
 
         .toggle-text span { color: var(--primary-light); cursor: pointer; font-weight: 600; }
-
         .hidden { display: none; }
-        
         .back-link { position: absolute; top: 20px; left: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
     </style>
 </head>
@@ -128,8 +126,8 @@
             <p class="subtitle">log in to see what's happening</p>
             <form id="login-form">
                 <div class="form-group">
-                    <label>username</label>
-                    <input type="text" id="login-user" class="form-control" placeholder="your name" required>
+                    <label>email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="email@example.com" required>
                 </div>
                 <div class="form-group">
                     <label>passkey</label>
@@ -149,8 +147,12 @@
                     <input type="text" id="reg-user" class="form-control" placeholder="coolname123" required>
                 </div>
                 <div class="form-group">
+                    <label>email address</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="email@example.com" required>
+                </div>
+                <div class="form-group">
                     <label>set passkey</label>
-                    <input type="password" id="reg-pass" class="form-control" placeholder="make it strong" required>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="min 6 characters" required>
                 </div>
                 <button type="submit" class="btn-submit">create account</button>
             </form>
@@ -158,41 +160,62 @@
         </div>
     </div>
 
-    <script>
-        function toggleForm() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
+            authDomain: "chatting-kingdom.firebaseapp.com",
+            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
+            projectId: "chatting-kingdom",
+            storageBucket: "chatting-kingdom.firebasestorage.app",
+            messagingSenderId: "159434733757",
+            appId: "1:159434733757:web:e86256ba72525c0830dfd4",
+            measurementId: "G-LWVS3N6RNK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // UI Toggle Function
+        window.toggleForm = function() {
             document.getElementById('login-section').classList.toggle('hidden');
             document.getElementById('register-section').classList.toggle('hidden');
         }
 
         // REGISTER LOGIC
-        document.getElementById('register-form').onsubmit = function(e) {
+        document.getElementById('register-form').onsubmit = async function(e) {
             e.preventDefault();
-            const user = document.getElementById('reg-user').value;
+            const username = document.getElementById('reg-user').value;
+            const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
 
-            // Check if user already exists
-            if(localStorage.getItem(user)) {
-                alert("That name is taken, choose another!");
-            } else {
-                localStorage.setItem(user, pass); // SAVE TO BROWSER
-                alert("Account created! Now you can sign in.");
-                toggleForm();
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                // Update profile to store the display name (username)
+                await updateProfile(userCredential.user, {
+                    displayName: username
+                });
+                
+                alert("Account created! Welcome " + username);
+                window.location.href = 'index.html';
+            } catch (error) {
+                alert("Error: " + error.message);
             }
         };
 
         // LOGIN LOGIC
-        document.getElementById('login-form').onsubmit = function(e) {
+        document.getElementById('login-form').onsubmit = async function(e) {
             e.preventDefault();
-            const user = document.getElementById('login-user').value;
+            const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-pass').value;
-            const storedPass = localStorage.getItem(user);
 
-            if (storedPass && storedPass === pass) {
-                // Success! Store session name and redirect
-                sessionStorage.setItem('currentUser', user);
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
                 window.location.href = 'index.html';
-            } else {
-                alert("Access Denied. Check your name or passkey.");
+            } catch (error) {
+                alert("Login Failed: " + error.message);
             }
         };
     </script>
