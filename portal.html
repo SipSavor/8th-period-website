@@ -162,7 +162,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // ✅ 1. Import Firestore instead of Realtime Database
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
@@ -177,7 +178,9 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app); // ← Initialize the database
+    
+    // ✅ 2. Initialize Firestore
+    const db = getFirestore(app); 
 
     window.toggleForm = function() {
         document.getElementById('login-section').classList.toggle('hidden');
@@ -198,8 +201,8 @@
             // Set display name in Auth profile
             await updateProfile(user, { displayName: username });
 
-            // ✅ Write user data to Realtime Database
-            await set(ref(db, 'users/' + user.uid), {
+            // ✅ 3. Write user data to Cloud Firestore using setDoc
+            await setDoc(doc(db, "users", user.uid), {
                 username: username,
                 email: email,
                 createdAt: new Date().toISOString()
