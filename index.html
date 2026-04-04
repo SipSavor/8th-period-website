@@ -285,6 +285,49 @@
             .btn-primary { width: 100%; }
             .mockup { width: 300px; }
         }
+        
+        .rebrand-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.rebrand-modal {
+    background: #0f172a; border: 1px solid #1e293b;
+    border-radius: 24px; padding: 40px; max-width: 420px; width: 90%;
+    text-align: center; position: relative;
+    box-shadow: 0 0 60px rgba(99,102,241,0.2);
+    animation: slideUp 0.3s ease;
+}
+
+.rebrand-badge {
+    display: inline-block; background: rgba(99,102,241,0.15);
+    color: #818cf8; border: 1px solid rgba(99,102,241,0.3);
+    padding: 4px 14px; border-radius: 20px; font-size: 0.75rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.rebrand-modal h2 {
+    font-size: 1.6rem; font-weight: 800; margin-bottom: 12px;
+}
+
+.rebrand-modal p {
+    color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px;
+}
+
+.rebrand-modal .btn-dismiss {
+    width: 100%; padding: 12px; background: #6366f1; color: white;
+    border: none; border-radius: 10px; font-weight: 700; font-size: 1rem;
+    cursor: pointer; font-family: inherit; transition: 0.2s;
+}
+
+.rebrand-modal .btn-dismiss:hover { background: #818cf8; transform: translateY(-1px); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
     </style>
 </head>
 <body>
@@ -347,6 +390,31 @@
     <footer style="text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color);">
         &copy; 2026 Echo Messaging | Kingdom of 8th Period
     </footer>
+    
+    <div class="rebrand-overlay" id="rebrand-overlay" style="display:none;">
+    <div class="rebrand-modal">
+        <div class="rebrand-badge">📣 Announcement</div>
+        <div style="font-size: 2.5rem; margin-bottom: 16px;">📡</div>
+        <h2>We've Rebranded!</h2>
+        <p>
+            Kingdom Comms is now <strong style="color: #818cf8;">Echo Messaging</strong> — 
+            same secure comms, same kingdom, fresh new identity. 
+            Everything still works exactly as before.
+        </p>
+        <button class="btn-dismiss" onclick="dismissRebrand()">Got it, let's go →</button>
+    </div>
+</div>
+
+<script>
+    function dismissRebrand() {
+        document.getElementById('rebrand-overlay').style.display = 'none';
+        localStorage.setItem('rebrand_echo_seen', 'true');
+    }
+
+    if (!localStorage.getItem('rebrand_echo_seen')) {
+        document.getElementById('rebrand-overlay').style.display = 'flex';
+    }
+</script>
 
 </body>
 </html>
