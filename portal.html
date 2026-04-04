@@ -204,11 +204,13 @@
             // 2. Save user details to Firestore
             // We include role: "citizen" to satisfy your security rules
             await setDoc(doc(db, "users", user.uid), {
-                username: username,
-                email: email,
-                role: "citizen", 
-                createdAt: new Date().toISOString()
-            });
+    name: username,
+    email: email,
+    role: "Texter",
+    isOnline: false,
+    contacts: [],
+    createdAt: new Date().toISOString()
+});
 
             window.location.href = 'chat.html';
         } catch (error) {
