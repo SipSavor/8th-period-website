@@ -101,7 +101,50 @@
         .message.me { background: var(--primary); color: #020617; font-weight: 500; border-top-right-radius: 4px; }
         .edited-tag { font-size: 0.7rem; opacity: 0.6; font-style: italic; margin-left: 5px; }
 
-        /* ── Message action buttons (edit / delete) ── */
+        /* ── Reply quote inside bubble ── */
+        .reply-quote {
+            background: rgba(0,0,0,0.25); border-left: 3px solid var(--primary);
+            padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; cursor: default;
+        }
+        .message.me .reply-quote { background: rgba(0,0,0,0.2); border-left-color: rgba(2,6,23,0.6); }
+        .reply-quote-name { font-size: 0.7rem; color: var(--primary); font-weight: 700; display: block; margin-bottom: 2px; }
+        .message.me .reply-quote-name { color: rgba(2,6,23,0.7); }
+        .reply-quote-text { font-size: 0.8rem; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+        .message.me .reply-quote-text { color: rgba(2,6,23,0.55); }
+
+        /* ── Reply preview bar above input ── */
+        #reply-preview-bar {
+            display: none; padding: 8px 20px; background: rgba(129,140,248,0.08);
+            border-top: 1px solid rgba(129,140,248,0.2);
+            align-items: center; gap: 10px;
+        }
+        #reply-preview-bar.active { display: flex; }
+        .reply-preview-content { flex: 1; min-width: 0; }
+        .reply-preview-name { font-size: 0.75rem; color: var(--primary); font-weight: 700; }
+        .reply-preview-text { font-size: 0.82rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-cancel-reply { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+        .btn-cancel-reply:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
+
+        /* ── Date separator ── */
+        .date-separator {
+            display: flex; align-items: center; gap: 12px;
+            color: var(--text-muted); font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 4px 0; flex-shrink: 0; align-self: stretch;
+        }
+        .date-separator::before, .date-separator::after {
+            content: ''; flex: 1; height: 1px; background: var(--card-border);
+        }
+
+        /* ── Spam warning ── */
+        #spam-warning {
+            display: none; padding: 6px 20px; background: rgba(239,68,68,0.1);
+            border-top: 1px solid rgba(239,68,68,0.2);
+            color: var(--danger); font-size: 0.8rem; font-weight: 700; text-align: center;
+        }
+        #spam-warning.active { display: block; }
+
+        /* ── Message action buttons (edit / delete / reply) ── */
         .msg-actions { display: none; gap: 4px; margin-top: 4px; }
         .msg-row:hover .msg-actions { display: flex; }
         .btn-msg-action {
@@ -140,6 +183,7 @@
         .input-area button.btn-send:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); }
         .input-area button.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ── Modals ── */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: #0f172a; border: 1px solid var(--card-border); padding: 30px; border-radius: 20px; width: 400px; display: flex; flex-direction: column; }
         .modal h2 { margin-bottom: 20px; font-size: 1.5rem; }
@@ -151,6 +195,24 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
         .btn-cancel { background: transparent; color: white; border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+        /* ── Group management modal extras ── */
+        .group-member-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+            border-radius: 8px; transition: 0.15s;
+        }
+        .group-member-row:hover { background: rgba(255,255,255,0.04); }
+        .group-member-row img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .group-member-name { flex: 1; font-size: 0.9rem; font-weight: 600; }
+        .admin-badge {
+            background: rgba(245,158,11,0.15); color: var(--accent);
+            border: 1px solid rgba(245,158,11,0.3); padding: 2px 8px;
+            border-radius: 5px; font-size: 0.7rem; font-weight: 700;
+        }
+        .group-section-label {
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); font-weight: 700; padding: 12px 10px 4px;
+        }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
@@ -231,10 +293,20 @@
         <div id="chat-box">
             <div class="message system" style="margin-top:auto;margin-bottom:auto;">Select a citizen or group from the sidebar to establish comms.</div>
         </div>
-        <!-- Typing indicator sits between messages and the input bar -->
         <div id="typing-indicator"></div>
         <div class="input-container">
             <div id="upload-progress">Uploading: 0%</div>
+            <!-- Reply preview bar -->
+            <div id="reply-preview-bar">
+                <div style="font-size:1rem;color:var(--primary);">↩</div>
+                <div class="reply-preview-content">
+                    <div class="reply-preview-name" id="reply-preview-name"></div>
+                    <div class="reply-preview-text" id="reply-preview-text"></div>
+                </div>
+                <button class="btn-cancel-reply" onclick="cancelReply()" title="Cancel reply">✕</button>
+            </div>
+            <!-- Spam warning -->
+            <div id="spam-warning">⚠️ Slow down! You're sending too fast. Wait a moment.</div>
             <div class="input-area">
                 <input type="file" id="image-upload" accept="image/png,image/jpeg,image/gif" style="display:none;" onchange="handleImageUpload(event)">
                 <button id="upload-btn" class="btn-upload" title="Send an image" onclick="document.getElementById('image-upload').click()" disabled>📷</button>
@@ -247,7 +319,7 @@
     </div>
 </div>
 
-<!-- Group Modal -->
+<!-- Group Create Modal -->
 <div class="modal-overlay" id="group-modal">
     <div class="modal">
         <h2>Create New Group</h2>
@@ -256,6 +328,30 @@
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeModal()">Cancel</button>
             <button class="btn-new-group" style="width:auto;padding:10px 20px;margin:0;" onclick="createGroup()">Create</button>
+        </div>
+    </div>
+</div>
+
+<!-- Group Management Modal -->
+<div class="modal-overlay" id="group-mgmt-modal">
+    <div class="modal" style="width:460px;max-width:95%;max-height:85vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;" id="group-mgmt-title">Manage Group</h2>
+            <button class="btn-remove" style="padding:6px 12px;" onclick="leaveGroup()">🚪 Leave</button>
+        </div>
+
+        <div class="group-section-label" style="padding-top:0;">Members</div>
+        <div id="group-members-list" style="border:1px solid var(--card-border);border-radius:10px;padding:6px;margin-bottom:16px;background:rgba(0,0,0,0.2);max-height:200px;overflow-y:auto;"></div>
+
+        <div id="group-add-section">
+            <div class="group-section-label" style="padding-top:0;">Add Members</div>
+            <div id="group-add-list" style="border:1px solid var(--card-border);border-radius:10px;padding:6px;margin-bottom:16px;background:rgba(0,0,0,0.2);max-height:160px;overflow-y:auto;">
+                <div style="color:var(--text-muted);font-size:0.8rem;padding:8px;">No contacts to add.</div>
+            </div>
+        </div>
+
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeGroupManagement()">Close</button>
         </div>
     </div>
 </div>
@@ -347,6 +443,63 @@
     let typingTimeout = null;
     const originalTitle = document.title;
 
+    // ── Reply state ──────────────────────────────────────────────────────────
+    let replyingTo = null; // { msgId, senderName, text, isImage }
+
+    // ── Group management state ───────────────────────────────────────────────
+    let managingGroupId = null;
+
+    // ── Spam protection ──────────────────────────────────────────────────────
+    // Allow max 6 messages per 8-second window
+    const SPAM_MAX = 6;
+    const SPAM_WINDOW_MS = 8000;
+    let spamTimestamps = [];
+    let spamBlocked = false;
+
+    function checkSpam() {
+        const now = Date.now();
+        spamTimestamps = spamTimestamps.filter(t => now - t < SPAM_WINDOW_MS);
+        if (spamTimestamps.length >= SPAM_MAX) {
+            if (!spamBlocked) {
+                spamBlocked = true;
+                const warn = document.getElementById('spam-warning');
+                warn.classList.add('active');
+                document.getElementById('send-btn').disabled = true;
+                document.getElementById('message-input').disabled = true;
+                setTimeout(() => {
+                    spamBlocked = false;
+                    spamTimestamps = [];
+                    warn.classList.remove('active');
+                    if (activeChatId) {
+                        document.getElementById('send-btn').disabled = false;
+                        document.getElementById('message-input').disabled = false;
+                        document.getElementById('message-input').focus();
+                    }
+                }, 5000);
+            }
+            return false;
+        }
+        spamTimestamps.push(now);
+        return true;
+    }
+
+    // ─── Reply UI ─────────────────────────────────────────────────────────────
+
+    window.setReply = (msgId, senderName, text, isImage) => {
+        replyingTo = { msgId, senderName, text: text || '', isImage: !!isImage };
+        document.getElementById('reply-preview-name').innerText = `Replying to ${senderName}`;
+        document.getElementById('reply-preview-text').innerText = isImage ? '📷 Image' : text;
+        document.getElementById('reply-preview-bar').classList.add('active');
+        document.getElementById('message-input').focus();
+    };
+
+    window.cancelReply = () => {
+        replyingTo = null;
+        document.getElementById('reply-preview-bar').classList.remove('active');
+        document.getElementById('reply-preview-name').innerText = '';
+        document.getElementById('reply-preview-text').innerText = '';
+    };
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     window.openMobileChat = () => {
@@ -369,6 +522,25 @@
 
     function getTypingRef() {
         return doc(db, "typing", activeChatId || "__none__");
+    }
+
+    // ─── Date separator helpers ───────────────────────────────────────────────
+
+    function getDateLabel(date) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        const msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        if (msgDay.getTime() === today.getTime()) return 'Today';
+        if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+        return date.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function makeDateSeparator(label) {
+        const div = document.createElement('div');
+        div.className = 'date-separator';
+        div.innerText = label;
+        return div;
     }
 
     // ─── Silent notifications ─────────────────────────────────────────────────
@@ -712,10 +884,129 @@
         catch (error) { console.error(error); }
     };
 
+    // ─── Group Management ─────────────────────────────────────────────────────
+
+    window.openGroupManagement = async (groupId) => {
+        managingGroupId = groupId;
+        document.getElementById('group-mgmt-modal').style.display = 'flex';
+
+        const groupSnap = await getDoc(doc(db, "group_chats", groupId));
+        if (!groupSnap.exists()) return;
+        const groupData = groupSnap.data();
+        const isAdmin = groupData.createdBy === currentUser.uid;
+
+        document.getElementById('group-mgmt-title').innerText = `⚙️ ${groupData.name}`;
+
+        // ── Render current members ──
+        const membersList = document.getElementById('group-members-list');
+        membersList.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:8px;text-align:center;">Loading...</div>';
+        const memberRows = [];
+        for (const uid of groupData.members) {
+            const uSnap = await getDoc(doc(db, "users", uid));
+            if (!uSnap.exists()) continue;
+            const uData = uSnap.data();
+            const row = document.createElement('div');
+            row.className = 'group-member-row';
+            const isThisAdmin = uid === groupData.createdBy;
+            const isSelf = uid === currentUser.uid;
+            row.innerHTML = `
+                <img src="${uData.photoURL || getDefaultAvatar(uData.name)}" alt="${uData.name}">
+                <span class="group-member-name">${uData.name}${isSelf ? ' (you)' : ''}</span>
+                ${isThisAdmin ? '<span class="admin-badge">Admin</span>' : ''}
+                ${isAdmin && !isSelf ? `<button onclick="window.removeMemberFromGroup('${uid}','${uData.name}')"
+                    style="background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.3);
+                    padding:2px 8px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">Remove</button>` : ''}`;
+            memberRows.push(row);
+        }
+        membersList.innerHTML = '';
+        memberRows.forEach(r => membersList.appendChild(r));
+
+        // ── Render contacts not already in group ──
+        const addList = document.getElementById('group-add-list');
+        addList.innerHTML = '';
+        const contacts = currentUserData.contacts || [];
+        const notInGroup = contacts.filter(uid => !groupData.members.includes(uid));
+        if (notInGroup.length === 0) {
+            addList.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:8px;">All your contacts are already in this group.</div>';
+        } else {
+            for (const uid of notInGroup) {
+                const uSnap = await getDoc(doc(db, "users", uid));
+                if (!uSnap.exists()) continue;
+                const uData = uSnap.data();
+                const row = document.createElement('div');
+                row.className = 'group-member-row';
+                row.innerHTML = `
+                    <img src="${uData.photoURL || getDefaultAvatar(uData.name)}" alt="${uData.name}">
+                    <span class="group-member-name">${uData.name}</span>
+                    <button onclick="window.addMemberToGroup('${uid}','${uData.name}')"
+                        style="background:rgba(129,140,248,0.15);color:var(--primary);border:1px solid rgba(129,140,248,0.3);
+                        padding:2px 8px;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;">+ Add</button>`;
+                addList.appendChild(row);
+            }
+        }
+    };
+
+    window.closeGroupManagement = () => {
+        document.getElementById('group-mgmt-modal').style.display = 'none';
+        managingGroupId = null;
+    };
+
+    window.addMemberToGroup = async (uid, name) => {
+        if (!managingGroupId) return;
+        try {
+            await updateDoc(doc(db, "group_chats", managingGroupId), { members: arrayUnion(uid) });
+            await window.openGroupManagement(managingGroupId); // refresh
+        } catch (e) { alert("Failed to add member."); }
+    };
+
+    window.removeMemberFromGroup = async (uid, name) => {
+        if (!managingGroupId) return;
+        if (!confirm(`Remove ${name} from the group?`)) return;
+        try {
+            await updateDoc(doc(db, "group_chats", managingGroupId), { members: arrayRemove(uid) });
+            await window.openGroupManagement(managingGroupId); // refresh
+        } catch (e) { alert("Failed to remove member."); }
+    };
+
+    window.leaveGroup = async () => {
+        if (!managingGroupId) return;
+        const groupSnap = await getDoc(doc(db, "group_chats", managingGroupId));
+        if (!groupSnap.exists()) return;
+        const groupData = groupSnap.data();
+        if (!confirm(`Leave "${groupData.name}"?`)) return;
+        try {
+            const remainingMembers = groupData.members.filter(uid => uid !== currentUser.uid);
+            if (remainingMembers.length === 0) {
+                // Last member — delete the group entirely
+                await deleteDoc(doc(db, "group_chats", managingGroupId));
+            } else {
+                // Transfer admin if leaving member is admin
+                const updates = { members: arrayRemove(currentUser.uid) };
+                if (groupData.createdBy === currentUser.uid) {
+                    updates.createdBy = remainingMembers[0]; // transfer to oldest remaining
+                }
+                await updateDoc(doc(db, "group_chats", managingGroupId), updates);
+            }
+            window.closeGroupManagement();
+            // Reset chat if we were in this group
+            if (activeChatType === 'group' && activeChatId === managingGroupId) {
+                document.getElementById('chat-header').innerHTML = "<div>Select a chat to begin</div>";
+                document.getElementById('chat-box').innerHTML = `<div class="message system">You left the group.</div>`;
+                ['message-input','send-btn','upload-btn','btn-voice'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
+                activeChatId = null; activeChatType = null;
+                if (unsubscribeChat) unsubscribeChat();
+            }
+        } catch (e) { alert("Failed to leave group."); }
+    };
+
     // ─── Open Chat ────────────────────────────────────────────────────────────
 
     window.openChat = (type, targetId, displayName, avatarSrc = "") => {
         clearTyping();
+        window.cancelReply();
+        spamTimestamps = []; spamBlocked = false;
+        document.getElementById('spam-warning').classList.remove('active');
+
         document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
         const activeItem = document.getElementById(`${type}-${targetId}`);
         if (activeItem) activeItem.classList.add('active');
@@ -726,7 +1017,10 @@
             actionsHTML = `
                 <button class="btn-new-group" style="padding:6px 12px;margin:0;" onclick="window.startCall()">📹 Call</button>
                 <button class="btn-remove" onclick="window.removeContact('${targetId}','${displayName}')">Remove</button>`;
+        } else if (type === 'group') {
+            actionsHTML = `<button class="btn-new-group" style="padding:6px 12px;margin:0;background:rgba(129,140,248,0.2);color:var(--primary);border:1px solid rgba(129,140,248,0.3);" onclick="window.openGroupManagement('${targetId}')">⚙️ Manage</button>`;
         }
+
         document.getElementById('chat-header').innerHTML = `
             <div style="display:flex;align-items:center;">
                 <button class="mobile-back-btn" onclick="window.closeMobileChat()">← Back</button>
@@ -774,10 +1068,22 @@
                 }
             });
 
+            let lastDateLabel = null;
+
             snapshot.forEach((docSnap) => {
                 const msgData = docSnap.data(); const msgId = docSnap.id;
                 const isMe = msgData.senderId === currentUser.uid;
                 const isTextMsg = !msgData.imageUrl && !msgData.audioUrl;
+
+                // ── Date separator ──
+                if (msgData.timestamp) {
+                    const msgDate = msgData.timestamp.toDate();
+                    const label = getDateLabel(msgDate);
+                    if (label !== lastDateLabel) {
+                        lastDateLabel = label;
+                        chatBox.appendChild(makeDateSeparator(label));
+                    }
+                }
 
                 if (!isMe && activeChatType === 'dm' && msgData.read === false) {
                     updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true });
@@ -810,14 +1116,35 @@
                 bubbleDiv.className = `message ${isMe ? 'me' : 'them'}`;
                 bubbleDiv.id = `bubble-${msgId}`;
 
+                // ── Reply quote ──
+                if (msgData.replyTo) {
+                    const quoteDiv = document.createElement('div');
+                    quoteDiv.className = 'reply-quote';
+                    const quoteName = document.createElement('span');
+                    quoteName.className = 'reply-quote-name';
+                    quoteName.innerText = `↩ ${msgData.replyTo.senderName}`;
+                    const quoteText = document.createElement('span');
+                    quoteText.className = 'reply-quote-text';
+                    quoteText.innerText = msgData.replyTo.isImage ? '📷 Image' : (msgData.replyTo.text || '');
+                    quoteDiv.appendChild(quoteName);
+                    quoteDiv.appendChild(quoteText);
+                    bubbleDiv.appendChild(quoteDiv);
+                }
+
                 if (msgData.imageUrl) {
                     bubbleDiv.classList.add('image-msg');
-                    bubbleDiv.innerHTML = `<img src="${msgData.imageUrl}" class="chat-image" onclick="window.open('${msgData.imageUrl}','_blank')" />`;
+                    const img = document.createElement('img');
+                    img.src = msgData.imageUrl; img.className = 'chat-image';
+                    img.onclick = () => window.open(msgData.imageUrl, '_blank');
+                    bubbleDiv.appendChild(img);
                 } else if (msgData.audioUrl) {
                     bubbleDiv.classList.add('image-msg');
-                    bubbleDiv.innerHTML = `<audio controls src="${msgData.audioUrl}"></audio>`;
+                    const audio = document.createElement('audio');
+                    audio.controls = true; audio.src = msgData.audioUrl;
+                    bubbleDiv.appendChild(audio);
                 } else {
-                    bubbleDiv.innerText = msgData.text || '';
+                    const textNode = document.createTextNode(msgData.text || '');
+                    bubbleDiv.appendChild(textNode);
                     if (msgData.edited) {
                         const tag = document.createElement('span');
                         tag.className = 'edited-tag'; tag.innerText = ' (edited)';
@@ -826,16 +1153,38 @@
                 }
                 wrapperDiv.appendChild(bubbleDiv);
 
-                // ── Edit / Delete buttons — only your own text messages ──
+                // ── Action buttons ──
+                const actDiv = document.createElement('div');
+                actDiv.className = 'msg-actions';
+
+                // Reply button for everyone
+                const rawText = (msgData.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const senderNameSafe = (msgData.senderName || 'Citizen').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const replyBtn = document.createElement('button');
+                replyBtn.className = 'btn-msg-action';
+                replyBtn.innerText = '↩ Reply';
+                replyBtn.onclick = () => window.setReply(
+                    msgId,
+                    msgData.senderName || 'Citizen',
+                    msgData.imageUrl ? '' : (msgData.text || ''),
+                    !!msgData.imageUrl
+                );
+                actDiv.appendChild(replyBtn);
+
+                // Edit & Delete only for own text messages
                 if (isMe && isTextMsg) {
-                    const actDiv = document.createElement('div');
-                    actDiv.className = 'msg-actions';
-                    const rawText = (msgData.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-                    actDiv.innerHTML = `
-                        <button class="btn-msg-action" onclick="window.editMessage('${msgId}','${rawText}')">✏️ Edit</button>
-                        <button class="btn-msg-action danger" onclick="window.deleteMessage('${msgId}')">🗑️ Delete</button>`;
-                    wrapperDiv.appendChild(actDiv);
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn-msg-action';
+                    editBtn.innerText = '✏️ Edit';
+                    editBtn.onclick = () => window.editMessage(msgId, msgData.text || '');
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn-msg-action danger';
+                    delBtn.innerText = '🗑️ Delete';
+                    delBtn.onclick = () => window.deleteMessage(msgId);
+                    actDiv.appendChild(editBtn);
+                    actDiv.appendChild(delBtn);
                 }
+                wrapperDiv.appendChild(actDiv);
 
                 if (isMe) {
                     const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
@@ -855,9 +1204,32 @@
     window.sendMessage = async () => {
         const input = document.getElementById('message-input'); if (!input) return;
         const text = input.value.trim(); if (!text || !activeChatId) return;
+
+        // ── Spam check ──
+        if (!checkSpam()) return;
+
         input.value = "";
         await clearTyping();
-        const newMessage = { text, senderId: currentUser.uid, senderName: currentUserData.name, senderPhotoURL: currentUserData.photoURL || getDefaultAvatar(currentUserData.name), timestamp: serverTimestamp() };
+
+        const newMessage = {
+            text,
+            senderId: currentUser.uid,
+            senderName: currentUserData.name,
+            senderPhotoURL: currentUserData.photoURL || getDefaultAvatar(currentUserData.name),
+            timestamp: serverTimestamp()
+        };
+
+        // ── Attach reply data if replying ──
+        if (replyingTo) {
+            newMessage.replyTo = {
+                msgId: replyingTo.msgId,
+                senderName: replyingTo.senderName,
+                text: replyingTo.text,
+                isImage: replyingTo.isImage
+            };
+            window.cancelReply();
+        }
+
         try {
             if (activeChatType === 'global') { await addDoc(collection(db, "town_square"), newMessage); }
             else { const folder = activeChatType === 'dm' ? "chats" : "group_chats"; if (activeChatType === 'dm') newMessage.read = false; await addDoc(collection(db, folder, activeChatId, "messages"), newMessage); }
@@ -878,6 +1250,7 @@
             async () => {
                 const url = await getDownloadURL(uploadTask.snapshot.ref); progressDiv.style.display = 'none';
                 const msg = { text: "📷 Sent an image", imageUrl: url, senderId: currentUser.uid, senderName: currentUserData.name, senderPhotoURL: currentUserData.photoURL || getDefaultAvatar(currentUserData.name), timestamp: serverTimestamp() };
+                if (replyingTo) { msg.replyTo = { msgId: replyingTo.msgId, senderName: replyingTo.senderName, text: replyingTo.text, isImage: replyingTo.isImage }; window.cancelReply(); }
                 if (activeChatType === 'global') { await addDoc(collection(db, "town_square"), msg); }
                 else { const f = activeChatType === 'dm' ? "chats" : "group_chats"; if (activeChatType === 'dm') msg.read = false; await addDoc(collection(db, f, activeChatId, "messages"), msg); }
             });
