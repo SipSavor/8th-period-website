@@ -238,6 +238,19 @@
             #remote-player, #local-player { width: 100%; height: 250px; }
         }
         .mobile-back-btn { display: none; background: rgba(255,255,255,0.1); color: var(--text-main); border: none; padding: 6px 12px; border-radius: 8px; margin-right: 10px; cursor: pointer; font-weight: 700; }
+
+        /* ── Load more bar ── */
+        .load-more-bar {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px; flex-shrink: 0;
+        }
+        .btn-load-more {
+            background: rgba(255,255,255,0.05); color: var(--text-muted);
+            border: 1px solid var(--card-border); padding: 6px 18px;
+            border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+            cursor: pointer; transition: 0.2s; font-family: inherit;
+        }
+        .btn-load-more:hover { background: rgba(255,255,255,0.12); color: var(--text-main); }
     </style>
 </head>
 <body>
@@ -411,7 +424,7 @@
     import {
         getFirestore, doc, getDoc, getDocs, collection, addDoc, query, orderBy, where,
         onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove,
-        deleteDoc, setDoc, deleteField
+        deleteDoc, setDoc, deleteField, limitToLast, endBefore
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -442,6 +455,14 @@
     let contactListeners = [];
     let typingTimeout = null;
     const originalTitle = document.title;
+
+    // ── Pagination state ─────────────────────────────────────────────────────
+    const MSGS_PER_PAGE = 50;
+    let historicalDocs = [];   // [{id, data}] older messages loaded on demand
+    let oldestCursor = null;   // Firestore doc snapshot — cursor for endBefore
+    let isLoadingMore = false;
+    let hasMoreHistory = false;
+    let lastLiveDocs = [];     // mirror of most recent live snapshot docs
 
     // ── Reply state ──────────────────────────────────────────────────────────
     let replyingTo = null; // { msgId, senderName, text, isImage }
@@ -1044,20 +1065,197 @@
         window.openMobileChat();
     };
 
+    // ─── Build a single message row DOM element ───────────────────────────────
+
+    function buildMsgRow(msgId, msgData) {
+        const isMe = msgData.senderId === currentUser.uid;
+        const isTextMsg = !msgData.imageUrl && !msgData.audioUrl;
+
+        if (!isMe && activeChatType === 'dm' && msgData.read === false) {
+            updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true }).catch(() => {});
+        }
+
+        let timeString = "Sending...";
+        if (msgData.timestamp) timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const rowDiv = document.createElement('div');
+        rowDiv.className = `msg-row ${isMe ? 'me' : 'them'}`;
+
+        const avatarImg = document.createElement('img');
+        avatarImg.className = 'msg-avatar';
+        avatarImg.src = msgData.senderPhotoURL || getDefaultAvatar(msgData.senderName || 'Citizen');
+        rowDiv.appendChild(avatarImg);
+
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
+
+        if (!isMe && (activeChatType === 'group' || activeChatType === 'global')) {
+            const nameDiv = document.createElement('div'); nameDiv.className = 'sender-name';
+            nameDiv.innerText = `${msgData.senderName || "Citizen"} • ${timeString}`;
+            wrapperDiv.appendChild(nameDiv);
+        } else if (!isMe && activeChatType === 'dm') {
+            const timeDiv = document.createElement('div'); timeDiv.className = 'sender-name';
+            timeDiv.innerText = timeString; wrapperDiv.appendChild(timeDiv);
+        }
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = `message ${isMe ? 'me' : 'them'}`;
+        bubbleDiv.id = `bubble-${msgId}`;
+
+        if (msgData.replyTo) {
+            const quoteDiv = document.createElement('div');
+            quoteDiv.className = 'reply-quote';
+            const quoteName = document.createElement('span');
+            quoteName.className = 'reply-quote-name';
+            quoteName.innerText = `↩ ${msgData.replyTo.senderName}`;
+            const quoteText = document.createElement('span');
+            quoteText.className = 'reply-quote-text';
+            quoteText.innerText = msgData.replyTo.isImage ? '📷 Image' : (msgData.replyTo.text || '');
+            quoteDiv.appendChild(quoteName);
+            quoteDiv.appendChild(quoteText);
+            bubbleDiv.appendChild(quoteDiv);
+        }
+
+        if (msgData.imageUrl) {
+            bubbleDiv.classList.add('image-msg');
+            const img = document.createElement('img');
+            img.src = msgData.imageUrl; img.className = 'chat-image';
+            img.onclick = () => window.open(msgData.imageUrl, '_blank');
+            bubbleDiv.appendChild(img);
+        } else if (msgData.audioUrl) {
+            bubbleDiv.classList.add('image-msg');
+            const audio = document.createElement('audio');
+            audio.controls = true; audio.src = msgData.audioUrl;
+            bubbleDiv.appendChild(audio);
+        } else {
+            const textNode = document.createTextNode(msgData.text || '');
+            bubbleDiv.appendChild(textNode);
+            if (msgData.edited) {
+                const tag = document.createElement('span');
+                tag.className = 'edited-tag'; tag.innerText = ' (edited)';
+                bubbleDiv.appendChild(tag);
+            }
+        }
+        wrapperDiv.appendChild(bubbleDiv);
+
+        const actDiv = document.createElement('div');
+        actDiv.className = 'msg-actions';
+        const replyBtn = document.createElement('button');
+        replyBtn.className = 'btn-msg-action';
+        replyBtn.innerText = '↩ Reply';
+        replyBtn.onclick = () => window.setReply(msgId, msgData.senderName || 'Citizen', msgData.imageUrl ? '' : (msgData.text || ''), !!msgData.imageUrl);
+        actDiv.appendChild(replyBtn);
+        if (isMe && isTextMsg) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-msg-action';
+            editBtn.innerText = '✏️ Edit';
+            editBtn.onclick = () => window.editMessage(msgId, msgData.text || '');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-msg-action danger';
+            delBtn.innerText = '🗑️ Delete';
+            delBtn.onclick = () => window.deleteMessage(msgId);
+            actDiv.appendChild(editBtn);
+            actDiv.appendChild(delBtn);
+        }
+        wrapperDiv.appendChild(actDiv);
+
+        if (isMe) {
+            const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
+            metaDiv.innerHTML = activeChatType === 'dm'
+                ? `${timeString} • ` + (msgData.read ? `<span class="status-read">Read</span>` : `Delivered`)
+                : timeString;
+            wrapperDiv.appendChild(metaDiv);
+        }
+
+        rowDiv.appendChild(wrapperDiv);
+        return rowDiv;
+    }
+
+    // ─── Render all messages into chatBox ──────────────────────────────────────
+
+    function renderAllMessages(chatBox, liveDocs) {
+        const total = historicalDocs.length + liveDocs.length;
+        chatBox.innerHTML = "";
+
+        if (total === 0) {
+            chatBox.innerHTML = `<div class="message system" style="margin-top:auto;margin-bottom:auto;">Send a message to start.</div>`;
+            return;
+        }
+
+        // Load-more bar at top
+        if (hasMoreHistory) {
+            const bar = document.createElement('div');
+            bar.className = 'load-more-bar'; bar.id = 'load-more-bar';
+            if (isLoadingMore) {
+                bar.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div><span style="font-size:0.78rem;color:var(--text-muted);">Loading older messages...</span>`;
+            } else {
+                const btn = document.createElement('button');
+                btn.className = 'btn-load-more';
+                btn.innerText = '↑ Load older messages';
+                btn.onclick = () => window.loadMoreMessages();
+                bar.appendChild(btn);
+            }
+            chatBox.appendChild(bar);
+        }
+
+        let lastDateLabel = null;
+
+        // Historical (older, paginated)
+        for (const { id, data } of historicalDocs) {
+            if (data.timestamp) {
+                const label = getDateLabel(data.timestamp.toDate());
+                if (label !== lastDateLabel) { lastDateLabel = label; chatBox.appendChild(makeDateSeparator(label)); }
+            }
+            chatBox.appendChild(buildMsgRow(id, data));
+        }
+
+        // Live (most recent MSGS_PER_PAGE)
+        for (const { id, data } of liveDocs) {
+            if (data.timestamp) {
+                const label = getDateLabel(data.timestamp.toDate());
+                if (label !== lastDateLabel) { lastDateLabel = label; chatBox.appendChild(makeDateSeparator(label)); }
+            }
+            chatBox.appendChild(buildMsgRow(id, data));
+        }
+    }
+
     // ─── Messages ─────────────────────────────────────────────────────────────
 
     function listenForMessages() {
-        const chatBox = document.getElementById('chat-box'); if (!chatBox) return;
+        // Reset pagination on every new chat open
+        historicalDocs = [];
+        oldestCursor = null;
+        isLoadingMore = false;
+        hasMoreHistory = false;
+        lastLiveDocs = [];
+
+        const chatBox = document.getElementById('chat-box');
+        if (!chatBox) return;
         if (unsubscribeChat) unsubscribeChat();
 
         const messagesRef = activeChatType === 'global'
             ? collection(db, "town_square")
             : collection(db, activeChatType === 'dm' ? "chats" : "group_chats", activeChatId, "messages");
 
-        unsubscribeChat = onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), (snapshot) => {
-            chatBox.innerHTML = "";
-            if (snapshot.empty) { chatBox.innerHTML = `<div class="message system" style="margin-top:auto;margin-bottom:auto;">Send a message to start.</div>`; return; }
+        // Scroll-to-top triggers loading older messages
+        chatBox.onscroll = () => {
+            if (chatBox.scrollTop < 80 && !isLoadingMore && hasMoreHistory) {
+                window.loadMoreMessages();
+            }
+        };
 
+        const liveQuery = query(messagesRef, orderBy("timestamp", "asc"), limitToLast(MSGS_PER_PAGE));
+
+        unsubscribeChat = onSnapshot(liveQuery, (snapshot) => {
+            // On first snapshot: set cursor and decide if history exists
+            if (oldestCursor === null) {
+                if (snapshot.docs.length > 0) {
+                    oldestCursor = snapshot.docs[0];
+                    hasMoreHistory = snapshot.docs.length >= MSGS_PER_PAGE;
+                }
+            }
+
+            // Notifications for newly added messages
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const mData = change.doc.data();
@@ -1068,138 +1266,54 @@
                 }
             });
 
-            let lastDateLabel = null;
+            // Store live docs for re-renders triggered by pagination
+            lastLiveDocs = snapshot.docs.map(d => ({ id: d.id, data: d.data() }));
 
-            snapshot.forEach((docSnap) => {
-                const msgData = docSnap.data(); const msgId = docSnap.id;
-                const isMe = msgData.senderId === currentUser.uid;
-                const isTextMsg = !msgData.imageUrl && !msgData.audioUrl;
-
-                // ── Date separator ──
-                if (msgData.timestamp) {
-                    const msgDate = msgData.timestamp.toDate();
-                    const label = getDateLabel(msgDate);
-                    if (label !== lastDateLabel) {
-                        lastDateLabel = label;
-                        chatBox.appendChild(makeDateSeparator(label));
-                    }
-                }
-
-                if (!isMe && activeChatType === 'dm' && msgData.read === false) {
-                    updateDoc(doc(db, "chats", activeChatId, "messages", msgId), { read: true });
-                }
-
-                let timeString = "Sending...";
-                if (msgData.timestamp) timeString = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                const rowDiv = document.createElement('div');
-                rowDiv.className = `msg-row ${isMe ? 'me' : 'them'}`;
-
-                const avatarImg = document.createElement('img');
-                avatarImg.className = 'msg-avatar';
-                avatarImg.src = msgData.senderPhotoURL || getDefaultAvatar(msgData.senderName || 'Citizen');
-                rowDiv.appendChild(avatarImg);
-
-                const wrapperDiv = document.createElement('div');
-                wrapperDiv.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
-
-                if (!isMe && (activeChatType === 'group' || activeChatType === 'global')) {
-                    const nameDiv = document.createElement('div'); nameDiv.className = 'sender-name';
-                    nameDiv.innerText = `${msgData.senderName || "Citizen"} • ${timeString}`;
-                    wrapperDiv.appendChild(nameDiv);
-                } else if (!isMe && activeChatType === 'dm') {
-                    const timeDiv = document.createElement('div'); timeDiv.className = 'sender-name';
-                    timeDiv.innerText = timeString; wrapperDiv.appendChild(timeDiv);
-                }
-
-                const bubbleDiv = document.createElement('div');
-                bubbleDiv.className = `message ${isMe ? 'me' : 'them'}`;
-                bubbleDiv.id = `bubble-${msgId}`;
-
-                // ── Reply quote ──
-                if (msgData.replyTo) {
-                    const quoteDiv = document.createElement('div');
-                    quoteDiv.className = 'reply-quote';
-                    const quoteName = document.createElement('span');
-                    quoteName.className = 'reply-quote-name';
-                    quoteName.innerText = `↩ ${msgData.replyTo.senderName}`;
-                    const quoteText = document.createElement('span');
-                    quoteText.className = 'reply-quote-text';
-                    quoteText.innerText = msgData.replyTo.isImage ? '📷 Image' : (msgData.replyTo.text || '');
-                    quoteDiv.appendChild(quoteName);
-                    quoteDiv.appendChild(quoteText);
-                    bubbleDiv.appendChild(quoteDiv);
-                }
-
-                if (msgData.imageUrl) {
-                    bubbleDiv.classList.add('image-msg');
-                    const img = document.createElement('img');
-                    img.src = msgData.imageUrl; img.className = 'chat-image';
-                    img.onclick = () => window.open(msgData.imageUrl, '_blank');
-                    bubbleDiv.appendChild(img);
-                } else if (msgData.audioUrl) {
-                    bubbleDiv.classList.add('image-msg');
-                    const audio = document.createElement('audio');
-                    audio.controls = true; audio.src = msgData.audioUrl;
-                    bubbleDiv.appendChild(audio);
-                } else {
-                    const textNode = document.createTextNode(msgData.text || '');
-                    bubbleDiv.appendChild(textNode);
-                    if (msgData.edited) {
-                        const tag = document.createElement('span');
-                        tag.className = 'edited-tag'; tag.innerText = ' (edited)';
-                        bubbleDiv.appendChild(tag);
-                    }
-                }
-                wrapperDiv.appendChild(bubbleDiv);
-
-                // ── Action buttons ──
-                const actDiv = document.createElement('div');
-                actDiv.className = 'msg-actions';
-
-                // Reply button for everyone
-                const rawText = (msgData.text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-                const senderNameSafe = (msgData.senderName || 'Citizen').replace(/'/g, "\\'").replace(/"/g, '\\"');
-                const replyBtn = document.createElement('button');
-                replyBtn.className = 'btn-msg-action';
-                replyBtn.innerText = '↩ Reply';
-                replyBtn.onclick = () => window.setReply(
-                    msgId,
-                    msgData.senderName || 'Citizen',
-                    msgData.imageUrl ? '' : (msgData.text || ''),
-                    !!msgData.imageUrl
-                );
-                actDiv.appendChild(replyBtn);
-
-                // Edit & Delete only for own text messages
-                if (isMe && isTextMsg) {
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'btn-msg-action';
-                    editBtn.innerText = '✏️ Edit';
-                    editBtn.onclick = () => window.editMessage(msgId, msgData.text || '');
-                    const delBtn = document.createElement('button');
-                    delBtn.className = 'btn-msg-action danger';
-                    delBtn.innerText = '🗑️ Delete';
-                    delBtn.onclick = () => window.deleteMessage(msgId);
-                    actDiv.appendChild(editBtn);
-                    actDiv.appendChild(delBtn);
-                }
-                wrapperDiv.appendChild(actDiv);
-
-                if (isMe) {
-                    const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
-                    metaDiv.innerHTML = activeChatType === 'dm'
-                        ? `${timeString} • ` + (msgData.read ? `<span class="status-read">Read</span>` : `Delivered`)
-                        : timeString;
-                    wrapperDiv.appendChild(metaDiv);
-                }
-
-                rowDiv.appendChild(wrapperDiv);
-                chatBox.appendChild(rowDiv);
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
+            const wasAtBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80;
+            renderAllMessages(chatBox, lastLiveDocs);
+            if (wasAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
         });
     }
+
+    window.loadMoreMessages = async () => {
+        if (isLoadingMore || !hasMoreHistory || !oldestCursor) return;
+        isLoadingMore = true;
+
+        // Show spinner in the bar immediately
+        const bar = document.getElementById('load-more-bar');
+        if (bar) bar.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div><span style="font-size:0.78rem;color:var(--text-muted);">Loading older messages...</span>`;
+
+        const chatBox = document.getElementById('chat-box');
+        const scrollHeightBefore = chatBox.scrollHeight;
+
+        try {
+            const messagesRef = activeChatType === 'global'
+                ? collection(db, "town_square")
+                : collection(db, activeChatType === 'dm' ? "chats" : "group_chats", activeChatId, "messages");
+
+            const olderQuery = query(messagesRef, orderBy("timestamp", "asc"), endBefore(oldestCursor), limitToLast(MSGS_PER_PAGE));
+            const snap = await getDocs(olderQuery);
+
+            if (snap.empty) {
+                hasMoreHistory = false;
+            } else {
+                const newDocs = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+                historicalDocs = [...newDocs, ...historicalDocs];
+                oldestCursor = snap.docs[0];
+                if (snap.docs.length < MSGS_PER_PAGE) hasMoreHistory = false;
+            }
+        } catch (e) {
+            console.error("Failed to load more messages:", e);
+        }
+
+        isLoadingMore = false;
+        renderAllMessages(chatBox, lastLiveDocs);
+
+        // Restore scroll position so the view doesn't jump to the top
+        requestAnimationFrame(() => {
+            chatBox.scrollTop = chatBox.scrollHeight - scrollHeightBefore;
+        });
+    };
 
     window.sendMessage = async () => {
         const input = document.getElementById('message-input'); if (!input) return;
