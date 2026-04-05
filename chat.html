@@ -1209,7 +1209,7 @@
         if (!checkSpam()) return;
 
         input.value = "";
-        await clearTyping();
+        clearTyping(); // fire-and-forget — don't block the send
 
         const newMessage = {
             text,
