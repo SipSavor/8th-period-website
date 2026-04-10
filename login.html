@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Messaging | Secure Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8; 
+            --primary-hover: #6366f1; 
+            --bg-main: #020617;
+            --surface-bg: rgba(30, 41, 59, 0.4); 
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --accent: #f59e0b; 
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-main);
+            color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+        }
+
+        .auth-container {
+            background: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .auth-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: #020617;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        .btn-google {
+            width: 100%;
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .btn-google:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        #auth-error {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+            text-align: center;
+        }
+
+        .register-fields {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Echo Messaging</h1>
+            <p>Kingdom of 8th Period</p>
+        </div>
+
+        <div class="auth-tabs">
+            <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+            <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+        </div>
+
+        <div id="auth-error"></div>
+
+        <form id="auth-form" onsubmit="handleAuth(event)">
+            <div class="input-group register-fields" id="name-group">
+                <label for="display-name">Citizen Name</label>
+                <input type="text" id="display-name" placeholder="How should we call you?">
+            </div>
+            
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="citizen@realm.com" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Security Clearance (Password)</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Initialize Comms</button>
+        </form>
+
+        <div class="divider">OR</div>
+
+        <button class="btn-google" onclick="signInWithGoogle()">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo">
+            Continue with Google
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            updateProfile,
+            GoogleAuthProvider,
+            signInWithPopup,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your exact Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
+            authDomain: "chatting-kingdom.firebaseapp.com",
+            databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
+            projectId: "chatting-kingdom",
+            storageBucket: "chatting-kingdom.firebasestorage.app",
+            messagingSenderId: "159434733757",
+            appId: "1:159434733757:web:e86256ba72525c0830dfd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentMode = 'login'; // 'login' or 'register'
+
+        // Check if user is already logged in, redirect to app if true
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'app.html'; // Adjust this to your main chat file name
+            }
+        });
+
+        // Tab Switching UI Logic
+        window.switchTab = function(mode) {
+            currentMode = mode;
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+            const nameGroup = document.getElementById('name-group');
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('auth-error');
+
+            errorDiv.style.display = 'none';
+
+            if (mode === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                nameGroup.style.display = 'none';
+                document.getElementById('display-name').removeAttribute('required');
+                submitBtn.textContent = 'Initialize Comms';
+            } else {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                nameGroup.style.display = 'block';
+                document.getElementById('display-name').setAttribute('required', 'true');
+                submitBtn.textContent = 'Register Citizen';
+            }
+        }
+
+        // Handle Email/Password Form Submit
+        window.handleAuth = async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('auth-error');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Authenticating...';
+            errorDiv.style.display = 'none';
+
+            try {
+                if (currentMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // onAuthStateChanged will handle the redirect
+                } else {
+                    const displayName = document.getElementById('display-name').value;
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    // Update Auth Profile
+                    await updateProfile(user, { displayName: displayName });
+
+                    // Generate a 6-digit Citizen ID
+                    const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+
+                    // Create user document in Firestore
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: displayName,
+                        email: email,
+                        commsId: commsId,
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=818cf8&color=fff`,
+                        createdAt: new Date(),
+                        groups: ['town_square'], // Auto-add to global
+                        contacts: []
+                    });
+
+                    // onAuthStateChanged will handle the redirect
+                }
+            } catch (error) {
+                errorDiv.textContent = mapFirebaseError(error.code);
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentMode === 'login' ? 'Initialize Comms' : 'Register Citizen';
+            }
+        }
+
+        // Handle Google Auth
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.style.display = 'none';
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Check if user document exists in Firestore (first time logging in with Google)
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (!userDoc.exists()) {
+                    const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: user.displayName || 'Citizen',
+                        email: user.email,
+                        commsId: commsId,
+                        avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'C')}&background=818cf8&color=fff`,
+                        createdAt: new Date(),
+                        groups: ['town_square'],
+                        contacts: []
+                    });
+                }
+                // onAuthStateChanged will handle the redirect
+            } catch (error) {
+                errorDiv.textContent = mapFirebaseError(error.code);
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Clean up Firebase error messages for the user
+        function mapFirebaseError(code) {
+            switch(code) {
+                case 'auth/invalid-credential':
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    return 'Invalid email or password.';
+                case 'auth/email-already-in-use':
+                    return 'This email is already registered.';
+                case 'auth/weak-password':
+                    return 'Password must be at least 6 characters.';
+                case 'auth/popup-closed-by-user':
+                    return 'Sign-in cancelled.';
+                default:
+                    return 'Authentication failed. Please try again.';
+            }
+        }
+    </script>
+</body>
+</html>
