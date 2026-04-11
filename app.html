@@ -428,14 +428,15 @@
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+    // ── Firebase Config ───────────────────────────────────────────────────────
     const firebaseConfig = {
-        apiKey: "AIzaSyCIsdB35U2clkR3b8bYdWNxRI14A9aGj-k",
-        authDomain: "chatting-kingdom.firebaseapp.com",
-        databaseURL: "https://chatting-kingdom-default-rtdb.firebaseio.com",
-        projectId: "chatting-kingdom",
-        storageBucket: "chatting-kingdom.firebasestorage.app",
-        messagingSenderId: "159434733757",
-        appId: "1:159434733757:web:e86256ba72525c0830dfd4"
+        apiKey: "AIzaSyATb67Q5zDliE0001MnEVINFUMbrB_mIIk",
+        authDomain: "texting0123-5349c.firebaseapp.com",
+        projectId: "texting0123-5349c",
+        storageBucket: "texting0123-5349c.firebasestorage.app",
+        messagingSenderId: "990739937491",
+        appId: "1:990739937491:web:e998813e38a9c0317d7c26",
+        measurementId: "G-B94J1M89WX"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -458,20 +459,19 @@
 
     // ── Pagination state ─────────────────────────────────────────────────────
     const MSGS_PER_PAGE = 50;
-    let historicalDocs = [];   // [{id, data}] older messages loaded on demand
-    let oldestCursor = null;   // Firestore doc snapshot — cursor for endBefore
+    let historicalDocs = [];
+    let oldestCursor = null;
     let isLoadingMore = false;
     let hasMoreHistory = false;
-    let lastLiveDocs = [];     // mirror of most recent live snapshot docs
+    let lastLiveDocs = [];
 
     // ── Reply state ──────────────────────────────────────────────────────────
-    let replyingTo = null; // { msgId, senderName, text, isImage }
+    let replyingTo = null;
 
     // ── Group management state ───────────────────────────────────────────────
     let managingGroupId = null;
 
     // ── Spam protection ──────────────────────────────────────────────────────
-    // Allow max 6 messages per 8-second window
     const SPAM_MAX = 6;
     const SPAM_WINDOW_MS = 8000;
     let spamTimestamps = [];
@@ -918,7 +918,6 @@
 
         document.getElementById('group-mgmt-title').innerText = `⚙️ ${groupData.name}`;
 
-        // ── Render current members ──
         const membersList = document.getElementById('group-members-list');
         membersList.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:8px;text-align:center;">Loading...</div>';
         const memberRows = [];
@@ -942,7 +941,6 @@
         membersList.innerHTML = '';
         memberRows.forEach(r => membersList.appendChild(r));
 
-        // ── Render contacts not already in group ──
         const addList = document.getElementById('group-add-list');
         addList.innerHTML = '';
         const contacts = currentUserData.contacts || [];
@@ -976,7 +974,7 @@
         if (!managingGroupId) return;
         try {
             await updateDoc(doc(db, "group_chats", managingGroupId), { members: arrayUnion(uid) });
-            await window.openGroupManagement(managingGroupId); // refresh
+            await window.openGroupManagement(managingGroupId);
         } catch (e) { alert("Failed to add member."); }
     };
 
@@ -985,7 +983,7 @@
         if (!confirm(`Remove ${name} from the group?`)) return;
         try {
             await updateDoc(doc(db, "group_chats", managingGroupId), { members: arrayRemove(uid) });
-            await window.openGroupManagement(managingGroupId); // refresh
+            await window.openGroupManagement(managingGroupId);
         } catch (e) { alert("Failed to remove member."); }
     };
 
@@ -998,18 +996,15 @@
         try {
             const remainingMembers = groupData.members.filter(uid => uid !== currentUser.uid);
             if (remainingMembers.length === 0) {
-                // Last member — delete the group entirely
                 await deleteDoc(doc(db, "group_chats", managingGroupId));
             } else {
-                // Transfer admin if leaving member is admin
                 const updates = { members: arrayRemove(currentUser.uid) };
                 if (groupData.createdBy === currentUser.uid) {
-                    updates.createdBy = remainingMembers[0]; // transfer to oldest remaining
+                    updates.createdBy = remainingMembers[0];
                 }
                 await updateDoc(doc(db, "group_chats", managingGroupId), updates);
             }
             window.closeGroupManagement();
-            // Reset chat if we were in this group
             if (activeChatType === 'group' && activeChatId === managingGroupId) {
                 document.getElementById('chat-header').innerHTML = "<div>Select a chat to begin</div>";
                 document.getElementById('chat-box').innerHTML = `<div class="message system">You left the group.</div>`;
@@ -1182,7 +1177,6 @@
             return;
         }
 
-        // Load-more bar at top
         if (hasMoreHistory) {
             const bar = document.createElement('div');
             bar.className = 'load-more-bar'; bar.id = 'load-more-bar';
@@ -1200,7 +1194,6 @@
 
         let lastDateLabel = null;
 
-        // Historical (older, paginated)
         for (const { id, data } of historicalDocs) {
             if (data.timestamp) {
                 const label = getDateLabel(data.timestamp.toDate());
@@ -1209,7 +1202,6 @@
             chatBox.appendChild(buildMsgRow(id, data));
         }
 
-        // Live (most recent MSGS_PER_PAGE)
         for (const { id, data } of liveDocs) {
             if (data.timestamp) {
                 const label = getDateLabel(data.timestamp.toDate());
@@ -1222,7 +1214,6 @@
     // ─── Messages ─────────────────────────────────────────────────────────────
 
     function listenForMessages() {
-        // Reset pagination on every new chat open
         historicalDocs = [];
         oldestCursor = null;
         isLoadingMore = false;
@@ -1237,7 +1228,6 @@
             ? collection(db, "town_square")
             : collection(db, activeChatType === 'dm' ? "chats" : "group_chats", activeChatId, "messages");
 
-        // Scroll-to-top triggers loading older messages
         chatBox.onscroll = () => {
             if (chatBox.scrollTop < 80 && !isLoadingMore && hasMoreHistory) {
                 window.loadMoreMessages();
@@ -1247,7 +1237,6 @@
         const liveQuery = query(messagesRef, orderBy("timestamp", "asc"), limitToLast(MSGS_PER_PAGE));
 
         unsubscribeChat = onSnapshot(liveQuery, (snapshot) => {
-            // On first snapshot: set cursor and decide if history exists
             if (oldestCursor === null) {
                 if (snapshot.docs.length > 0) {
                     oldestCursor = snapshot.docs[0];
@@ -1255,7 +1244,6 @@
                 }
             }
 
-            // Notifications for newly added messages
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const mData = change.doc.data();
@@ -1266,7 +1254,6 @@
                 }
             });
 
-            // Store live docs for re-renders triggered by pagination
             lastLiveDocs = snapshot.docs.map(d => ({ id: d.id, data: d.data() }));
 
             const wasAtBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80;
@@ -1279,7 +1266,6 @@
         if (isLoadingMore || !hasMoreHistory || !oldestCursor) return;
         isLoadingMore = true;
 
-        // Show spinner in the bar immediately
         const bar = document.getElementById('load-more-bar');
         if (bar) bar.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div><span style="font-size:0.78rem;color:var(--text-muted);">Loading older messages...</span>`;
 
@@ -1309,7 +1295,6 @@
         isLoadingMore = false;
         renderAllMessages(chatBox, lastLiveDocs);
 
-        // Restore scroll position so the view doesn't jump to the top
         requestAnimationFrame(() => {
             chatBox.scrollTop = chatBox.scrollHeight - scrollHeightBefore;
         });
@@ -1319,11 +1304,10 @@
         const input = document.getElementById('message-input'); if (!input) return;
         const text = input.value.trim(); if (!text || !activeChatId) return;
 
-        // ── Spam check ──
         if (!checkSpam()) return;
 
         input.value = "";
-        clearTyping(); // fire-and-forget — don't block the send
+        clearTyping();
 
         const newMessage = {
             text,
@@ -1333,7 +1317,6 @@
             timestamp: serverTimestamp()
         };
 
-        // ── Attach reply data if replying ──
         if (replyingTo) {
             newMessage.replyTo = {
                 msgId: replyingTo.msgId,
