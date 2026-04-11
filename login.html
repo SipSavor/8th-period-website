@@ -166,13 +166,8 @@
             border-bottom: 1px solid var(--card-border);
         }
 
-        .divider:not(:empty)::before {
-            margin-right: .5em;
-        }
-
-        .divider:not(:empty)::after {
-            margin-left: .5em;
-        }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
 
         .btn-google {
             width: 100%;
@@ -192,14 +187,8 @@
             font-family: inherit;
         }
 
-        .btn-google:hover {
-            background: #f1f5f9;
-        }
-
-        .btn-google img {
-            width: 20px;
-            height: 20px;
-        }
+        .btn-google:hover { background: #f1f5f9; }
+        .btn-google img { width: 20px; height: 20px; }
 
         #auth-error {
             color: var(--danger);
@@ -213,10 +202,7 @@
             text-align: center;
         }
 
-        .register-fields {
-            display: none;
-        }
-
+        .register-fields { display: none; }
     </style>
 </head>
 <body>
@@ -274,31 +260,27 @@
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your newly updated Firebase config
         const firebaseConfig = {
-          apiKey: "AIzaSyATb67Q5zDliE0001MnEVINFUMbrB_mIIk",
-          authDomain: "texting0123-5349c.firebaseapp.com",
-          projectId: "texting0123-5349c",
-          storageBucket: "texting0123-5349c.firebasestorage.app",
-          messagingSenderId: "990739937491",
-          appId: "1:990739937491:web:e998813e38a9c0317d7c26",
-          measurementId: "G-B94J1M89WX"
+            apiKey: "AIzaSyATb67Q5zDliE0001MnEVINFUMbrB_mIIk",
+            authDomain: "texting0123-5349c.firebaseapp.com",
+            projectId: "texting0123-5349c",
+            storageBucket: "texting0123-5349c.firebasestorage.app",
+            messagingSenderId: "990739937491",
+            appId: "1:990739937491:web:e998813e38a9c0317d7c26",
+            measurementId: "G-B94J1M89WX"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        let currentMode = 'login'; // 'login' or 'register'
+        let currentMode = 'login';
 
-        // Check if user is already logged in, redirect to app if true
+        // Redirect to app if already logged in
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = 'app.html'; // Adjust this to your main chat file name
-            }
+            if (user) window.location.href = 'app.html';
         });
 
-        // Tab Switching UI Logic
         window.switchTab = function(mode) {
             currentMode = mode;
             const loginTab = document.getElementById('tab-login');
@@ -324,7 +306,6 @@
             }
         }
 
-        // Handle Email/Password Form Submit
         window.handleAuth = async function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value;
@@ -339,30 +320,28 @@
             try {
                 if (currentMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
-                    // onAuthStateChanged will handle the redirect
                 } else {
                     const displayName = document.getElementById('display-name').value;
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
-                    
-                    // Update Auth Profile
+
                     await updateProfile(user, { displayName: displayName });
 
-                    // Generate a 6-digit Citizen ID
                     const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=818cf8&color=fff`;
 
-                    // Create user document in Firestore
                     await setDoc(doc(db, "users", user.uid), {
                         name: displayName,
                         email: email,
                         commsId: commsId,
-                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=818cf8&color=fff`,
+                        // Store under BOTH keys so both pages can read it
+                        photoURL: avatarUrl,
+                        avatar: avatarUrl,
                         createdAt: new Date(),
-                        groups: ['town_square'], // Auto-add to global
-                        contacts: []
+                        groups: ['town_square'],
+                        contacts: [],
+                        isOnline: false
                     });
-
-                    // onAuthStateChanged will handle the redirect
                 }
             } catch (error) {
                 errorDiv.textContent = mapFirebaseError(error.code);
@@ -372,7 +351,6 @@
             }
         }
 
-        // Handle Google Auth
         window.signInWithGoogle = async function() {
             const provider = new GoogleAuthProvider();
             const errorDiv = document.getElementById('auth-error');
@@ -382,29 +360,31 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                // Check if user document exists in Firestore (first time logging in with Google)
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 
                 if (!userDoc.exists()) {
                     const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'C')}&background=818cf8&color=fff`;
+
                     await setDoc(doc(db, "users", user.uid), {
                         name: user.displayName || 'Citizen',
                         email: user.email,
                         commsId: commsId,
-                        avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'C')}&background=818cf8&color=fff`,
+                        // Store under BOTH keys so both pages can read it
+                        photoURL: avatarUrl,
+                        avatar: avatarUrl,
                         createdAt: new Date(),
                         groups: ['town_square'],
-                        contacts: []
+                        contacts: [],
+                        isOnline: false
                     });
                 }
-                // onAuthStateChanged will handle the redirect
             } catch (error) {
                 errorDiv.textContent = mapFirebaseError(error.code);
                 errorDiv.style.display = 'block';
             }
         }
 
-        // Clean up Firebase error messages for the user
         function mapFirebaseError(code) {
             switch(code) {
                 case 'auth/invalid-credential':
