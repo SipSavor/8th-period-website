@@ -275,10 +275,11 @@
         const db = getFirestore(app);
         
         let currentMode = 'login';
+        let isRegistering = false; // ← FIX: flag to block redirect during registration
 
-        // Redirect to app if already logged in
+        // Redirect to app if already logged in — but NOT during registration
         onAuthStateChanged(auth, (user) => {
-            if (user) window.location.href = 'app.html';
+            if (user && !isRegistering) window.location.href = 'app.html'; // ← FIX
         });
 
         window.switchTab = function(mode) {
@@ -320,7 +321,10 @@
             try {
                 if (currentMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
+                    // onAuthStateChanged will handle the redirect for login
                 } else {
+                    isRegistering = true; // ← FIX: block onAuthStateChanged redirect
+
                     const displayName = document.getElementById('display-name').value;
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
@@ -330,11 +334,11 @@
                     const commsId = Math.floor(100000 + Math.random() * 900000).toString();
                     const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=818cf8&color=fff`;
 
+                    // Firestore write fully completes before we redirect
                     await setDoc(doc(db, "users", user.uid), {
                         name: displayName,
                         email: email,
                         commsId: commsId,
-                        // Store under BOTH keys so both pages can read it
                         photoURL: avatarUrl,
                         avatar: avatarUrl,
                         createdAt: new Date(),
@@ -342,8 +346,12 @@
                         contacts: [],
                         isOnline: false
                     });
+
+                    isRegistering = false; // ← FIX: done writing, re-enable redirects
+                    window.location.href = 'app.html'; // ← FIX: redirect manually now
                 }
             } catch (error) {
+                isRegistering = false; // ← FIX: reset flag on error too
                 errorDiv.textContent = mapFirebaseError(error.code);
                 errorDiv.style.display = 'block';
                 submitBtn.disabled = false;
@@ -370,7 +378,6 @@
                         name: user.displayName || 'Citizen',
                         email: user.email,
                         commsId: commsId,
-                        // Store under BOTH keys so both pages can read it
                         photoURL: avatarUrl,
                         avatar: avatarUrl,
                         createdAt: new Date(),
@@ -379,6 +386,7 @@
                         isOnline: false
                     });
                 }
+                // onAuthStateChanged handles redirect for Google sign-in
             } catch (error) {
                 errorDiv.textContent = mapFirebaseError(error.code);
                 errorDiv.style.display = 'block';
