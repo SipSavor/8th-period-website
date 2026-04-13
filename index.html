@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo Messaging | The Kingdom Comms Portal</title>
+    <title>Echo Messaging | Secure Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,277 +31,384 @@
             color: var(--text-main); 
             min-height: 100vh; 
             display: flex; 
-            flex-direction: column;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 85% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
-            overflow-x: hidden;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
         }
 
-        /* ── Navigation ── */
-        nav {
-            background: rgba(2, 6, 23, 0.6); 
-            backdrop-filter: blur(20px);
-            padding: 1.2rem 5%; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
-            position: fixed;
+        .auth-container {
+            background: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
             width: 100%;
-            top: 0;
-            z-index: 100;
+            max-width: 420px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin: 20px;
         }
 
-        .nav-logo { 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            color: var(--primary); 
-            font-size: 1.2rem;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .nav-links a { 
-            text-decoration: none; 
-            color: var(--text-muted); 
-            font-weight: 600; 
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover { 
-            color: var(--text-main); 
-        }
-
-        .btn-nav-cta {
-            background: rgba(129, 140, 248, 0.15);
-            color: var(--primary) !important;
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid rgba(129, 140, 248, 0.3);
-        }
-
-        .btn-nav-cta:hover {
-            background: rgba(129, 140, 248, 0.25);
-        }
-
-        /* ── Hero Section ── */
-        .hero {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .auth-header {
             text-align: center;
-            padding: 120px 20px 60px;
-            max-width: 1000px;
-            margin: 0 auto;
+            margin-bottom: 30px;
         }
 
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+        .auth-header h1 {
+            color: var(--primary);
             font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to right, var(--text-main), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        .hero p {
-            font-size: 1.2rem;
+        .auth-header p {
             color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 2.5rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
         }
 
-        .hero-btns {
+        .auth-tabs {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
         }
 
-        .btn-primary {
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .auth-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-submit {
+            width: 100%;
             background: var(--primary);
             color: #020617;
-            text-decoration: none;
-            padding: 14px 32px;
-            border-radius: 12px;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            font-family: inherit;
+            margin-top: 10px;
         }
 
-        .btn-primary:hover {
+        .btn-submit:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
         }
 
-        .btn-secondary {
-            background: var(--surface-bg);
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 14px 32px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            border: 1px solid var(--card-border);
-            transition: 0.2s;
-            backdrop-filter: blur(12px);
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-muted);
-        }
-
-        /* ── Features Section ── */
-        .features {
-            padding: 60px 20px 100px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
+        .divider {
+            display: flex;
+            align-items: center;
             text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 3rem;
-            color: var(--text-main);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--surface-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(12px);
-            transition: 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(129, 140, 248, 0.4);
-            background: rgba(30, 41, 59, 0.6);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-            color: var(--primary);
-        }
-
-        .feature-card p {
+            margin: 24px 0;
             color: var(--text-muted);
-            line-height: 1.5;
+            font-size: 0.85rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+
+        .btn-google {
+            width: 100%;
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
             font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
         }
 
-        /* ── Footer ── */
-        footer {
-            background: rgba(2, 6, 23, 0.8);
-            border-top: 1px solid var(--card-border);
-            padding: 30px 20px;
+        .btn-google:hover { background: #f1f5f9; }
+        .btn-google img { width: 20px; height: 20px; }
+
+        #auth-error {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
             text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: auto;
         }
 
-        /* ── Responsive ── */
-        @media (max-width: 768px) {
-            nav {
-                padding: 1rem 5%;
-            }
-            .nav-links {
-                display: none; /* Can be toggled with JS in a full build */
-            }
-            .hero {
-                padding-top: 100px;
-            }
-            .hero-btns {
-                flex-direction: column;
-                width: 100%;
-                max-width: 300px;
-            }
-            .btn-primary, .btn-secondary {
-                width: 100%;
-                text-align: center;
-            }
-        }
+        .register-fields { display: none; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-logo">Echo Messaging</div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#">About</a>
-            <a href="login.html" class="btn-nav-cta">Login in</a>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Echo Messaging</h1>
+            <p>Kingdom of 8th Period</p>
         </div>
-    </nav>
 
-    <header class="hero">
-        <div style="display: inline-block; background: rgba(245, 158, 11, 0.15); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3);">
-            v2.0 Beta is Live
+        <div class="auth-tabs">
+            <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+            <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
         </div>
-        <h1>The Secure Hub for the Kingdom of 8th Period.</h1>
-        <p>Establish fast, secure communications with citizens of the realm. Featuring crystal-clear video links, unique 6-digit citizen IDs, and real-time global town squares.</p>
-        <div class="hero-btns">
-            <a href="login.html" class="btn-primary">Enter the Portal</a>
-            <a href="#features" class="btn-secondary">Explore Features</a>
-        </div>
-    </header>
 
-    <section id="features" class="features">
-        <h2 class="section-title">Everything you need to stay connected</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🛡️</div>
-                <h3>Unique Citizen IDs</h3>
-                <p>Every user is assigned a unique, copyable 6-digit Citizen ID. Easily add friends to your direct messages without sharing personal phone numbers.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📹</div>
-                <h3>Secure Video Links</h3>
-                <p>Powered by the Agora RTC engine, initiate high-fidelity voice and video calls seamlessly. Mute, disable camera, or share your screen with a click.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>Global Town Square</h3>
-                <p>Join the global public chat to broadcast messages to the entire realm, or create private, custom groups with designated administrators.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Real-Time Engine</h3>
-                <p>Experience ultra-fast messaging with live typing indicators, image uploads, voice notes, and inline message editing, all backed by Firebase.</p>
-            </div>
-        </div>
-    </section>
+        <div id="auth-error"></div>
 
-    <footer>
-        &copy; 2026 Kingdom of 8th Period | Echo Messaging System. All rights reserved.
-    </footer>
+        <form id="auth-form" onsubmit="handleAuth(event)">
+            <div class="input-group register-fields" id="name-group">
+                <label for="display-name">Citizen Name</label>
+                <input type="text" id="display-name" placeholder="How should we call you?">
+            </div>
+            
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="citizen@realm.com" required>
+            </div>
 
+            <div class="input-group">
+                <label for="password">Security Clearance (Password)</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Initialize Comms</button>
+        </form>
+
+        <div class="divider">OR</div>
+
+        <button class="btn-google" onclick="signInWithGoogle()">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo">
+            Continue with Google
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            updateProfile,
+            GoogleAuthProvider,
+            signInWithPopup,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyATb67Q5zDliE0001MnEVINFUMbrB_mIIk",
+            authDomain: "texting0123-5349c.firebaseapp.com",
+            projectId: "texting0123-5349c",
+            storageBucket: "texting0123-5349c.firebasestorage.app",
+            messagingSenderId: "990739937491",
+            appId: "1:990739937491:web:e998813e38a9c0317d7c26",
+            measurementId: "G-B94J1M89WX"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentMode = 'login';
+        let isRegistering = false; // ← FIX: flag to block redirect during registration
+
+        // Redirect to app if already logged in — but NOT during registration
+        onAuthStateChanged(auth, (user) => {
+            if (user && !isRegistering) window.location.href = 'app.html'; // ← FIX
+        });
+
+        window.switchTab = function(mode) {
+            currentMode = mode;
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+            const nameGroup = document.getElementById('name-group');
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('auth-error');
+
+            errorDiv.style.display = 'none';
+
+            if (mode === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                nameGroup.style.display = 'none';
+                document.getElementById('display-name').removeAttribute('required');
+                submitBtn.textContent = 'Initialize Comms';
+            } else {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                nameGroup.style.display = 'block';
+                document.getElementById('display-name').setAttribute('required', 'true');
+                submitBtn.textContent = 'Register Citizen';
+            }
+        }
+
+        window.handleAuth = async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('auth-error');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Authenticating...';
+            errorDiv.style.display = 'none';
+
+            try {
+                if (currentMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // onAuthStateChanged will handle the redirect for login
+                } else {
+                    isRegistering = true; // ← FIX: block onAuthStateChanged redirect
+
+                    const displayName = document.getElementById('display-name').value;
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                    await updateProfile(user, { displayName: displayName });
+
+                    const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=818cf8&color=fff`;
+
+                    // Firestore write fully completes before we redirect
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: displayName,
+                        email: email,
+                        commsId: commsId,
+                        photoURL: avatarUrl,
+                        avatar: avatarUrl,
+                        createdAt: new Date(),
+                        groups: ['town_square'],
+                        contacts: [],
+                        isOnline: false
+                    });
+
+                    isRegistering = false; // ← FIX: done writing, re-enable redirects
+                    window.location.href = 'app.html'; // ← FIX: redirect manually now
+                }
+            } catch (error) {
+                isRegistering = false; // ← FIX: reset flag on error too
+                errorDiv.textContent = mapFirebaseError(error.code);
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentMode === 'login' ? 'Initialize Comms' : 'Register Citizen';
+            }
+        }
+
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.style.display = 'none';
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (!userDoc.exists()) {
+                    const commsId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'C')}&background=818cf8&color=fff`;
+
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: user.displayName || 'Citizen',
+                        email: user.email,
+                        commsId: commsId,
+                        photoURL: avatarUrl,
+                        avatar: avatarUrl,
+                        createdAt: new Date(),
+                        groups: ['town_square'],
+                        contacts: [],
+                        isOnline: false
+                    });
+                }
+                // onAuthStateChanged handles redirect for Google sign-in
+            } catch (error) {
+                errorDiv.textContent = mapFirebaseError(error.code);
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function mapFirebaseError(code) {
+            switch(code) {
+                case 'auth/invalid-credential':
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    return 'Invalid email or password.';
+                case 'auth/email-already-in-use':
+                    return 'This email is already registered.';
+                case 'auth/weak-password':
+                    return 'Password must be at least 6 characters.';
+                case 'auth/popup-closed-by-user':
+                    return 'Sign-in cancelled.';
+                default:
+                    return 'Authentication failed. Please try again.';
+            }
+        }
+    </script>
 </body>
 </html>
